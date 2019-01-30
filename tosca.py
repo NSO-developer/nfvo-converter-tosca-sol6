@@ -29,7 +29,6 @@ log = logging.getLogger(__name__)
 ytd = YangToDict(file=args.yang_template, log=log, g_req=args.no_grouping)
 parsed_dict = ytd.parse_yang()
 
-print(parsed_dict)
 # Read the tosca vnf into a dict from yaml format
 with open(args.file, 'rb') as f:
     tosca_vnf = yaml.load(f.read())
