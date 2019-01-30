@@ -59,8 +59,11 @@ class TOSCA:
 
     group_affinity_type     = "tosca.groups.nfv.PlacementGroup"
     anti_affinity_type      = "tosca.policies.nfv.AntiAffinityRule"
+    # TODO: Handle Affinity as well
     group_aff_members_key   = "members"
     policy_aff_targets_key  = "targets"
+    policy_aff_type_key     = "type"
+    policy_aff_scope_key    = "properties.scope"
 
 
 class SOL6:
@@ -89,6 +92,10 @@ class SOL6:
     _deployment_flavor               = _vnfd + ".df"
     df_id                            = _deployment_flavor + ".id"
     df_desc                          = _deployment_flavor + ".description"
+    df_affinity_group                = _deployment_flavor + ".affinity-or-anti-affinity-group"
+    df_affinity_group_id             = df_affinity_group + ".id"
+    df_affinity_group_type           = df_affinity_group + ".type"
+    df_affinity_group_scope          = df_affinity_group + ".scope"
 
     # VDU profiles are a list and will be built then placed in
     df_vdu_profile                   = _deployment_flavor + ".vdu-profile"
@@ -98,8 +105,9 @@ class SOL6:
 
     df_vdu_p_affinity_group          = df_vdu_profile + ".affinity-or-anti-affinity-group"
     df_vdu_p_aff_id                  = df_vdu_p_affinity_group + ".id"
-    df_vdu_p_aff_type                = df_vdu_p_affinity_group + ".type"
-    df_vdu_p_aff_scope               = df_vdu_p_affinity_group + ".scope"
+
+    def df_anti_affinity_value(x):
+        return "anti-affinity" if x == TOSCA.anti_affinity_type else "affinity"
 
     # --------------------------------
 
@@ -119,7 +127,7 @@ class SOL6:
     virtual_storage_desc            = _vnfd + ".virtual-storage-descriptor"
     vsd_id                          = virtual_storage_desc + ".id"
     vsd_type_storage                = virtual_storage_desc + ".type-of-storage"
-    vsd_type_storage_value            = "lvm"  # This can't be read from the yaml at this point
+    vsd_type_storage_value          = "lvm"  # This can't be read from the yaml at this point
     vsd_size_storage                = virtual_storage_desc + ".size-of-storage"
 
     virtual_link_desc               = _vnfd + ".virtual-link-descriptor"
