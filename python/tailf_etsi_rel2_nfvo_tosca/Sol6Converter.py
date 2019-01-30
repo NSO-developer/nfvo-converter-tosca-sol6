@@ -95,11 +95,8 @@ class Sol6Converter:
         groups = get_roots_from_filter(self.tosca_vnf, child_key="type",
                                        child_value=TOSCA.group_affinity_type)
 
-        anti_affinity_groups = get_roots_from_filter(self.tosca_vnf, child_key="type",
-                                                     child_value=TOSCA.anti_affinity_type)
-
-        # Populate the instatiation-level anti-affinity-groups info
-        # TODO
+        anti_affinity_policies = get_roots_from_filter(self.tosca_vnf, child_key="type",
+                                                       child_value=TOSCA.anti_affinity_type)
 
         for vdu in vdus:
             vdu_name = get_dict_key(vdu)
@@ -111,11 +108,55 @@ class Sol6Converter:
             self._handle_config_params(vdu_name)
 
             # Populate the list of vdu profiles
-            df_vdu_prof.append(self._handle_vdu_profile(vdu_name, groups, anti_affinity_groups))
+            df_vdu_prof.append(self._populate_vdu_profile(vdu_name, groups, anti_affinity_policies))
 
         set_path_to(SOL6.df_vdu_profile, self.vnfd, df_vdu_prof)
 
-    def _handle_vdu_profile(self, vdu_name, groups, anti_aff_rules):
+        self._populate_init_affinity(anti_affinity_policies, groups)
+
+    def _populate_init_affinity(self, anti_affinity_policies, groups):
+        """
+        Populate the instatiation-level (df.) anti-affinity-groups info
+        We need the id, type, and scope of each group
+        All the data we need is in anti_affinity_policies
+        """
+        # First off, get the full list of groups
+        group_names = []
+        for group in groups:
+            group_names.append(get_dict_key(group))
+
+        init_aff = []
+        for policy in anti_affinity_policies:
+            policy = policy[get_dict_key(policy)]
+
+            # We are going to pop the group name out of this list when we've populated it
+            # So if there are multiple policies that target one group, we are only going to take
+            # the first one
+            targets = policy[TOSCA.policy_aff_targets_key]
+
+            try:
+                for target in targets:
+                    # Throws ValueError if the element is not in the list
+                    group_names.remove(target)
+            except ValueError:
+                # Skip the outer loop if we have already found the group
+                continue
+
+            for target in targets:
+                # Construct the dict of values that we need to get
+                typ = policy[TOSCA.policy_aff_type_key]
+                c = {KeyUtils.get_path_last(SOL6.df_affinity_group_id): target,
+                     KeyUtils.get_path_last(SOL6.df_affinity_group_type):
+                         SOL6.df_anti_affinity_value(typ),
+                     KeyUtils.get_path_last(SOL6.df_affinity_group_scope):
+                         path_to_value(TOSCA.policy_aff_scope_key, policy)}
+
+                # Put them in the outer list
+                init_aff.append(c)
+
+        set_path_to(SOL6.df_affinity_group, self.vnfd, init_aff)
+
+    def _populate_vdu_profile(self, vdu_name, groups, anti_aff_rules):
         """
         Populate the vdu id, min/max num of instances, then link the policies to the VDUs through
         the groups in TOSCA.
@@ -221,7 +262,7 @@ class Sol6Converter:
             storage_size = storage_size.split(" ")[0]  # Remove 'GB' from the end
 
             dic = {KeyUtils.get_path_last(SOL6.vsd_id): name,
-                   KeyUtils.get_path_last(SOL6.vsd_type_storage): SOL6.vsd_type_storage_value,
+                   # KeyUtils.get_path_last(SOL6.vsd_type_storage): SOL6.vsd_type_storage_value,
                    KeyUtils.get_path_last(SOL6.vsd_size_storage): storage_size}
 
             res_list.append(dic)

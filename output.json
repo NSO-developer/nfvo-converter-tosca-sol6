@@ -88,22 +88,18 @@
           "virtual-storage-descriptor": [
             {
               "id": "vnfd1-deployment-control-function-1-cf-boot",
-              "type-of-storage": "lvm",
               "size-of-storage": "16"
             },
             {
               "id": "vnfd1-deployment-control-function-1-cf-cdr",
-              "type-of-storage": "lvm",
               "size-of-storage": "200"
             },
             {
               "id": "vnfd1-deployment-control-function-0-cf-boot",
-              "type-of-storage": "lvm",
               "size-of-storage": "16"
             },
             {
               "id": "vnfd1-deployment-control-function-0-cf-cdr",
-              "type-of-storage": "lvm",
               "size-of-storage": "200"
             }
           ],
@@ -249,9 +245,19 @@
               "max-recommended-graceful-stop-timeout": "",
               "affinity-or-anti-affinity-group": [
                 {
-                  "id": "",
-                  "type": "",
-                  "scope": ""
+                  "id": "cf2_aa_group",
+                  "type": "anti-affinity",
+                  "scope": "nfvi_node"
+                },
+                {
+                  "id": "sf3_aa_group",
+                  "type": "anti-affinity",
+                  "scope": "nfvi_node"
+                },
+                {
+                  "id": "sf4_aa_group",
+                  "type": "anti-affinity",
+                  "scope": "nfvi_node"
                 }
               ],
               "monitoring-parameter": [
