@@ -1,6 +1,0 @@
-result log        : 0.1
-
-successful        : 0
-failed            : 1
-	test.lux:23 - match_timeout
-summary           : FAIL
