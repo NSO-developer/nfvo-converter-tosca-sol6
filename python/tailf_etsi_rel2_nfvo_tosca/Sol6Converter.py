@@ -86,7 +86,6 @@ class Sol6Converter:
         # Get the information about the VDUs into a list of dicts
         vdus = get_roots_from_filter(self.tosca_vnf, child_key='type',
                                      child_value=TOSCA.vdu_type)
-
         virt_compute_descriptors = path_to_value(SOL6.virtual_comp_desc, self.vnfd)
 
         # Make a list for deployment-flavors vdu-profiles
@@ -350,17 +349,8 @@ def set_path_to(path, cur_dict, value, create_missing=False):
         i += 1
 
 
-def copy_to_path(path, copy_to, dict_to_copy):
-    """
-    Copy the given dict into cur_dict at path.
-    :param path:
-    :param copy_to:
-    :param dict_to_copy:
-    """
-
-
 def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key=None,
-                          internal_call=False, aggregate=True):
+                          internal_call=False, agg=None):
     """
     Probably going to change the name of this.
     We need to be able to get root elements based on some interior condition, for example:
@@ -368,11 +358,15 @@ def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key
     VDU c1 has a type of 'cisco.nodes.nfv.Vdu.Compute', so we need to be able to get all the VDUs
     based on this type and value.
 
-    :return: A list of dicts that satisfies the conditions
+    This method returns a single list of the elements that meet the conditions. It performs
+    aggregation along the way and returns the aggregated list at the end of the recursion.
+
+    :return: A single list of dicts that satisfies the conditions
     """
     # Recursively search through the dict since it's a large nested dict of other dicts
     # and lists and values
-    results = []
+    if agg is None:
+        agg = []
 
     # Stop if we get too far in to the data and don't know how to handle it
     if not type(cur_dict) is dict:
@@ -399,35 +393,33 @@ def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key
         # around that only has dicts in it, and eventually it gets to the top and is returned
         # We call this in two different places, which is why it's extracted into a method
         # There is probably a better way to do this than to have another internal method, though
-        def _handle_dict(k, v):
-            if type(v) is dict:
-                res = get_roots_from_filter(cur_dict[k], child_key, child_value, k, True)
-
-                if type(res) is dict:
-                    results.append(res)
-                elif type(res) is list and len(res) > 0:
-                    for e in res:
-                        if e:
-                            results.append(e)
 
         # Handle if we have a list of dicts, which is very common
         if type(value) is list:
             for i in range(len(value)):
-                r = get_roots_from_filter(value[i], child_key, child_value, True)
+                r = get_roots_from_filter(value[i], child_key, child_value,
+                                          internal_call=True, agg=agg)
                 # Prevent adding to the results list if we do not have a valid output
                 if r:
-                    results.append(r)
+                    agg.append(r)
         else:
-            _handle_dict(key, value)
+            if type(value) is dict:
+                res = get_roots_from_filter(cur_dict[key], child_key, child_value, key,
+                                            internal_call=True, agg=agg)
+
+                if type(res) is dict:
+                    agg.append(res)
+                elif type(res) is list and len(res) > 0:
+                    for e in res:
+                        if e:
+                            agg.append(e)
 
     # Keep track of if we are calling this method internally, and if we reach the endpoint where we
     # are not, that means we're at the top level of recursion, about to finish.
-    # In that case, aggregate our results to ensure that we're returning a single top-level list
-    # If the optional parameters aggregate is false, then don't do this.
-    if not internal_call and aggregate:
-        return aggregate_list_items(results)
-    else:
-        return results
+    # If that is the case then return our aggregated list, since we need to give it back to the
+    # calling point
+    if not internal_call:
+        return agg
 
 
 def get_dict_key(dic, n=0):
@@ -440,20 +432,3 @@ def get_dict_key(dic, n=0):
 def get_object_keys(obj):
     return [attr for attr in dir(obj) if not callable(getattr(obj, attr)) and
             not (attr.startswith("__") or attr.startswith("_"))]
-
-
-def aggregate_list_items(top_list):
-    """
-    Given a list of nested lists, return a single list with all the non-list items of all the lists
-    aggregated into a single list
-    :param top_list:
-    :return:
-    """
-    results = []
-    for item in top_list:
-        if type(item) is list:
-            for i in aggregate_list_items(item):
-                results.append(i)
-        else:
-            results.append(item)
-    return results
