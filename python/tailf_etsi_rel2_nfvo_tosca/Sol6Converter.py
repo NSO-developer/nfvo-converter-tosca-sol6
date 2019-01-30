@@ -98,12 +98,6 @@ class Sol6Converter:
 
         anti_affinity_groups = get_roots_from_filter(self.tosca_vnf, child_key="type",
                                                      child_value=TOSCA.anti_affinity_type)
-        # This returns a list of lists, so aggregate the interior lists into a single top-level list
-        aag = []
-        for g in anti_affinity_groups:
-            for int_g in g:
-                aag.append(int_g)
-        anti_affinity_groups = aag
 
         # Populate the instatiation-level anti-affinity-groups info
         # TODO
@@ -365,7 +359,8 @@ def copy_to_path(path, copy_to, dict_to_copy):
     """
 
 
-def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key=None):
+def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key=None,
+                          internal_call=False, aggregate=True):
     """
     Probably going to change the name of this.
     We need to be able to get root elements based on some interior condition, for example:
@@ -373,10 +368,6 @@ def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key
     VDU c1 has a type of 'cisco.nodes.nfv.Vdu.Compute', so we need to be able to get all the VDUs
     based on this type and value.
 
-    :param cur_dict:
-    :param child_key:
-    :param child_value:
-    :param parent_key:
     :return: A list of dicts that satisfies the conditions
     """
     # Recursively search through the dict since it's a large nested dict of other dicts
@@ -410,7 +401,7 @@ def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key
         # There is probably a better way to do this than to have another internal method, though
         def _handle_dict(k, v):
             if type(v) is dict:
-                res = get_roots_from_filter(cur_dict[k], child_key, child_value, k)
+                res = get_roots_from_filter(cur_dict[k], child_key, child_value, k, True)
 
                 if type(res) is dict:
                     results.append(res)
@@ -422,14 +413,21 @@ def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key
         # Handle if we have a list of dicts, which is very common
         if type(value) is list:
             for i in range(len(value)):
-                r = get_roots_from_filter(value[i], child_key, child_value)
+                r = get_roots_from_filter(value[i], child_key, child_value, True)
                 # Prevent adding to the results list if we do not have a valid output
                 if r:
                     results.append(r)
         else:
             _handle_dict(key, value)
 
-    return results
+    # Keep track of if we are calling this method internally, and if we reach the endpoint where we
+    # are not, that means we're at the top level of recursion, about to finish.
+    # In that case, aggregate our results to ensure that we're returning a single top-level list
+    # If the optional parameters aggregate is false, then don't do this.
+    if not internal_call and aggregate:
+        return aggregate_list_items(results)
+    else:
+        return results
 
 
 def get_dict_key(dic, n=0):
@@ -443,9 +441,19 @@ def get_object_keys(obj):
     return [attr for attr in dir(obj) if not callable(getattr(obj, attr)) and
             not (attr.startswith("__") or attr.startswith("_"))]
 
-def aggregate_list_items(list):
+
+def aggregate_list_items(top_list):
     """
-    Given a list of nested lists, return a single list with all the
-    :param list:
+    Given a list of nested lists, return a single list with all the non-list items of all the lists
+    aggregated into a single list
+    :param top_list:
     :return:
     """
+    results = []
+    for item in top_list:
+        if type(item) is list:
+            for i in aggregate_list_items(item):
+                results.append(i)
+        else:
+            results.append(item)
+    return results
