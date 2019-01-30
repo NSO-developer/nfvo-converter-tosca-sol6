@@ -1,0 +1,2 @@
+export PS1=SH-PROMPT:
+ncs_cli -u admin

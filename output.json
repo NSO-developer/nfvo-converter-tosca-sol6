@@ -1,0 +1,353 @@
+{
+  "data": {
+    "etsi-nfv:nfv": {
+      "vnfd": [
+        {
+          "id": "VPC-4.4",
+          "provider": "cisco",
+          "product-name": "VPC",
+          "software-version": "1.0",
+          "version": "1.0",
+          "product-info-name": "Virtual Packet Core (VPC); 32 vCPUs, 64Gb RAM, 66Gb vStorage",
+          "product-info-description": "",
+          "vnfm-info": [
+            "9:Cisco Elastic Services Controller:v04.04.01"
+          ],
+          "localization-language": "",
+          "default-localization-language": "",
+          "vdu": [
+            {
+              "id": "",
+              "name": "",
+              "description": "",
+              "int-cpd": [
+                {
+                  "int-virtual-link-desc": "",
+                  "ext-cpd": "",
+                  "bitrate-requirement": "",
+                  "order": [
+                    {}
+                  ]
+                }
+              ],
+              "virtual-compute-desc": "",
+              "virtual-storage-desc": [
+                {}
+              ],
+              "boot-order": [
+                {
+                  "key": "",
+                  "value": ""
+                }
+              ],
+              "sw-image-desc": "",
+              "nfvi-constraint": [
+                {}
+              ],
+              "monitoring-parameter": [
+                {
+                  "id": ""
+                }
+              ],
+              "configurable-properties": [
+                {
+                  "key": "",
+                  "value": ""
+                }
+              ],
+              "boot-data": [
+                {
+                  "key": "",
+                  "value": ""
+                }
+              ]
+            }
+          ],
+          "virtual-compute-descriptor": [
+            {
+              "id": "vim_flavor_cf",
+              "flavor-name-variable": "VIM_FLAVOR_CF",
+              "virtual-cpu": {
+                "num-virtual-cpus": 8
+              },
+              "virtual-memory": {
+                "size": "16"
+              }
+            },
+            {
+              "id": "vim_flavor_sf",
+              "flavor-name-variable": "VIM_FLAVOR_SF",
+              "virtual-cpu": {
+                "num-virtual-cpus": 8
+              },
+              "virtual-memory": {
+                "size": "16"
+              }
+            }
+          ],
+          "virtual-storage-descriptor": [
+            {
+              "id": "vnfd1-deployment-control-function-1-cf-boot",
+              "type-of-storage": "lvm",
+              "size-of-storage": "16"
+            },
+            {
+              "id": "vnfd1-deployment-control-function-1-cf-cdr",
+              "type-of-storage": "lvm",
+              "size-of-storage": "200"
+            },
+            {
+              "id": "vnfd1-deployment-control-function-0-cf-boot",
+              "type-of-storage": "lvm",
+              "size-of-storage": "16"
+            },
+            {
+              "id": "vnfd1-deployment-control-function-0-cf-cdr",
+              "type-of-storage": "lvm",
+              "size-of-storage": "200"
+            }
+          ],
+          "sw-image-desc": [
+            {
+              "id": "",
+              "name": "",
+              "version": "",
+              "checksum": "",
+              "container-format": "",
+              "disk-format": "",
+              "min-disk": "",
+              "min-ram": "",
+              "size": "",
+              "image": "",
+              "operating-system": "",
+              "supported-virtualization-environment": [
+                {}
+              ]
+            }
+          ],
+          "int-virtual-link-desc": [
+            {
+              "id": "",
+              "desc-flavor": [
+                {
+                  "id": "",
+                  "latency": "",
+                  "packet-delay-variation": "",
+                  "packet-loss-ratio": ""
+                }
+              ],
+              "test-access": [
+                {}
+              ],
+              "description": "",
+              "monitoring-parameters": [
+                {
+                  "id": ""
+                }
+              ]
+            }
+          ],
+          "ext-cpd": [
+            {
+              "int-virtual-link-desc": ""
+            }
+          ],
+          "df": [
+            {
+              "id": "default",
+              "description": "Default VNF Deployment Flavour",
+              "vdu-profile": [
+                {
+                  "id": "c1",
+                  "min-number-of-instances": 1,
+                  "max-number-of-instances": 1,
+                  "affinity-or-anti-affinity-group": {
+                    "id": [
+                      "cf2_aa_group",
+                      "sf3_aa_group",
+                      "sf4_aa_group"
+                    ]
+                  }
+                },
+                {
+                  "id": "c2",
+                  "min-number-of-instances": 1,
+                  "max-number-of-instances": 1,
+                  "affinity-or-anti-affinity-group": {
+                    "id": [
+                      "cf2_aa_group",
+                      "sf3_aa_group",
+                      "sf4_aa_group"
+                    ]
+                  }
+                },
+                {
+                  "id": "s3",
+                  "min-number-of-instances": 1,
+                  "max-number-of-instances": 1,
+                  "affinity-or-anti-affinity-group": {
+                    "id": [
+                      "sf3_aa_group",
+                      "sf4_aa_group"
+                    ]
+                  }
+                },
+                {
+                  "id": "s4",
+                  "min-number-of-instances": 1,
+                  "max-number-of-instances": 1,
+                  "affinity-or-anti-affinity-group": {
+                    "id": [
+                      "sf4_aa_group"
+                    ]
+                  }
+                }
+              ],
+              "virtual-link-profile": [
+                {
+                  "id": "",
+                  "flavor": "",
+                  "affinity-or-anti-affinity-group": [
+                    {
+                      "id": ""
+                    }
+                  ]
+                }
+              ],
+              "instantiation-level": [
+                {
+                  "id": "",
+                  "description": "",
+                  "vdu-level": [
+                    {
+                      "id": "",
+                      "number-of-instances": ""
+                    }
+                  ],
+                  "scaling-info": [
+                    {
+                      "id": "",
+                      "scale-level": ""
+                    }
+                  ]
+                }
+              ],
+              "default-instantiation-level": "default",
+              "supported-operation": [
+                {}
+              ],
+              "instantiate-vnf-op-config": "",
+              "parameter": "",
+              "key": "",
+              "value": "",
+              "scaling-by-more-than-one-step-supported": "",
+              "arbitrary-target-levels-supported": "",
+              "cause": "",
+              "min-graceful-termination": "",
+              "max-recommended-graceful-termination": "",
+              "min-graceful-stop-timeout": "",
+              "max-recommended-graceful-stop-timeout": "",
+              "affinity-or-anti-affinity-group": [
+                {
+                  "id": "",
+                  "type": "",
+                  "scope": ""
+                }
+              ],
+              "monitoring-parameter": [
+                {
+                  "id": ""
+                }
+              ],
+              "scaling-aspect": [
+                {
+                  "id": "",
+                  "name": "",
+                  "description": "",
+                  "max-scale-level": "",
+                  "deltas": [
+                    {}
+                  ],
+                  "vdu-delta": [
+                    {}
+                  ],
+                  "number-of-instances": "",
+                  "virtual-link-bit-rate-delta": [
+                    {}
+                  ],
+                  "root": "",
+                  "leaf": "",
+                  "step-deltas": ""
+                }
+              ]
+            }
+          ],
+          "auto-scalable": "",
+          "auto-healable": "",
+          "additional-configurable-property": [
+            {}
+          ],
+          "key": "",
+          "value": "",
+          "extension": [
+            {}
+          ],
+          "metadata": [
+            {}
+          ],
+          "lifecycle-management-script": [
+            {
+              "event": "",
+              "lcm-transition-event": "",
+              "script": "",
+              "script-dsl": "",
+              "script-input": [
+                {
+                  "key": "",
+                  "value": ""
+                }
+              ]
+            }
+          ],
+          "element-group": [
+            {
+              "id": "",
+              "description": "",
+              "vdu": [
+                {}
+              ],
+              "virtual-link-desc": [
+                {}
+              ]
+            }
+          ],
+          "indicator": [
+            {
+              "id": "",
+              "name": "",
+              "indicator-value": [
+                {}
+              ],
+              "source": ""
+            }
+          ],
+          "auto-scale": [
+            {}
+          ],
+          "virtual-link-descriptor": [
+            {
+              "id": "etsi-vpc-di-internal1",
+              "description": "DI Internal 1 Network VL",
+              "connectivity-type.layer-protocol": "ipv4"
+            },
+            {
+              "id": "etsi-vpc-di-internal2",
+              "description": "DI Internal 2 Network VL",
+              "connectivity-type.layer-protocol": "ipv4"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

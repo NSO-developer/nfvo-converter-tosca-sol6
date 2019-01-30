@@ -1,0 +1,50 @@
+module tailf-etsi-rel2-nfvo-tosca {
+
+  namespace "http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-tosca";
+  prefix tailf-etsi-rel2-nfvo-tosca;
+  yang-version 1.1;
+
+  import tailf-etsi-rel2-nfvo { prefix nfvo-rel2; }
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+
+  description
+    "Bla bla...";
+
+  revision 2016-01-01 {
+    description
+      "Initial revision.";
+  }
+
+  augment /nfvo-rel2:nfvo {
+    container tosca {
+      action import {
+        tailf:actionpoint tailf-etsi-rel2-nfvo-tosca-import;
+        input {
+          choice inp {
+            mandatory true;
+            leaf uri {
+              type inet:uri;
+            }
+            leaf raw {
+              type string;
+            }
+          }
+        }
+        output {
+          leaf error {
+            type string;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+Tool for converting between VNF SOL001 (TOSCA) and NFVO SOL006 (YANG)
+Can be run as a package in NSO and also standalone with
+    python3 tosca.py -f examples/standalone_vpc_vnfd_esc_4_4.yaml --dry-run -y etsi-nfv-vnf.yang
+
+
+-- DATA STRUCTURES --
+
+
+-- ALGORITHMS --

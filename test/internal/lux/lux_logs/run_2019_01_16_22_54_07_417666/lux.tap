@@ -1,0 +1,32 @@
+1..1
+
+    # ssh aasteele@AASTEELE-M-C566
+    # cd /Users/aasteele/Documents/nso/tailf-etsi-rel2-nfvo-tosca/test/internal/lux
+    # lux test.lux
+    # open lux_logs/run_2019_01_16_22_54_07_417666/lux_summary.log.html
+
+not ok     1 test.lux
+    # FAIL at line 23
+    # expected*
+    # 	product-name CSR1kv;
+    # actual match_timeout
+    # 	 show configuration nfvo vnfd vnfd_csr1kv
+    # 	---------------------------------------^
+    # 	syntax error: element does not exist
+    # 	[error][2019-01-16 14:54:08]
+    # 	ncs-oper> 
+    # diff
+    # 	- product-name CSR1kv;
+    # 	+  show configuration nfvo vnfd vnfd_csr1kv
+    # 	+ ---------------------------------------^
+    # 	+ syntax error: element does not exist
+    # 	+ [error][2019-01-16 14:54:08]
+    # 	+ ncs-oper> 
+    # 	
+
+    # Errors:     0
+    # Failed:     1
+    # Warnings:   0
+    # Skipped:    0
+    # Successful: 0
+    # Summary:    fail

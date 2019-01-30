@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+
+<style>
+  body {
+        color: #000000;
+        background-color: white
+  }
+
+  div {
+        overflow: auto;
+        padding: 2px;
+        border: 1px solid #b00;
+        margin-left: 2%;
+        margin-bottom: 2px;
+        margin-top: 2px;
+        color: #000000;
+        background-color: #FFFFE0
+  }
+
+  div.event {
+        font-weight: normal;
+  }
+
+  div.result {
+  }
+
+  div.config {
+  }
+
+  div.code {
+        font-weight: bold;
+        overflow: visible;
+        padding: 0px;
+        border: 0px;
+        margin-left: 0%;
+        margin-bottom: 0px;
+        margin-top: 0px;
+        color: #000000;
+        background-color: white
+  }
+
+  div.send {
+        background-color: #FFEC8B;
+  }
+
+  div.recv {
+        background-color: #E9967A;
+  }
+
+  div.match {
+        background-color: #FFFFE0
+  }
+
+  div.expect {
+        background-color: #FFFFE0
+  }
+
+  div.case {
+        background-color: #D3D3D3
+  }
+
+  td.fail {
+        background-color: #CC3333
+  }
+
+  td.secondary_fail {
+        background-color: #F26C4F
+  }
+
+  td.skip {
+        background-color: #FFFFE0
+  }
+
+  td.warning {
+        background-color: #FFF380
+  }
+
+  td.none {
+        background-color: #80FF80
+  }
+
+  td.success {
+        background-color: #00A651
+  }
+
+  td.no_data {
+        background-color: #FFFFFF
+  }
+  </style>
+
+<title>Lux summary log (run_2019_01_16_19_31_51_921679)</title>
+</head>
+
+<body>
+<table border="1">
+  <tr>
+    <td><strong>Log files:</strong></td>
+    <td><strong><a href="lux_summary.log" type="text/plain">Summary</a></strong></td>
+    <td><strong><a href="lux_result.log" type="text/plain">Result</a></strong></td>
+    <td><strong><a href="lux_config.log" type="text/plain">Config</a></strong></td>
+    <td><strong><a href="lux.tap" type="text/plain">TAP</a></strong></td>
+  </tr>
+</table>
+
+
+<h3><a href="#suite_config">Suite configuration</a></h3>
+
+<h3>Elapsed time: 0:0:10.163253 (h:m:s.us)</h3>
+<h2>Final result: FAIL</h2>
+<div class="case"><pre><strong>failed: 1</strong>
+<div class="event"><pre><a href="#test.lux">test.lux:6 - match_timeout</a>
+</pre></div><strong>successful: 0</strong>
+</pre></div><a name="test.lux"></a>
+
+<h2>Test case: <a href="./test.lux.event.log.html">test.lux</a></h2>
+
+<div class="case"><pre>
+<a><a href="./test.lux.event.log.html#logs">Result</a>: <strong><a href="./test.lux.event.log.html#failed">FAILED</a> at line <a href="./test.lux.event.log.html#6">6</a></strong></a>
+<h3>Expected:</h3>
+<div class="event"><pre>admin@ncs&gt;</pre></div>
+<h3>Actual: match_timeout</h3><div class="event"><pre>ncs_cli -u admin
+Failed to connect to server
+SH-PROMPT:</pre></div><a name="failed"></a>
+<h3>Diff:</h3><div class="event"><pre>
+<font color="red"><b>- ad<mark>mi</mark>n<mark>@</mark>ncs<mark>&gt;</mark></b></font>
+<font color="blue"><b>+ <mark>ncs_cli -u admin
++ F</mark>a<mark>ile</mark>d<mark> to co</mark>nn<mark>e</mark>c<mark>t to </mark>s<mark>erver
++ SH-PROMPT:</mark></b></font></pre></div>
+</pre></div><h2><a name="suite_config">Suite configuration:</a></h2>
+<div class="event"><pre>start time        : 2019-01-16 11:31:51.921679
+version           : 1.18.2
+root_dir          : /usr/local/Homebrew/Cellar/erlang@20/20.3.8.11/lib/erlang
+run_dir           : /Users/aasteele/Documents/nso/tailf-etsi-rel2-nfvo-tosca/test/internal/lux
+log_dir           : /Users/aasteele/Documents/nso/tailf-etsi-rel2-nfvo-tosca/test/internal/lux/lux_logs/run_2019_01_16_19_31_51_921679
+command           : /users/aasteele/Documents/Github/lux/bin/lux
+arguments         : test.lux
+hostname          : AASTEELE-M-C566
+architecture      : Darwin-x86_64
+system info       : Darwin AASTEELE-M-C566 17.7.0 Darwin Kernel Version 17.7.0: Fri Nov  2 20:43:16 PDT 2018; root:xnu-4570.71.17~1/RELEASE_X86_64 x86_64
+suite             : unknown
+run               : run_2019_01_16_19_31_51_921679
+revision          : 
+config name       : undefined
+config_dir        : undefined
+default file      : /users/aasteele/Documents/Github/lux/priv/luxcfg
+end time          : 2019-01-16 11:32:02.084932
+</pre></div>
+
+</body>
+</html>

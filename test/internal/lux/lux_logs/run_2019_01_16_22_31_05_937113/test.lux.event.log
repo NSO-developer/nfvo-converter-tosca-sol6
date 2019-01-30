@@ -1,0 +1,130 @@
+event log         : 0.1
+
+/Users/aasteele/Documents/nso/tailf-etsi-rel2-nfvo-tosca/test/internal/lux/test.lux
+
+lux(0): start_time "2019-01-16 14:31:06.043680"
+lux(1): doc "TOSCA Test"
+lux(2): global "NCS_PROMPT_OPER=ncs-oper>"
+nso(4): start "/users/aasteele/Documents/Github/lux/priv/bin/runpty /bin/sh -i"
+nso(4): expected* ".+"
+nso(4): timer started (10 seconds * 1.000 multiplier)
+nso(4): recv "\e[?1034hsh-3.2$ "
+nso(4): timer canceled (after 118915 micro seconds)
+nso(4): match "\e[?1034hsh-3.2$ "
+nso(4): send "export PS1=SH-PROMPT:\n"
+nso(4): recv "export PS1="
+nso(4): expected* "^SH-PROMPT:"
+nso(4): timer started (10 seconds * 1.000 multiplier)
+nso(4): recv "SH-PROMPT:\nSH-PROMPT:"
+nso(4): timer canceled (after 212 micro seconds)
+nso(4): skip "export PS1=SH-PROMPT:\n"
+nso(4): match "SH-PROMPT:"
+nso(5): send "ncs_cli -u admin\n"
+nso(5): recv "ncs_cli -u"
+nso(6): expected* "admin@ncs>"
+nso(6): timer started (10 seconds * 1.000 multiplier)
+nso(6): recv " admin\n"
+nso(6): recv "\r\nadmin connected from 127.0.0.1 using console on AASTEELE-M-C566\r\n\e[?7hadmin@ncs> "
+nso(6): timer canceled (after 78490 micro seconds)
+nso(6): skip "ncs_cli -u admin\n\r\nadmin connected from 127.0.0.1 using console on AASTEELE-M-C566\r\n\e[?7h"
+nso(6): match "admin@ncs>"
+nso(7): send "set prompt1 "ncs-oper> "\n"
+nso(8): expected* "\\[ok\\]"
+nso(8): timer started (10 seconds * 1.000 multiplier)
+nso(8): recv "set"
+nso(8): recv " prompt1"
+nso(8): recv " "ncs-oper>"
+nso(8): recv " ""
+nso(8): recv "\r\n"
+nso(8): recv "[ok][2019-01-16 14:31:06]\r\nncs-oper> "
+nso(8): timer canceled (after 46612 micro seconds)
+nso(8): skip " set prompt1 "ncs-oper> "\r\n"
+nso(8): match "[ok]"
+nso(9): expected* "ncs-oper>"
+nso(9): timer started (10 seconds * 1.000 multiplier)
+nso(9): timer canceled (after 34 micro seconds)
+nso(9): skip "[2019-01-16 14:31:06]\r\n"
+nso(9): match "ncs-oper>"
+nso(10): send "set paginate false\n"
+nso(11): expected* "ncs-oper>"
+nso(11): timer started (10 seconds * 1.000 multiplier)
+nso(11): recv "set"
+nso(11): recv " paginate"
+nso(11): recv " false"
+nso(11): recv "\r\n"
+nso(11): recv "[ok][2019-01-16 14:31:06]\r\nncs-oper> "
+nso(11): timer canceled (after 39958 micro seconds)
+nso(11): skip " set paginate false\r\n[ok][2019-01-16 14:31:06]\r\n"
+nso(11): match "ncs-oper>"
+nso(12): send "set autowizard false\n"
+nso(13): expected* "ncs-oper>"
+nso(13): timer started (10 seconds * 1.000 multiplier)
+nso(13): recv "set"
+nso(13): recv " autowizard"
+nso(13): recv " false"
+nso(13): recv "\r\n"
+nso(13): recv "[ok][2019-01-16 14:31:06]\r\nncs-oper> "
+nso(13): timer canceled (after 40097 micro seconds)
+nso(13): skip " set autowizard false\r\n[ok][2019-01-16 14:31:06]\r\n"
+nso(13): match "ncs-oper>"
+nso(14): send "set terminal lux\n"
+nso(15): expected* "ncs-oper>"
+nso(15): timer started (10 seconds * 1.000 multiplier)
+nso(15): recv "set"
+nso(15): recv " terminal"
+nso(15): recv " lux"
+nso(15): recv "\r\n"
+nso(15): recv "[ok][2019-01-16 14:31:06]\r\nncs-oper> "
+nso(15): timer canceled (after 40929 micro seconds)
+nso(15): skip " set terminal lux\r\n[ok][2019-01-16 14:31:06]\r\n"
+nso(15): match "ncs-oper>"
+nso(15): suspend
+tosca(17): start "/users/aasteele/Documents/Github/lux/priv/bin/runpty /bin/sh -i"
+tosca(17): expected* ".+"
+tosca(17): timer started (10 seconds * 1.000 multiplier)
+tosca(17): recv "\e[?1034hsh-3.2$ "
+tosca(17): timer canceled (after 102646 micro seconds)
+tosca(17): match "\e[?1034hsh-3.2$ "
+tosca(17): send "export PS1=SH-PROMPT:\n"
+tosca(17): recv "ex"
+tosca(17): expected* "^SH-PROMPT:"
+tosca(17): timer started (10 seconds * 1.000 multiplier)
+tosca(17): recv "port PS1=SH-PROMPT:\nSH-PROMPT:"
+tosca(17): timer canceled (after 198 micro seconds)
+tosca(17): skip "export PS1=SH-PROMPT:\n"
+tosca(17): match "SH-PROMPT:"
+tosca(18): send "./tosca.py -i csr_3nic.yaml\n"
+tosca(18): recv "./tos"
+tosca(19): expected* "SH-PROMPT:"
+tosca(19): timer started (10 seconds * 1.000 multiplier)
+tosca(19): recv "ca.py -i csr_3nic.yaml\n"
+tosca(19): recv "sh: ./tosca.py: No such file or directory\n"
+tosca(19): recv "SH-PROMPT:"
+tosca(19): timer canceled (after 1209 micro seconds)
+tosca(19): skip "./tosca.py -i csr_3nic.yaml\nsh: ./tosca.py: No such file or directory\n"
+tosca(19): match "SH-PROMPT:"
+tosca(19): suspend
+nso(21): resume (idle since line 15)
+nso(22): send "show configuration nfvo vnfd vnfd_csr1kv\n"
+nso(23): expected* "product-name CSR1kv;"
+nso(23): timer started (10 seconds * 1.000 multiplier)
+nso(23): recv "show"
+nso(23): recv " configuration"
+nso(23): recv " nfvo"
+nso(23): recv " vnfd"
+nso(23): recv " vnfd_csr1kv"
+nso(23): recv "\r\n"
+nso(23): recv "---------------------------------------^\r\nsyntax error: element does not exist\r\n[error][2019-01-16 14:31:06]\r\nncs-oper> "
+nso(23): recv "match_timeout"
+nso(23): timer failed (after 10000799 micro seconds)
+nso(23): skip " show configuration nfvo vnfd vnfd_csr1kv\r\n---------------------------------------^\r\nsyntax error: element does not exist\r\n[error][2019-01-16 14:31:06]\r\nncs-oper> "
+nso(23): stop fail
+tosca(19): stop relax
+lux(23): no cleanup
+lux(0): end_time "2019-01-16 14:31:16.555159"
+
+result            : FAIL at 23
+expected*
+"product-name CSR1kv;"
+actual match_timeout
+" show configuration nfvo vnfd vnfd_csr1kv\r\n---------------------------------------^\r\nsyntax error: element does not exist\r\n[error][2019-01-16 14:31:06]\r\nncs-oper> "
