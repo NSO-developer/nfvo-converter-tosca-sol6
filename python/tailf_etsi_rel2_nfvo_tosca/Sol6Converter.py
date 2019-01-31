@@ -68,8 +68,8 @@ class Sol6Converter:
                                        self.tosca_vnf)
             self.flavor_names.append(vim_flavor)
 
-        # flavor_names = [i for i in self.template_inputs if 'vim_flavor' in i.lower()]
-        flavor_vars = {}
+        # Save this data on flavors for later use
+        self.flavor_vars = {}
 
         # Flavor names and information can be either a variable (from inputs) or it can be hardcoded
         # which means that we need to handle getting data from both inputs and also locally
@@ -87,7 +87,7 @@ class Sol6Converter:
                 #             vim_flavor: "ab-auto-test-vnfm3-control-function"
                 flavor_data = flavor
 
-            flavor_vars[flavor] = flavor_data
+            self.flavor_vars[flavor] = flavor_data
 
         # We need len(flavor_vars) number of duplicate 'virtual-compute-descriptors' in the
         # vnfd dict, so we will build a list
@@ -96,7 +96,7 @@ class Sol6Converter:
         # Remove the beginning because we really don't need the full path stored inside this list
         # Loop through our data and create the paths and values in a temp dict, then append it to
         # the final list
-        for name, data in flavor_vars.items():
+        for name, data in self.flavor_vars.items():
             cur_dict = {}
             set_path_to(KeyUtils.remove_path_elem(SOL6.vcd_id, 0), cur_dict, name.lower(),
                         create_missing=True)
@@ -187,8 +187,8 @@ class Sol6Converter:
         """
         Populate the vdu id, min/max num of instances, then link the policies to the VDUs through
         the groups in TOSCA.
-        We will then have enough information to set the affinity-or-anti-affinity-group(s) in the VDU
-        and also outside of it
+        We will then have enough information to set the affinity-or-anti-affinity-group(s)
+        in the VDU and also outside of it
         :return: A dict of values for the instance
         """
         prof = {KeyUtils.get_path_last(SOL6.df_id): vdu_name,
@@ -236,14 +236,15 @@ class Sol6Converter:
         """
 
         # There very strongly should only be one key in each of these dicts
-        name = get_dict_key(vdu)
         # This is now the full path of the vdu
-        # TODO: Change this
+        name = get_dict_key(vdu)
+
+        # Get the name of the flavor of the VDU
         vim_flavor = path_to_value(TOSCA.vdu_vim_flavor.format(name), self.tosca_vnf)
 
-        if 'get_input' in vim_flavor:
-            # For some reason this is wrapped in get_input, but only sometimes
-            vim_flavor = vim_flavor['get_input']
+        if TOSCA.from_input in vim_flavor:
+            # If this is from an input call the TODO: Input method
+            vim_flavor = vim_flavor[TOSCA.from_input]
 
         num_cpu = path_to_value(TOSCA.vdu_num_cpu.format(name), self.tosca_vnf)
         mem_size = path_to_value(TOSCA.vdu_mem_size.format(name), self.tosca_vnf)
