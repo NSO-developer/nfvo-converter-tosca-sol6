@@ -3,10 +3,10 @@
     "etsi-nfv:nfv": {
       "vnfd": [
         {
-          "id": "VPC-4.4",
+          "id": "VEPC-SI",
           "provider": "cisco",
           "product-name": "VPC",
-          "software-version": "1.0",
+          "software-version": 1.0,
           "version": "1.0",
           "product-info-name": "Virtual Packet Core (VPC); 32 vCPUs, 64Gb RAM, 66Gb vStorage",
           "product-info-description": "",
@@ -65,18 +65,8 @@
           ],
           "virtual-compute-descriptor": [
             {
-              "id": "vim_flavor_cf",
-              "flavor-name-variable": "VIM_FLAVOR_CF",
-              "virtual-cpu": {
-                "num-virtual-cpus": 8
-              },
-              "virtual-memory": {
-                "size": "16"
-              }
-            },
-            {
-              "id": "vim_flavor_sf",
-              "flavor-name-variable": "VIM_FLAVOR_SF",
+              "id": "upp_flavour",
+              "flavor-name-variable": "UPP_FLAVOUR",
               "virtual-cpu": {
                 "num-virtual-cpus": 8
               },
@@ -87,20 +77,8 @@
           ],
           "virtual-storage-descriptor": [
             {
-              "id": "vnfd1-deployment-control-function-1-cf-boot",
-              "size-of-storage": "16"
-            },
-            {
-              "id": "vnfd1-deployment-control-function-1-cf-cdr",
-              "size-of-storage": "200"
-            },
-            {
-              "id": "vnfd1-deployment-control-function-0-cf-boot",
-              "size-of-storage": "16"
-            },
-            {
-              "id": "vnfd1-deployment-control-function-0-cf-cdr",
-              "size-of-storage": "200"
+              "id": "UPP-boot1-volume",
+              "size-of-storage": "16GB"
             }
           ],
           "sw-image-desc": [
@@ -154,48 +132,11 @@
               "description": "Default VNF Deployment Flavour",
               "vdu-profile": [
                 {
-                  "id": "c1",
+                  "id": "UPP",
                   "min-number-of-instances": 1,
                   "max-number-of-instances": 1,
                   "affinity-or-anti-affinity-group": {
-                    "id": [
-                      "cf2_aa_group",
-                      "sf3_aa_group",
-                      "sf4_aa_group"
-                    ]
-                  }
-                },
-                {
-                  "id": "c2",
-                  "min-number-of-instances": 1,
-                  "max-number-of-instances": 1,
-                  "affinity-or-anti-affinity-group": {
-                    "id": [
-                      "cf2_aa_group",
-                      "sf3_aa_group",
-                      "sf4_aa_group"
-                    ]
-                  }
-                },
-                {
-                  "id": "s3",
-                  "min-number-of-instances": 1,
-                  "max-number-of-instances": 1,
-                  "affinity-or-anti-affinity-group": {
-                    "id": [
-                      "sf3_aa_group",
-                      "sf4_aa_group"
-                    ]
-                  }
-                },
-                {
-                  "id": "s4",
-                  "min-number-of-instances": 1,
-                  "max-number-of-instances": 1,
-                  "affinity-or-anti-affinity-group": {
-                    "id": [
-                      "sf4_aa_group"
-                    ]
+                    "id": []
                   }
                 }
               ],
@@ -243,23 +184,7 @@
               "max-recommended-graceful-termination": "",
               "min-graceful-stop-timeout": "",
               "max-recommended-graceful-stop-timeout": "",
-              "affinity-or-anti-affinity-group": [
-                {
-                  "id": "cf2_aa_group",
-                  "type": "anti-affinity",
-                  "scope": "nfvi_node"
-                },
-                {
-                  "id": "sf3_aa_group",
-                  "type": "anti-affinity",
-                  "scope": "nfvi_node"
-                },
-                {
-                  "id": "sf4_aa_group",
-                  "type": "anti-affinity",
-                  "scope": "nfvi_node"
-                }
-              ],
+              "affinity-or-anti-affinity-group": [],
               "monitoring-parameter": [
                 {
                   "id": ""
@@ -340,18 +265,7 @@
           "auto-scale": [
             {}
           ],
-          "virtual-link-descriptor": [
-            {
-              "id": "etsi-vpc-di-internal1",
-              "description": "DI Internal 1 Network VL",
-              "connectivity-type.layer-protocol": "ipv4"
-            },
-            {
-              "id": "etsi-vpc-di-internal2",
-              "description": "DI Internal 2 Network VL",
-              "connectivity-type.layer-protocol": "ipv4"
-            }
-          ]
+          "virtual-link-descriptor": []
         }
       ]
     }
