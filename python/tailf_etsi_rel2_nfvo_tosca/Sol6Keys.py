@@ -13,6 +13,7 @@ class TOSCA:
     _nodes          = "topology_template.node_templates"
     _vnf            = _nodes + ".vnf"
     _properties     = _vnf + ".properties"
+    from_input      = "get_input"
     # --------------------------------
 
     id                              = _properties + ".descriptor_id"

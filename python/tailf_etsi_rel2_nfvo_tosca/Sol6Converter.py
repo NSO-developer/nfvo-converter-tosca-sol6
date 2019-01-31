@@ -13,6 +13,8 @@ class Sol6Converter:
         self.tosca_vnf = tosca_vnf
         self.parsed_dict = parsed_dict
         self.log = log
+        # Set this up for _virtual_get_flavor_names
+        self.flavor_names = []
 
     def parse(self):
         """
@@ -50,15 +52,42 @@ class Sol6Converter:
 
     def _virtual_get_flavor_names(self):
         """
-        Assume that vim flavors are always prefaced with VIM_FLAVOR
-        This is a false assumption. TODO: Talk with Anu about this
+        We need to get the flavor names from all the VDUs
+        Now take those values and combine them with the compute descriptors and set them.
+
+        Note: Must be called before
         """
-        flavor_names = [i for i in self.template_inputs if 'vim_flavor' in i.lower()]
+
+        # Get the information about the VDUs into a list of dicts
+        self.vdus = get_roots_from_filter(self.tosca_vnf, child_key='type',
+                                          child_value=TOSCA.vdu_type)
+        for vdu in self.vdus:
+            # First, get the value of the vim_flavor for this VDU
+            # This is just going to be basic, don't actually parse it yet, we'll do that later
+            vim_flavor = path_to_value(TOSCA.vdu_vim_flavor.format(get_dict_key(vdu)),
+                                       self.tosca_vnf)
+            self.flavor_names.append(vim_flavor)
+
+        # flavor_names = [i for i in self.template_inputs if 'vim_flavor' in i.lower()]
         flavor_vars = {}
 
-        # Get the flavor names & data from the inputs dict
-        for flavor in flavor_names:
-            flavor_vars[flavor] = self.template_inputs[flavor]
+        # Flavor names and information can be either a variable (from inputs) or it can be hardcoded
+        # which means that we need to handle getting data from both inputs and also locally
+        for flavor in self.flavor_names:
+            # If the value is saying to get information from an input
+            # TODO: Move this to a method for retrieving inputs
+            if TOSCA.from_input in flavor:
+                # Get the flavor data from the template inputs
+                flavor_data = self.template_inputs[flavor[TOSCA.from_input]]
+                # Then set flavor to the name of the flavor, instead of the get_input dict
+                flavor = flavor[TOSCA.from_input]
+            else:
+                # The information is not coming from an input, so handle it all here
+                # This works if it's formatted as follow:
+                #             vim_flavor: "ab-auto-test-vnfm3-control-function"
+                flavor_data = flavor
+
+            flavor_vars[flavor] = flavor_data
 
         # We need len(flavor_vars) number of duplicate 'virtual-compute-descriptors' in the
         # vnfd dict, so we will build a list
@@ -83,9 +112,6 @@ class Sol6Converter:
         There are multiple methods that need data from VDUs, and there's no need to loop through
         them more than once, at least not right now.
         """
-        # Get the information about the VDUs into a list of dicts
-        vdus = get_roots_from_filter(self.tosca_vnf, child_key='type',
-                                     child_value=TOSCA.vdu_type)
         virt_compute_descriptors = path_to_value(SOL6.virtual_comp_desc, self.vnfd)
 
         # Make a list for deployment-flavors vdu-profiles
@@ -98,14 +124,15 @@ class Sol6Converter:
         anti_affinity_policies = get_roots_from_filter(self.tosca_vnf, child_key="type",
                                                        child_value=TOSCA.anti_affinity_type)
 
-        for vdu in vdus:
+        for vdu in self.vdus:
             vdu_name = get_dict_key(vdu)
-            # Set the virtual capabilities
-            # To do this we need to match the entries from compute_descriptors to the ones in vdus
-            self._virtual_compute_set_capabilities(vdu, virt_compute_descriptors)
 
             # Populate the configurable properties
             self._handle_config_params(vdu_name)
+
+            # Set the virtual capabilities
+            # To do this we need to match the entries from compute_descriptors to the ones in vdus
+            self._virtual_compute_set_capabilities(vdu, virt_compute_descriptors)
 
             # Populate the list of vdu profiles
             df_vdu_prof.append(self._populate_vdu_profile(vdu_name, groups, anti_affinity_policies))
@@ -211,6 +238,7 @@ class Sol6Converter:
         # There very strongly should only be one key in each of these dicts
         name = get_dict_key(vdu)
         # This is now the full path of the vdu
+        # TODO: Change this
         vim_flavor = path_to_value(TOSCA.vdu_vim_flavor.format(name), self.tosca_vnf)
 
         if 'get_input' in vim_flavor:
@@ -244,7 +272,8 @@ class Sol6Converter:
         """
         Get all the additional properties and put them in a list at configurable-properties
         """
-        pass
+
+        # Now get the rest of the configurable parameters
 
     def _virtual_storage_set_capabilities(self):
         """

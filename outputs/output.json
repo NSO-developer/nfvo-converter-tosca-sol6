@@ -65,6 +65,16 @@
           ],
           "virtual-compute-descriptor": [
             {
+              "id": "ab-auto-test-vnfm3-control-function",
+              "flavor-name-variable": "ab-auto-test-vnfm3-control-function",
+              "virtual-cpu": {
+                "num-virtual-cpus": 8
+              },
+              "virtual-memory": {
+                "size": "16"
+              }
+            },
+            {
               "id": "vim_flavor_cf",
               "flavor-name-variable": "VIM_FLAVOR_CF",
               "virtual-cpu": {
