@@ -76,7 +76,7 @@ class SOL6:
 
     # value_key is for if we have a default value we want to assign, the program can handle
     # assigning it automatically for basic keys
-    # The variable must be postfixed with value_key
+    # The variable must be postfixed with the value of 'value_key'
     value_key = "_VAL"
     # --------------------------------
     id                              = _vnfd + ".id"
@@ -106,6 +106,7 @@ class SOL6:
     df_vdu_p_affinity_group          = df_vdu_profile + ".affinity-or-anti-affinity-group"
     df_vdu_p_aff_id                  = df_vdu_p_affinity_group + ".id"
 
+    @staticmethod
     def df_anti_affinity_value(x):
         return "anti-affinity" if x == TOSCA.anti_affinity_type else "affinity"
 

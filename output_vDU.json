@@ -1,0 +1,289 @@
+{
+  "data": {
+    "etsi-nfv:nfv": {
+      "vnfd": [
+        {
+          "id": "altiostar_vDU",
+          "provider": "Cisco",
+          "product-name": "altiostar_vDU",
+          "software-version": "1.0",
+          "version": "1.1",
+          "product-info-name": "altiostar_vDU",
+          "product-info-description": "",
+          "vnfm-info": [
+            "Cisco ESC"
+          ],
+          "localization-language": "",
+          "default-localization-language": "",
+          "vdu": [
+            {
+              "id": "",
+              "name": "",
+              "description": "",
+              "int-cpd": [
+                {
+                  "int-virtual-link-desc": "",
+                  "ext-cpd": "",
+                  "bitrate-requirement": "",
+                  "order": [
+                    {}
+                  ]
+                }
+              ],
+              "virtual-compute-desc": "",
+              "virtual-storage-desc": [
+                {}
+              ],
+              "boot-order": [
+                {
+                  "key": "",
+                  "value": ""
+                }
+              ],
+              "sw-image-desc": "",
+              "nfvi-constraint": [
+                {}
+              ],
+              "monitoring-parameter": [
+                {
+                  "id": ""
+                }
+              ],
+              "configurable-properties": [
+                {
+                  "key": "",
+                  "value": ""
+                }
+              ],
+              "boot-data": [
+                {
+                  "key": "",
+                  "value": ""
+                }
+              ]
+            }
+          ],
+          "virtual-compute-descriptor": [
+            {
+              "id": "vim_flavor",
+              "flavor-name-variable": "VIM_FLAVOR",
+              "virtual-cpu": {
+                "num-virtual-cpus": 1
+              },
+              "virtual-memory": {
+                "size": "512"
+              }
+            }
+          ],
+          "virtual-storage-descriptor": [
+            {
+              "id": "vDU4_vol",
+              "size-of-storage": "15"
+            }
+          ],
+          "sw-image-desc": [
+            {
+              "id": "",
+              "name": "",
+              "version": "",
+              "checksum": "",
+              "container-format": "",
+              "disk-format": "",
+              "min-disk": "",
+              "min-ram": "",
+              "size": "",
+              "image": "",
+              "operating-system": "",
+              "supported-virtualization-environment": [
+                {}
+              ]
+            }
+          ],
+          "int-virtual-link-desc": [
+            {
+              "id": "",
+              "desc-flavor": [
+                {
+                  "id": "",
+                  "latency": "",
+                  "packet-delay-variation": "",
+                  "packet-loss-ratio": ""
+                }
+              ],
+              "test-access": [
+                {}
+              ],
+              "description": "",
+              "monitoring-parameters": [
+                {
+                  "id": ""
+                }
+              ]
+            }
+          ],
+          "ext-cpd": [
+            {
+              "int-virtual-link-desc": ""
+            }
+          ],
+          "df": [
+            {
+              "id": "default",
+              "description": "Default VNF Deployment Flavour",
+              "vdu-profile": [
+                {
+                  "id": "vdu_node_1",
+                  "min-number-of-instances": 1,
+                  "max-number-of-instances": 1,
+                  "affinity-or-anti-affinity-group": {
+                    "id": []
+                  }
+                }
+              ],
+              "virtual-link-profile": [
+                {
+                  "id": "",
+                  "flavor": "",
+                  "affinity-or-anti-affinity-group": [
+                    {
+                      "id": ""
+                    }
+                  ]
+                }
+              ],
+              "instantiation-level": [
+                {
+                  "id": "",
+                  "description": "",
+                  "vdu-level": [
+                    {
+                      "id": "",
+                      "number-of-instances": ""
+                    }
+                  ],
+                  "scaling-info": [
+                    {
+                      "id": "",
+                      "scale-level": ""
+                    }
+                  ]
+                }
+              ],
+              "default-instantiation-level": "default",
+              "supported-operation": [
+                {}
+              ],
+              "instantiate-vnf-op-config": "",
+              "parameter": "",
+              "key": "",
+              "value": "",
+              "scaling-by-more-than-one-step-supported": "",
+              "arbitrary-target-levels-supported": "",
+              "cause": "",
+              "min-graceful-termination": "",
+              "max-recommended-graceful-termination": "",
+              "min-graceful-stop-timeout": "",
+              "max-recommended-graceful-stop-timeout": "",
+              "affinity-or-anti-affinity-group": [],
+              "monitoring-parameter": [
+                {
+                  "id": ""
+                }
+              ],
+              "scaling-aspect": [
+                {
+                  "id": "",
+                  "name": "",
+                  "description": "",
+                  "max-scale-level": "",
+                  "deltas": [
+                    {}
+                  ],
+                  "vdu-delta": [
+                    {}
+                  ],
+                  "number-of-instances": "",
+                  "virtual-link-bit-rate-delta": [
+                    {}
+                  ],
+                  "root": "",
+                  "leaf": "",
+                  "step-deltas": ""
+                }
+              ]
+            }
+          ],
+          "auto-scalable": "",
+          "auto-healable": "",
+          "additional-configurable-property": [
+            {}
+          ],
+          "key": "",
+          "value": "",
+          "extension": [
+            {}
+          ],
+          "metadata": [
+            {}
+          ],
+          "lifecycle-management-script": [
+            {
+              "event": "",
+              "lcm-transition-event": "",
+              "script": "",
+              "script-dsl": "",
+              "script-input": [
+                {
+                  "key": "",
+                  "value": ""
+                }
+              ]
+            }
+          ],
+          "element-group": [
+            {
+              "id": "",
+              "description": "",
+              "vdu": [
+                {}
+              ],
+              "virtual-link-desc": [
+                {}
+              ]
+            }
+          ],
+          "indicator": [
+            {
+              "id": "",
+              "name": "",
+              "indicator-value": [
+                {}
+              ],
+              "source": ""
+            }
+          ],
+          "auto-scale": [
+            {}
+          ],
+          "virtual-link-descriptor": [
+            {
+              "id": "front-haul",
+              "description": "Front Haul Network VL",
+              "connectivity-type.layer-protocol": "ipv4"
+            },
+            {
+              "id": "back-haul",
+              "description": "Back Haul Network VL",
+              "connectivity-type.layer-protocol": "ipv4"
+            },
+            {
+              "id": "altiostar-mgmt",
+              "description": "Altiostar Management Network VL",
+              "connectivity-type.layer-protocol": "ipv4"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
