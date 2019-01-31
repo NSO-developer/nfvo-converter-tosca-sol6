@@ -62,6 +62,9 @@ class TOSCA:
     _instan_level               = "{}"
     _instan_level_properties    = _instan_level + ".properties"
     instan_level_type           = "tosca.policies.nfv.VduInstantiationLevels"
+    instan_level_nfv_type       = "tosca.policies.nfv.InstantiationLevels"
+    instan_level_nfv            = "{}.properties.levels"
+    instan_level_nfv_desc       = instan_level_nfv + ".{}.description"
     instan_levels               = _instan_level_properties + ".levels"
     instan_level_num            = instan_levels + ".{}.number_of_instances"
     instan_level_targets        = _instan_level + ".targets"
@@ -117,9 +120,10 @@ class SOL6:
     df_vdu_p_aff_id                  = df_vdu_p_affinity_group + ".id"
 
     df_inst_level_path_level         = 3
-    df_inst_level                   = _deployment_flavor + ".instantiation-level"
+    df_inst_level                    = _deployment_flavor + ".instantiation-level"
     _df_inst_vdu_level               = df_inst_level + ".vdu-level"
     df_inst_level_id                 = df_inst_level + ".id"
+    df_inst_level_desc               = df_inst_level + ".description"
     df_inst_level_vdu                = _df_inst_vdu_level + ".vdu"
     df_inst_level_num                = _df_inst_vdu_level + ".number-of-instances"
 
