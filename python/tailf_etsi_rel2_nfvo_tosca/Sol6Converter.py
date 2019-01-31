@@ -140,16 +140,44 @@ class Sol6Converter:
         i_levels_data = get_roots_from_filter(self.tosca_vnf, child_key="type",
                                               child_value=TOSCA.instan_level_type)
 
+        nfv_policy_info = get_roots_from_filter(self.tosca_vnf, child_key="type",
+                                                child_value=TOSCA.instan_level_nfv_type)
+
+        # ------------------------------------------------------------------------------------------
+        def _get_desc_from_level(outer_level_name):
+            """
+            Loop through all the nfv InstantiationLevel entries.
+            We want to match the levels: level_name to our cur_level, and then get the description
+            of that key
+            nfv_policy_info comes from outside this method
+            """
+            for nfv_p in nfv_policy_info:
+                nfv_p = nfv_p[get_dict_key(nfv_p)]
+                nfv_levels = path_to_value(KeyUtils.remove_path_first(TOSCA.instan_level_nfv),
+                                           nfv_p)
+                # We want to loop over all the levels, but if there's only one element it's a dict
+                # so if there is only 1, make it into a list
+                if type(nfv_levels) is not list:
+                    nfv_levels = [nfv_levels]
+                # Look for a match of the level_names, then set cur_desc if we find it
+                for level in nfv_levels:
+                    cur_level_name = get_dict_key(level)
+                    if cur_level_name == outer_level_name:
+                        return level[outer_level_name][KeyUtils.get_path_last(
+                            TOSCA.instan_level_nfv_desc)]
+            return None
+        # ------------------------------------------------------------------------------------------
+
         inst_parsed = []
-
         for inst_level in i_levels_data:
-
             cur_name = get_dict_key(inst_level)
             cur_level = get_dict_key(path_to_value(TOSCA.instan_levels.format(cur_name),
                                                    inst_level))
             cur_targets = path_to_value(TOSCA.instan_level_targets.format(cur_name), inst_level)
             cur_num_inst = path_to_value(
                 TOSCA.instan_level_num.format(cur_name, cur_level), inst_level)
+
+            cur_desc = _get_desc_from_level(cur_level)
 
             for target in cur_targets:
                 c = {}
@@ -158,9 +186,18 @@ class Sol6Converter:
                 set_path_to(KeyUtils.remove_path_first(
                     SOL6.df_inst_level_id, SOL6.df_inst_level_path_level),
                     c, cur_level, create_missing=True)
+
+                if cur_desc is not None:
+                    set_path_to(KeyUtils.remove_path_first(
+                        SOL6.df_inst_level_desc, SOL6.df_inst_level_path_level),
+                        c, cur_desc, create_missing=True)
+                else:
+                    print("A matching description was not found for {}.".format(cur_level))
+
                 set_path_to(KeyUtils.remove_path_first(
                     SOL6.df_inst_level_vdu, SOL6.df_inst_level_path_level),
                     c, target, create_missing=True)
+
                 set_path_to(KeyUtils.remove_path_first(
                     SOL6.df_inst_level_num, SOL6.df_inst_level_path_level),
                     c, cur_num_inst, create_missing=True)
@@ -168,7 +205,6 @@ class Sol6Converter:
                 inst_parsed.append(c)
 
         set_path_to(SOL6.df_inst_level, self.vnfd, inst_parsed)
-
 
     def _populate_init_affinity(self, anti_affinity_policies, groups):
         """
