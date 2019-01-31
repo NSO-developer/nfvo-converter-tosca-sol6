@@ -212,20 +212,32 @@
               ],
               "instantiation-level": [
                 {
-                  "id": "",
-                  "description": "",
-                  "vdu-level": [
-                    {
-                      "id": "",
-                      "number-of-instances": ""
-                    }
-                  ],
-                  "scaling-info": [
-                    {
-                      "id": "",
-                      "scale-level": ""
-                    }
-                  ]
+                  "id": "default",
+                  "vdu-level": {
+                    "vdu": "c1",
+                    "number-of-instances": 1
+                  }
+                },
+                {
+                  "id": "default",
+                  "vdu-level": {
+                    "vdu": "c2",
+                    "number-of-instances": 1
+                  }
+                },
+                {
+                  "id": "default",
+                  "vdu-level": {
+                    "vdu": "s3",
+                    "number-of-instances": 1
+                  }
+                },
+                {
+                  "id": "default",
+                  "vdu-level": {
+                    "vdu": "s4",
+                    "number-of-instances": 1
+                  }
                 }
               ],
               "default-instantiation-level": "default",

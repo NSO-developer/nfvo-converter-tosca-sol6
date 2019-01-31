@@ -31,7 +31,6 @@ class Sol6Converter:
         self._handle_virtual_compute()
         self._handle_virtual_link()
 
-        print("End", self.vnfd)
         return self.vnfd
 
     def _handle_virtual_compute(self):
@@ -54,16 +53,13 @@ class Sol6Converter:
         """
         We need to get the flavor names from all the VDUs
         Now take those values and combine them with the compute descriptors and set them.
-
-        Note: Must be called before
         """
 
         # Get the information about the VDUs into a list of dicts
         self.vdus = get_roots_from_filter(self.tosca_vnf, child_key='type',
                                           child_value=TOSCA.vdu_type)
         for vdu in self.vdus:
-            # First, get the value of the vim_flavor for this VDU
-            # This is just going to be basic, don't actually parse it yet, we'll do that later
+            # First, get the value of the vim_flavor for this VDU, don't parse it yet
             vim_flavor = path_to_value(TOSCA.vdu_vim_flavor.format(get_dict_key(vdu)),
                                        self.tosca_vnf)
             self.flavor_names.append(vim_flavor)
@@ -74,26 +70,20 @@ class Sol6Converter:
         # Flavor names and information can be either a variable (from inputs) or it can be hardcoded
         # which means that we need to handle getting data from both inputs and also locally
         for flavor in self.flavor_names:
-            # If the value is saying to get information from an input
-            # TODO: Move this to a method for retrieving inputs
-            if TOSCA.from_input in flavor:
-                # Get the flavor data from the template inputs
-                flavor_data = self.template_inputs[flavor[TOSCA.from_input]]
-                # Then set flavor to the name of the flavor, instead of the get_input dict
-                flavor = flavor[TOSCA.from_input]
+            if is_tosca_input(flavor):
+                # Get the variable name + flavor data from the template inputs
+                name, data = self.tosca_get_input(flavor)
             else:
                 # The information is not coming from an input, so handle it all here
-                # This works if it's formatted as follow:
+                # This works if it's formatted as follows:
                 #             vim_flavor: "ab-auto-test-vnfm3-control-function"
-                flavor_data = flavor
+                name = flavor
+                data = flavor
 
-            self.flavor_vars[flavor] = flavor_data
+            self.flavor_vars[name] = data
 
-        # We need len(flavor_vars) number of duplicate 'virtual-compute-descriptors' in the
-        # vnfd dict, so we will build a list
         compute_descriptors = []
 
-        # Remove the beginning because we really don't need the full path stored inside this list
         # Loop through our data and create the paths and values in a temp dict, then append it to
         # the final list
         for name, data in self.flavor_vars.items():
@@ -140,6 +130,45 @@ class Sol6Converter:
         set_path_to(SOL6.df_vdu_profile, self.vnfd, df_vdu_prof)
 
         self._populate_init_affinity(anti_affinity_policies, groups)
+        self._populate_init_level()
+
+    def _populate_init_level(self):
+        """
+        Populate the <instantiation-level> data, includes scaling info
+        """
+        # Get the InstationationLevels data
+        i_levels_data = get_roots_from_filter(self.tosca_vnf, child_key="type",
+                                              child_value=TOSCA.instan_level_type)
+
+        inst_parsed = []
+
+        for inst_level in i_levels_data:
+
+            cur_name = get_dict_key(inst_level)
+            cur_level = get_dict_key(path_to_value(TOSCA.instan_levels.format(cur_name),
+                                                   inst_level))
+            cur_targets = path_to_value(TOSCA.instan_level_targets.format(cur_name), inst_level)
+            cur_num_inst = path_to_value(
+                TOSCA.instan_level_num.format(cur_name, cur_level), inst_level)
+
+            for target in cur_targets:
+                c = {}
+                # Remove the vnfd.df.instantiation-level before the keys,
+                # since we're building a list and will put it in that location at the end
+                set_path_to(KeyUtils.remove_path_first(
+                    SOL6.df_inst_level_id, SOL6.df_inst_level_path_level),
+                    c, cur_level, create_missing=True)
+                set_path_to(KeyUtils.remove_path_first(
+                    SOL6.df_inst_level_vdu, SOL6.df_inst_level_path_level),
+                    c, target, create_missing=True)
+                set_path_to(KeyUtils.remove_path_first(
+                    SOL6.df_inst_level_num, SOL6.df_inst_level_path_level),
+                    c, cur_num_inst, create_missing=True)
+
+                inst_parsed.append(c)
+
+        set_path_to(SOL6.df_inst_level, self.vnfd, inst_parsed)
+
 
     def _populate_init_affinity(self, anti_affinity_policies, groups):
         """
@@ -243,8 +272,11 @@ class Sol6Converter:
         vim_flavor = path_to_value(TOSCA.vdu_vim_flavor.format(name), self.tosca_vnf)
 
         if TOSCA.from_input in vim_flavor:
-            # If this is from an input call the TODO: Input method
+            # If this is from an input get the interior variable
             vim_flavor = vim_flavor[TOSCA.from_input]
+        else:
+            if not is_hashable(vim_flavor):
+                raise ValueError("vim_flavor: {} is not a recognized format.".format(vim_flavor))
 
         num_cpu = path_to_value(TOSCA.vdu_num_cpu.format(name), self.tosca_vnf)
         mem_size = path_to_value(TOSCA.vdu_mem_size.format(name), self.tosca_vnf)
@@ -359,8 +391,27 @@ class Sol6Converter:
         for key in value_keys:
             set_path_to(getattr(SOL6, key), self.vnfd, getattr(SOL6, key + SOL6.value_key))
 
+    def tosca_get_input(self, input_name):
+        """
+        Attempt to locate and return the value of the given input from the tosca vnf file
+        :param input_name: { 'get_input': 'VAR_NAME' }
+        :returns: (var_name, data) or (None, None)
+        """
+        # Make sure the
+        if not is_tosca_input(input_name):
+            return None, None
+
+        data = self.template_inputs[input_name[TOSCA.from_input]]
+        name = input_name[TOSCA.from_input]
+
+        return name, data
+
 
 # ******* Static Methods ********
+def is_tosca_input(val):
+    return TOSCA.from_input in val
+
+
 def path_to_value(path, cur_dict):
     """
     topology_template.node_templates.vnf.properties.descriptor_id
@@ -503,3 +554,12 @@ def get_dict_key(dic, n=0):
 def get_object_keys(obj):
     return [attr for attr in dir(obj) if not callable(getattr(obj, attr)) and
             not (attr.startswith("__") or attr.startswith("_"))]
+
+
+def is_hashable(obj):
+    """Determine whether 'obj' can be hashed."""
+    try:
+        hash(obj)
+    except TypeError:
+        return False
+    return True

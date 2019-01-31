@@ -34,37 +34,45 @@ class TOSCA:
     inputs = "topology_template.inputs"
 
     # These all need to be formatted with the proper node before use
-    vdu                     = _nodes + ".{}"
-    vdu_cap_props           = vdu + ".capabilities.virtual_compute.properties"
-    vdu_num_cpu             = vdu_cap_props + ".virtual_cpu.num_virtual_cpu"
-    vdu_mem_size            = vdu_cap_props + ".virtual_memory.virtual_mem_size"
-    vdu_conf_props          = vdu + ".properties.configurable_properties"
-    vdu_vim_flavor          = vdu_conf_props + ".additional_vnfc_configurable_properties.vim_flavor"
-    vdu_type                = "cisco.nodes.nfv.Vdu.Compute"
+    vdu                         = _nodes + ".{}"
+    vdu_cap_props               = vdu + ".capabilities.virtual_compute.properties"
+    vdu_num_cpu                 = vdu_cap_props + ".virtual_cpu.num_virtual_cpu"
+    vdu_mem_size                = vdu_cap_props + ".virtual_memory.virtual_mem_size"
+    vdu_conf_props              = vdu + ".properties.configurable_properties"
+    vdu_vim_flavor              = vdu_conf_props + ".additional_vnfc_configurable_properties" \
+                                                   ".vim_flavor"
+    vdu_type                    = "cisco.nodes.nfv.Vdu.Compute"
 
-    vdu_profile             = vdu + ".properties.vdu_profile"
-    vdu_profile_min         = vdu_profile + ".min_number_of_instances"
-    vdu_profile_max         = vdu_profile + ".max_number_of_instances"
+    vdu_profile                 = vdu + ".properties.vdu_profile"
+    vdu_profile_min             = vdu_profile + ".min_number_of_instances"
+    vdu_profile_max             = vdu_profile + ".max_number_of_instances"
 
     # These also need to be formatted before use
-    virtual_block_storage   = _nodes + ".{}"
-    vbs_props               = virtual_block_storage + ".properties"
-    vbs_size                = vbs_props + ".virtual_block_storage_data.size_of_storage"
-    vbs_type                = "cisco.nodes.nfv.Vdu.VirtualBlockStorage"
+    virtual_block_storage       = _nodes + ".{}"
+    vbs_props                   = virtual_block_storage + ".properties"
+    vbs_size                    = vbs_props + ".virtual_block_storage_data.size_of_storage"
+    vbs_type                    = "cisco.nodes.nfv.Vdu.VirtualBlockStorage"
 
-    virtual_link_mapping    = _nodes + ".{}"
-    _vlm_props              = virtual_link_mapping + ".properties"
-    vlm_desc                = _vlm_props + ".description"
-    vlm_protocols           = _vlm_props + ".connectivity_type.layer_protocols"
-    vlm_type                = "tosca.nodes.nfv.VnfVirtualLink"
+    virtual_link_mapping        = _nodes + ".{}"
+    _vlm_props                  = virtual_link_mapping + ".properties"
+    vlm_desc                    = _vlm_props + ".description"
+    vlm_protocols               = _vlm_props + ".connectivity_type.layer_protocols"
+    vlm_type                    = "tosca.nodes.nfv.VnfVirtualLink"
 
-    group_affinity_type     = "tosca.groups.nfv.PlacementGroup"
-    anti_affinity_type      = "tosca.policies.nfv.AntiAffinityRule"
+    _instan_level               = "{}"
+    _instan_level_properties    = _instan_level + ".properties"
+    instan_level_type           = "tosca.policies.nfv.VduInstantiationLevels"
+    instan_levels               = _instan_level_properties + ".levels"
+    instan_level_num            = instan_levels + ".{}.number_of_instances"
+    instan_level_targets        = _instan_level + ".targets"
+
+    group_affinity_type         = "tosca.groups.nfv.PlacementGroup"
+    anti_affinity_type          = "tosca.policies.nfv.AntiAffinityRule"
     # TODO: Handle Affinity as well
-    group_aff_members_key   = "members"
-    policy_aff_targets_key  = "targets"
-    policy_aff_type_key     = "type"
-    policy_aff_scope_key    = "properties.scope"
+    group_aff_members_key       = "members"
+    policy_aff_targets_key      = "targets"
+    policy_aff_type_key         = "type"
+    policy_aff_scope_key        = "properties.scope"
 
 
 class SOL6:
@@ -90,6 +98,7 @@ class SOL6:
     vnfm_info                       = _vnfd + ".vnfm-info"
     # --------------------------------
     # Deployment Flavor
+    df_path_level                    = 2  # How many elements in 'df' is
     _deployment_flavor               = _vnfd + ".df"
     df_id                            = _deployment_flavor + ".id"
     df_desc                          = _deployment_flavor + ".description"
@@ -107,6 +116,15 @@ class SOL6:
     df_vdu_p_affinity_group          = df_vdu_profile + ".affinity-or-anti-affinity-group"
     df_vdu_p_aff_id                  = df_vdu_p_affinity_group + ".id"
 
+    df_inst_level_path_level         = 3
+    df_inst_level                   = _deployment_flavor + ".instantiation-level"
+    _df_inst_vdu_level               = df_inst_level + ".vdu-level"
+    df_inst_level_id                 = df_inst_level + ".id"
+    df_inst_level_vdu                = _df_inst_vdu_level + ".vdu"
+    df_inst_level_num                = _df_inst_vdu_level + ".number-of-instances"
+
+
+
     @staticmethod
     def df_anti_affinity_value(x):
         return "anti-affinity" if x == TOSCA.anti_affinity_type else "affinity"
@@ -123,6 +141,7 @@ class SOL6:
     virtual_comp_desc               = _vnfd + ".virtual-compute-descriptor"
     vcd_id                          = virtual_comp_desc + ".id"
     vcd_flavor_name                 = virtual_comp_desc + ".flavor-name-variable"
+    flavor_name_key                 = "flavor-name"
     vcd_virtual_memory              = virtual_comp_desc + ".virtual-memory.size"
     vcd_virtual_cpu                 = virtual_comp_desc + ".virtual-cpu.num-virtual-cpus"
 
@@ -147,6 +166,15 @@ class KeyUtils:
         paths = path.split(".")
         if len(paths) > 0:
             return ".".join(paths[len(paths) - n:len(paths)])
+        else:
+            raise KeyError("Path {} is an invalid path to use in this method.".format(path))
+
+    @staticmethod
+    def remove_path_first(path, n=1):
+        """ Get the string without the first n elements of the path """
+        paths = path.split(".")
+        if len(paths) > 0:
+            return ".".join(paths[n:len(paths)])
         else:
             raise KeyError("Path {} is an invalid path to use in this method.".format(path))
 
