@@ -67,7 +67,11 @@ class TOSCA:
     instan_level_num            = instan_levels + ".{}.number_of_instances"
     instan_level_targets        = _instan_level + ".targets"
 
+    scaling_aspects_path_level  = 3
     scaling_aspects             = "{}.properties.aspects"
+    scaling_aspect              = scaling_aspects + ".{}"
+    scaling_aspect_desc         = scaling_aspect + ".description"
+    scaling_aspect_max_level    = scaling_aspect + ".max_scale_level"
 
     instan_level_type           = "tosca.policies.nfv.VduInstantiationLevels"
     instan_level_nfv_type       = "tosca.policies.nfv.InstantiationLevels"
@@ -134,8 +138,12 @@ class SOL6:
     df_inst_scale_aspect             = df_inst_scale_info + ".aspect"
     df_inst_scale_level              = df_inst_scale_info + ".scale-level"
 
-
-
+    df_scaling_aspect_path_level     = 3
+    df_scaling_aspect                = _deployment_flavor + ".scaling-aspect"
+    df_scaling_id                    = df_scaling_aspect + ".id"
+    df_scaling_name                  = df_scaling_aspect + ".name"
+    df_scaling_desc                  = df_scaling_aspect + ".description"
+    df_scaling_max_scale             = df_scaling_aspect + ".max-scale-level"
 
 
     @staticmethod

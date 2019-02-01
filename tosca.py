@@ -3,7 +3,7 @@
 import argparse
 import json
 import yaml
-from YangToDict import YangToDict
+from YangToDict import YangToDict, count_empty_fields
 from Sol6Converter import Sol6Converter
 import nso as nso
 import logging
@@ -28,6 +28,7 @@ log = logging.getLogger(__name__)
 # Parse the yang specifications file into an empty dictionary
 ytd = YangToDict(file=args.yang_template, log=log, g_req=args.no_grouping)
 parsed_dict = ytd.parse_yang()
+start_empty = count_empty_fields(parsed_dict)
 
 # Read the tosca vnf into a dict from yaml format
 with open(args.file, 'rb') as f:
@@ -36,6 +37,10 @@ with open(args.file, 'rb') as f:
 # Do the actual converting to SOL006
 converter = Sol6Converter(tosca_vnf, parsed_dict, log=log)
 cnfv = converter.parse()
+
+end_empty = count_empty_fields(cnfv)
+
+print("{}% of fields filled".format(round((end_empty / start_empty)*100, 2)))
 
 # Put the data:esti-nfv:vnf tags at the base
 cnfv = {'data': {'etsi-nfv:nfv': cnfv}}

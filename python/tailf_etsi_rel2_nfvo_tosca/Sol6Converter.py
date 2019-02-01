@@ -220,30 +220,76 @@ class Sol6Converter:
         scaling_props = get_roots_from_filter(self.tosca_vnf, child_key="type",
                                               child_value=TOSCA.scaling_aspect_type)
 
+        # ------------------------------------------------------------------------------------------
+        # Populate instantiation-level scaling info
         inst_scalings = []
-
+        df_scalings = []
         for policy in scaling_props:
-            policy = policy[get_dict_key(policy)]
+            policy_name = get_dict_key(policy)
+            policy = policy[policy_name]
 
-            aspects = path_to_value(KeyUtils.remove_path_first(TOSCA.scaling_aspects), policy)
+            aspects_path = KeyUtils.remove_path_first(TOSCA.scaling_aspects.format(policy_name))
+            aspects = path_to_value(aspects_path, policy)
+
             # Convert this into a list of dicts with single elements
             aspects = [{k: v} for k, v in aspects.items()]
 
             for aspect in aspects:
-                a = {}
+                # Init the blank dicts for these elements
+                scale_entry = {}
+                inst_entry = {}
+
+                # Define a lambda to remove the first bits of the path that we don't need rn
+                path_form = lambda x: KeyUtils.remove_path_first(x,
+                                                                 TOSCA.scaling_aspects_path_level)
+                # Get the values for the paths
+                aspect_name = get_dict_key(aspect)
+                # For these two we have two values that need to be formatted, but we're immediately
+                # removing the first one. There should be a better way to do this that doesn't
+                # required a confusing lambda expression, but I can't think of it right now.
+                cur_desc = path_to_value(path_form(TOSCA.scaling_aspect_desc
+                                                   .format("", aspect_name)), aspect)
+                max_scale = path_to_value(path_form(TOSCA.scaling_aspect_max_level
+                                                    .format("", aspect_name)), aspect)
+                inst_scale_level = 0
+
+                # Populate the instantiation scaling info
                 set_path_to(KeyUtils.remove_path_first(SOL6.df_inst_scale_aspect,
                                                        SOL6.df_inst_level_path_level),
-                            a, get_dict_key(aspect), create_missing=True)
-
+                            inst_entry, aspect_name, create_missing=True)
                 set_path_to(KeyUtils.remove_path_first(SOL6.df_inst_scale_level,
                                                        SOL6.df_inst_level_path_level),
-                            a, 0, create_missing=True)
-                inst_scalings.append(a)
+                            inst_entry, inst_scale_level, create_missing=True)
 
-        # TODO: We are attempting to add a dict to an existing list of dicts
-        # Seems like this might be helpful functionality in set_path_to
-        set_path_to(SOL6.df_inst_scale_info, self.vnfd, inst_scalings)
-        print(inst_scalings)
+                # Populate the entries for the scaling-aspect entries
+                set_path_to(KeyUtils.remove_path_first(SOL6.df_scaling_id,
+                                                       SOL6.df_scaling_aspect_path_level),
+                            scale_entry, aspect_name, create_missing=True)
+                set_path_to(KeyUtils.remove_path_first(SOL6.df_scaling_name,
+                                                       SOL6.df_scaling_aspect_path_level),
+                            scale_entry, aspect_name, create_missing=True)
+                set_path_to(KeyUtils.remove_path_first(SOL6.df_scaling_desc,
+                                                       SOL6.df_scaling_aspect_path_level),
+                            scale_entry, cur_desc, create_missing=True)
+                set_path_to(KeyUtils.remove_path_first(SOL6.df_scaling_max_scale,
+                                                       SOL6.df_scaling_aspect_path_level),
+                            scale_entry, max_scale, create_missing=True)
+
+                inst_scalings.append(inst_entry)
+                df_scalings.append(scale_entry)
+
+        # We need to add a list to an existing list of dicts
+        # There is currently not support for this built in to set_path_to, so we need to
+        # extract the list and iterate over it manually
+        existing_inst_dict = path_to_value(SOL6.df_inst_level, self.vnfd)
+        for e in existing_inst_dict:
+            set_path_to(KeyUtils.get_path_last(SOL6.df_inst_scale_info), e, inst_scalings,
+                        create_missing=True)
+        # Because of how python works we don't need to re-set the dict, we can just it and it'll
+        # keep the changes in the main dict
+        # ------------------------------------------------------------------------------------------
+        # Populate df scaling-aspects
+        set_path_to(SOL6.df_scaling_aspect, self.vnfd, df_scalings)
 
     def _populate_init_affinity(self, anti_affinity_policies, groups):
         """
@@ -512,19 +558,21 @@ def path_to_value(path, cur_dict):
     return cur_context
 
 
-def set_path_to(path, cur_dict, value, create_missing=False):
+def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
     """
     Sets the value of path inside of cur_dict to value
     If create_missing is set then it will create all the required dicts to make the assignment true
+
+    If a list is encountered and set_all_lists is false, then the method will pick list_elem
+    in the list and continue with that as the context.
     """
     values = path.split(".")
     cur_context = cur_dict
     i = 0
     while i < len(values):
-        # The current way we handle lists is to only access/set the value of the first one
-        # This works fine if we aren't really using lists as lists
+        # When we encounter a list, get the list_elem (default the first) and continue
         if type(cur_context) is list:
-            cur_context = cur_context[0]
+            cur_context = cur_context[list_elem]
 
         if values[i] in cur_context:
             if values[i] == values[-1]:

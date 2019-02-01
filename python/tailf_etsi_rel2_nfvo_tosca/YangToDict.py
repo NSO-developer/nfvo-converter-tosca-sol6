@@ -40,8 +40,10 @@ class YangToDict:
         self._main_loop()
 
         used = sum(self.lines_used)
-        print("Used {} lines out of {} = {}%".format(used, len(self.lines),
-                                                     round(used/len(self.lines), 3)*100))
+        # print("Used {} lines out of {} = {}%".format(used, len(self.lines),
+        #                                             round((used/len(self.lines))*100, 2)))
+        print("{}% of SOL6 YANG used".format(round((used/len(self.lines))*100, 2)))
+
         return self.dict_result
 
     def _main_loop(self):
@@ -208,3 +210,36 @@ def ensure_bracket(lst):
         return True, lst[-2]
     else:
         return False, lst
+
+
+def count_empty_fields(cur_elem):
+    """
+    Loop through the whole dict and count the number of fields that contain empty values,
+    such as empty lists or empty dicts
+    """
+    empty_elems = 0
+    if type(cur_elem) is dict:
+        if len(cur_elem.items()) == 0:
+            empty_elems += 1
+
+        for k, v in cur_elem.items():
+            c_e = v
+            if type(v) is not str:
+                c_e = cur_elem[k]
+            if not c_e:
+                empty_elems += 1
+            else:
+                empty_elems += count_empty_fields(c_e)
+
+    elif type(cur_elem) is list:
+        if not cur_elem:
+            empty_elems += 1
+        for i in cur_elem:
+            if not i:
+                empty_elems += 1
+            else:
+                empty_elems += count_empty_fields(i)
+    elif type(cur_elem) is str:
+        if not cur_elem:
+            empty_elems += 1
+    return empty_elems
