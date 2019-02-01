@@ -39,6 +39,8 @@ class Sol6Converter:
         """
         self._virtual_get_flavor_names()
         self._process_vdus()
+        self._populate_init_level()
+        self._populate_scaling_aspects()
         self._virtual_storage_set_capabilities()
 
         compute_descriptors = path_to_value(SOL6.virtual_comp_desc, self.vnfd)
@@ -130,7 +132,6 @@ class Sol6Converter:
         set_path_to(SOL6.df_vdu_profile, self.vnfd, df_vdu_prof)
 
         self._populate_init_affinity(anti_affinity_policies, groups)
-        self._populate_init_level()
 
     def _populate_init_level(self):
         """
@@ -158,7 +159,9 @@ class Sol6Converter:
                 # We want to loop over all the levels, but if there's only one element it's a dict
                 # so if there is only 1, make it into a list
                 if type(nfv_levels) is not list:
-                    nfv_levels = [nfv_levels]
+                    # Convert a dict with multiple keys into a list of multiple dicts
+                    nfv_levels = [{k: v} for k, v in nfv_levels.items()]
+
                 # Look for a match of the level_names, then set cur_desc if we find it
                 for level in nfv_levels:
                     cur_level_name = get_dict_key(level)
@@ -205,6 +208,42 @@ class Sol6Converter:
                 inst_parsed.append(c)
 
         set_path_to(SOL6.df_inst_level, self.vnfd, inst_parsed)
+
+    def _populate_scaling_aspects(self):
+        """
+        Get information from the scaling_aspect policy, then populate
+        <instantiation-level><scaling-info>
+        and
+        <df><scaling-aspect>
+        At the same time
+        """
+        scaling_props = get_roots_from_filter(self.tosca_vnf, child_key="type",
+                                              child_value=TOSCA.scaling_aspect_type)
+
+        inst_scalings = []
+
+        for policy in scaling_props:
+            policy = policy[get_dict_key(policy)]
+
+            aspects = path_to_value(KeyUtils.remove_path_first(TOSCA.scaling_aspects), policy)
+            # Convert this into a list of dicts with single elements
+            aspects = [{k: v} for k, v in aspects.items()]
+
+            for aspect in aspects:
+                a = {}
+                set_path_to(KeyUtils.remove_path_first(SOL6.df_inst_scale_aspect,
+                                                       SOL6.df_inst_level_path_level),
+                            a, get_dict_key(aspect), create_missing=True)
+
+                set_path_to(KeyUtils.remove_path_first(SOL6.df_inst_scale_level,
+                                                       SOL6.df_inst_level_path_level),
+                            a, 0, create_missing=True)
+                inst_scalings.append(a)
+
+        # TODO: We are attempting to add a dict to an existing list of dicts
+        # Seems like this might be helpful functionality in set_path_to
+        set_path_to(SOL6.df_inst_scale_info, self.vnfd, inst_scalings)
+        print(inst_scalings)
 
     def _populate_init_affinity(self, anti_affinity_policies, groups):
         """

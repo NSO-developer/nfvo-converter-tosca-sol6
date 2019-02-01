@@ -61,16 +61,20 @@ class TOSCA:
 
     _instan_level               = "{}"
     _instan_level_properties    = _instan_level + ".properties"
-    instan_level_type           = "tosca.policies.nfv.VduInstantiationLevels"
-    instan_level_nfv_type       = "tosca.policies.nfv.InstantiationLevels"
     instan_level_nfv            = "{}.properties.levels"
     instan_level_nfv_desc       = instan_level_nfv + ".{}.description"
     instan_levels               = _instan_level_properties + ".levels"
     instan_level_num            = instan_levels + ".{}.number_of_instances"
     instan_level_targets        = _instan_level + ".targets"
 
-    group_affinity_type         = "tosca.groups.nfv.PlacementGroup"
+    scaling_aspects             = "{}.properties.aspects"
+
+    instan_level_type           = "tosca.policies.nfv.VduInstantiationLevels"
+    instan_level_nfv_type       = "tosca.policies.nfv.InstantiationLevels"
+    scaling_aspect_type         = "tosca.policies.nfv.ScalingAspects"
     anti_affinity_type          = "tosca.policies.nfv.AntiAffinityRule"
+
+    group_affinity_type         = "tosca.groups.nfv.PlacementGroup"
     # TODO: Handle Affinity as well
     group_aff_members_key       = "members"
     policy_aff_targets_key      = "targets"
@@ -126,6 +130,11 @@ class SOL6:
     df_inst_level_desc               = df_inst_level + ".description"
     df_inst_level_vdu                = _df_inst_vdu_level + ".vdu"
     df_inst_level_num                = _df_inst_vdu_level + ".number-of-instances"
+    df_inst_scale_info               = df_inst_level + ".scaling-info"
+    df_inst_scale_aspect             = df_inst_scale_info + ".aspect"
+    df_inst_scale_level              = df_inst_scale_info + ".scale-level"
+
+
 
 
 
