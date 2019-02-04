@@ -10,9 +10,12 @@ class TOSCA:
     The proper paths for the tosca values
     Variable names are in mostly-sol6 format. Their values are TOSCA yaml strings.
     """
-    _nodes          = "topology_template.node_templates"
+    _top            = "topology_template"
+    _nodes          = _top + ".node_templates"
     _vnf            = _nodes + ".vnf"
     _properties     = _vnf + ".properties"
+    _policies       = "tosca.policies"
+    _nfv_policies   = _policies + ".nvf"
     from_input      = "get_input"
     # --------------------------------
 
@@ -67,16 +70,21 @@ class TOSCA:
     instan_level_num            = instan_levels + ".{}.number_of_instances"
     instan_level_targets        = _instan_level + ".targets"
 
-    scaling_aspects_path_level  = 3
     scaling_aspects             = "{}.properties.aspects"
     scaling_aspect              = scaling_aspects + ".{}"
     scaling_aspect_desc         = scaling_aspect + ".description"
     scaling_aspect_max_level    = scaling_aspect + ".max_scale_level"
 
-    instan_level_type           = "tosca.policies.nfv.VduInstantiationLevels"
-    instan_level_nfv_type       = "tosca.policies.nfv.InstantiationLevels"
-    scaling_aspect_type         = "tosca.policies.nfv.ScalingAspects"
-    anti_affinity_type          = "tosca.policies.nfv.AntiAffinityRule"
+    instan_level_type           = _nfv_policies + ".VduInstantiationLevels"
+    instan_level_nfv_type       = _nfv_policies + ".InstantiationLevels"
+    scaling_aspect_type         = _nfv_policies + ".ScalingAspects"
+    anti_affinity_type          = _nfv_policies + ".AntiAffinityRule"
+    sub_link_types              = ["virtual_link"]
+
+    substitution_mappings       = _top + ".substitution_mappings.requirements"
+    connection_point            = _nodes + ".{}"
+    cp_properties               = connection_point + ".properties"
+    cp_management               = cp_properties + ".management"
 
     group_affinity_type         = "tosca.groups.nfv.PlacementGroup"
     # TODO: Handle Affinity as well
@@ -84,6 +92,7 @@ class TOSCA:
     policy_aff_targets_key      = "targets"
     policy_aff_type_key         = "type"
     policy_aff_scope_key        = "properties.scope"
+    cp_link_key                 = "link_type"
 
 
 class SOL6:
@@ -109,7 +118,6 @@ class SOL6:
     vnfm_info                       = _vnfd + ".vnfm-info"
     # --------------------------------
     # Deployment Flavor
-    df_path_level                    = 2  # How many elements in 'df' is
     _deployment_flavor               = _vnfd + ".df"
     df_id                            = _deployment_flavor + ".id"
     df_desc                          = _deployment_flavor + ".description"
@@ -127,7 +135,6 @@ class SOL6:
     df_vdu_p_affinity_group          = df_vdu_profile + ".affinity-or-anti-affinity-group"
     df_vdu_p_aff_id                  = df_vdu_p_affinity_group + ".id"
 
-    df_inst_level_path_level         = 3
     df_inst_level                    = _deployment_flavor + ".instantiation-level"
     _df_inst_vdu_level               = df_inst_level + ".vdu-level"
     df_inst_level_id                 = df_inst_level + ".id"
@@ -138,13 +145,11 @@ class SOL6:
     df_inst_scale_aspect             = df_inst_scale_info + ".aspect"
     df_inst_scale_level              = df_inst_scale_info + ".scale-level"
 
-    df_scaling_aspect_path_level     = 3
     df_scaling_aspect                = _deployment_flavor + ".scaling-aspect"
     df_scaling_id                    = df_scaling_aspect + ".id"
     df_scaling_name                  = df_scaling_aspect + ".name"
     df_scaling_desc                  = df_scaling_aspect + ".description"
     df_scaling_max_scale             = df_scaling_aspect + ".max-scale-level"
-
 
     @staticmethod
     def df_anti_affinity_value(x):
@@ -177,6 +182,10 @@ class SOL6:
     vld_desc                        = virtual_link_desc + ".description"
     vld_protocol                    = virtual_link_desc + ".connectivity-type.layer-protocol"
 
+    # -- Internal --
+    cp_mgmt_key                 = "management"
+    cp_vim_orch_key             = "vim_orchestration"
+
 
 class KeyUtils:
     @staticmethod
@@ -200,6 +209,10 @@ class KeyUtils:
             raise KeyError("Path {} is an invalid path to use in this method.".format(path))
 
     @staticmethod
+    def remove_path_level(path, path_level):
+        return KeyUtils.remove_path_first(path, KeyUtils.get_path_level(path_level))
+
+    @staticmethod
     def remove_path_elem(path, elem):
         """
         Remove the given elem of the path, return the path string without that element
@@ -207,3 +220,7 @@ class KeyUtils:
         paths = path.split(".")
         del paths[elem]
         return ".".join(paths)
+
+    @staticmethod
+    def get_path_level(path):
+        return path.count(".") + 1
