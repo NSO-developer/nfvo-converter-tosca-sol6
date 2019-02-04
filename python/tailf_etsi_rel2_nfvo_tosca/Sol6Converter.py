@@ -25,9 +25,10 @@ class Sol6Converter:
         # First, get the vnfd specifications model
         self.vnfd = copy.deepcopy(self.parsed_dict[SOL6.vnfd])
 
-        self._handle_one_to_one()
         # Get all of the inputs from tosca
-        self.template_inputs = path_to_value(TOSCA.inputs, self.tosca_vnf)
+        self.template_inputs = self.path_to_value(TOSCA.inputs, self.tosca_vnf)
+
+        self._handle_one_to_one()
         self._handle_virtual_compute()
         self._handle_virtual_link()
 
@@ -43,7 +44,7 @@ class Sol6Converter:
         self._populate_scaling_aspects()
         self._virtual_storage_set_capabilities()
 
-        compute_descriptors = path_to_value(SOL6.virtual_comp_desc, self.vnfd)
+        compute_descriptors = self.path_to_value(SOL6.virtual_comp_desc, self.vnfd)
         node_list = []
 
         for c in compute_descriptors:
@@ -62,8 +63,8 @@ class Sol6Converter:
                                           child_value=TOSCA.vdu_type)
         for vdu in self.vdus:
             # First, get the value of the vim_flavor for this VDU, don't parse it yet
-            vim_flavor = path_to_value(TOSCA.vdu_vim_flavor.format(get_dict_key(vdu)),
-                                       self.tosca_vnf)
+            vim_flavor = self.path_to_value(TOSCA.vdu_vim_flavor.format(get_dict_key(vdu)),
+                                            self.tosca_vnf)
             self.flavor_names.append(vim_flavor)
 
         # Save this data on flavors for later use
@@ -104,7 +105,7 @@ class Sol6Converter:
         There are multiple methods that need data from VDUs, and there's no need to loop through
         them more than once, at least not right now.
         """
-        virt_compute_descriptors = path_to_value(SOL6.virtual_comp_desc, self.vnfd)
+        virt_compute_descriptors = self.path_to_value(SOL6.virtual_comp_desc, self.vnfd)
 
         # Make a list for deployment-flavors vdu-profiles
         df_vdu_prof = []
@@ -154,8 +155,8 @@ class Sol6Converter:
             """
             for nfv_p in nfv_policy_info:
                 nfv_p = nfv_p[get_dict_key(nfv_p)]
-                nfv_levels = path_to_value(KeyUtils.remove_path_first(TOSCA.instan_level_nfv),
-                                           nfv_p)
+                nfv_levels = self.path_to_value(KeyUtils.remove_path_first(TOSCA.instan_level_nfv),
+                                                nfv_p)
                 # We want to loop over all the levels, but if there's only one element it's a dict
                 # so if there is only 1, make it into a list
                 if type(nfv_levels) is not list:
@@ -174,10 +175,11 @@ class Sol6Converter:
         inst_parsed = []
         for inst_level in i_levels_data:
             cur_name = get_dict_key(inst_level)
-            cur_level = get_dict_key(path_to_value(TOSCA.instan_levels.format(cur_name),
-                                                   inst_level))
-            cur_targets = path_to_value(TOSCA.instan_level_targets.format(cur_name), inst_level)
-            cur_num_inst = path_to_value(
+            cur_level = get_dict_key(self.path_to_value(TOSCA.instan_levels.format(cur_name),
+                                                        inst_level))
+            cur_targets = self.path_to_value(TOSCA.instan_level_targets.format(cur_name),
+                                             inst_level)
+            cur_num_inst = self.path_to_value(
                 TOSCA.instan_level_num.format(cur_name, cur_level), inst_level)
 
             cur_desc = _get_desc_from_level(cur_level)
@@ -229,7 +231,7 @@ class Sol6Converter:
             policy = policy[policy_name]
 
             aspects_path = KeyUtils.remove_path_first(TOSCA.scaling_aspects.format(policy_name))
-            aspects = path_to_value(aspects_path, policy)
+            aspects = self.path_to_value(aspects_path, policy)
 
             # Convert this into a list of dicts with single elements
             aspects = [{k: v} for k, v in aspects.items()]
@@ -247,10 +249,10 @@ class Sol6Converter:
                 # For these two we have two values that need to be formatted, but we're immediately
                 # removing the first one. There should be a better way to do this that doesn't
                 # required a confusing lambda expression, but I can't think of it right now.
-                cur_desc = path_to_value(path_form(TOSCA.scaling_aspect_desc
-                                                   .format("", aspect_name)), aspect)
-                max_scale = path_to_value(path_form(TOSCA.scaling_aspect_max_level
-                                                    .format("", aspect_name)), aspect)
+                cur_desc = self.path_to_value(path_form(TOSCA.scaling_aspect_desc
+                                                        .format("", aspect_name)), aspect)
+                max_scale = self.path_to_value(path_form(TOSCA.scaling_aspect_max_level
+                                                         .format("", aspect_name)), aspect)
                 inst_scale_level = 0
 
                 # Populate the instantiation scaling info
@@ -281,7 +283,7 @@ class Sol6Converter:
         # We need to add a list to an existing list of dicts
         # There is currently not support for this built in to set_path_to, so we need to
         # extract the list and iterate over it manually
-        existing_inst_dict = path_to_value(SOL6.df_inst_level, self.vnfd)
+        existing_inst_dict = self.path_to_value(SOL6.df_inst_level, self.vnfd)
         for e in existing_inst_dict:
             set_path_to(KeyUtils.get_path_last(SOL6.df_inst_scale_info), e, inst_scalings,
                         create_missing=True)
@@ -326,7 +328,7 @@ class Sol6Converter:
                      KeyUtils.get_path_last(SOL6.df_affinity_group_type):
                          SOL6.df_anti_affinity_value(typ),
                      KeyUtils.get_path_last(SOL6.df_affinity_group_scope):
-                         path_to_value(TOSCA.policy_aff_scope_key, policy)}
+                         self.path_to_value(TOSCA.policy_aff_scope_key, policy)}
 
                 # Put them in the outer list
                 init_aff.append(c)
@@ -343,10 +345,10 @@ class Sol6Converter:
         """
         prof = {KeyUtils.get_path_last(SOL6.df_id): vdu_name,
                 KeyUtils.get_path_last(SOL6.df_vdu_p_min):
-                    path_to_value(TOSCA.vdu_profile_min.format(vdu_name), self.tosca_vnf),
+                    self.path_to_value(TOSCA.vdu_profile_min.format(vdu_name), self.tosca_vnf),
 
                 KeyUtils.get_path_last(SOL6.df_vdu_p_max):
-                    path_to_value(TOSCA.vdu_profile_min.format(vdu_name), self.tosca_vnf)
+                    self.path_to_value(TOSCA.vdu_profile_min.format(vdu_name), self.tosca_vnf)
                 }
 
         in_groups = []
@@ -390,7 +392,7 @@ class Sol6Converter:
         name = get_dict_key(vdu)
 
         # Get the name of the flavor of the VDU
-        vim_flavor = path_to_value(TOSCA.vdu_vim_flavor.format(name), self.tosca_vnf)
+        vim_flavor = self.path_to_value(TOSCA.vdu_vim_flavor.format(name), self.tosca_vnf)
 
         if TOSCA.from_input in vim_flavor:
             # If this is from an input get the interior variable
@@ -399,8 +401,8 @@ class Sol6Converter:
             if not is_hashable(vim_flavor):
                 raise ValueError("vim_flavor: {} is not a recognized format.".format(vim_flavor))
 
-        num_cpu = path_to_value(TOSCA.vdu_num_cpu.format(name), self.tosca_vnf)
-        mem_size = path_to_value(TOSCA.vdu_mem_size.format(name), self.tosca_vnf)
+        num_cpu = self.path_to_value(TOSCA.vdu_num_cpu.format(name), self.tosca_vnf)
+        mem_size = self.path_to_value(TOSCA.vdu_mem_size.format(name), self.tosca_vnf)
 
         # Remove the 'GB' from the end and only keep the number
         mem_size = mem_size.split(" ")[0]
@@ -408,8 +410,8 @@ class Sol6Converter:
         # Find the compute_descriptor that matches the vim_flavor
         comp = None
         for c in compute_descriptors:
-            if path_to_value(KeyUtils.remove_path_elem(SOL6.vcd_flavor_name, 0),
-                             c) == vim_flavor:
+            if self.path_to_value(KeyUtils.remove_path_elem(SOL6.vcd_flavor_name, 0),
+                                  c) == vim_flavor:
                 comp = c
                 break
 
@@ -441,7 +443,7 @@ class Sol6Converter:
         # list and handling writing it properly later
         for cur_vb in vbs:
             name = get_dict_key(cur_vb)
-            storage_size = path_to_value(TOSCA.vbs_size.format(name), self.tosca_vnf)
+            storage_size = self.path_to_value(TOSCA.vbs_size.format(name), self.tosca_vnf)
             storage_size = storage_size.split(" ")[0]  # Remove 'GB' from the end
 
             dic = {KeyUtils.get_path_last(SOL6.vsd_id): name,
@@ -463,8 +465,8 @@ class Sol6Converter:
         # list and handling writing it properly later
         for cur_link in links:
             name = get_dict_key(cur_link)
-            desc = path_to_value(TOSCA.vlm_desc.format(name), self.tosca_vnf)
-            protocols = path_to_value(TOSCA.vlm_protocols.format(name), self.tosca_vnf)
+            desc = self.path_to_value(TOSCA.vlm_desc.format(name), self.tosca_vnf)
+            protocols = self.path_to_value(TOSCA.vlm_protocols.format(name), self.tosca_vnf)
             protocol = protocols
 
             # The normal type of protocols is list, so get the first element for now
@@ -507,7 +509,7 @@ class Sol6Converter:
 
         for key in valid_keys:
             set_path_to(getattr(SOL6, key), self.vnfd,
-                        path_to_value(getattr(TOSCA, key), self.tosca_vnf))
+                        self.path_to_value(getattr(TOSCA, key), self.tosca_vnf))
 
         for key in value_keys:
             set_path_to(getattr(SOL6, key), self.vnfd, getattr(SOL6, key + SOL6.value_key))
@@ -518,7 +520,6 @@ class Sol6Converter:
         :param input_name: { 'get_input': 'VAR_NAME' }
         :returns: (var_name, data) or (None, None)
         """
-        # Make sure the
         if not is_tosca_input(input_name):
             return None, None
 
@@ -527,35 +528,44 @@ class Sol6Converter:
 
         return name, data
 
+    def path_to_value(self, path, cur_dict, map_inputs=False):
+        """
+        topology_template.node_templates.vnf.properties.descriptor_id
+        Pass in a path and a dict the path applies to and get the value of the key
+
+        This is experimental, and disabled for now.
+        If map_inputs is set, the method will check to see if the final result
+        is an input from TOSCA, and if so it will try to return that instead of the
+        raw value.
+        """
+        values = path.split(".")
+        cur_context = cur_dict
+
+        for i in range(len(values)):
+            if type(cur_context) is list:
+                cur_context = cur_context[0]
+
+            if values[i] in cur_context:
+                cur_context = cur_context[values[i]]
+            else:
+                raise KeyError("Specified path/key '{}' "
+                               "not found in '{}'".format(values[i], list(cur_dict.keys())[0]))
+
+        # We're only going to support automatically mapping get_inputs when they are the final value
+        if map_inputs and is_tosca_input(cur_context):
+            # For now, just return the name and not the data of the variable.
+            name, data = self.tosca_get_input(cur_context)
+            cur_context = name
+
+        return cur_context
+
 
 # ******* Static Methods ********
 def is_tosca_input(val):
-    return TOSCA.from_input in val
-
-
-def path_to_value(path, cur_dict):
-    """
-    topology_template.node_templates.vnf.properties.descriptor_id
-    Pass in a path and a dict the path applies to and get the value of the key
-    :param path:
-    :param cur_dict:
-    :return:
-    """
-    values = path.split(".")
-    cur_context = cur_dict
-
-    for i in range(len(values)):
-        if type(cur_context) is list:
-            cur_context = cur_context[0]
-
-        if values[i] in cur_context:
-            cur_context = cur_context[values[i]]
-        else:
-
-            raise KeyError("Specified path/key '{}' "
-                           "not found in '{}'".format(values[i], list(cur_dict.keys())[0]))
-
-    return cur_context
+    try:
+        return TOSCA.from_input in val
+    except TypeError:
+        return False
 
 
 def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
