@@ -15,6 +15,7 @@ class Sol6Converter:
         self.log = log
         # Set this up for _virtual_get_flavor_names
         self.flavor_names = []
+        self.connection_points = {}
 
     def parse(self):
         """
@@ -31,6 +32,7 @@ class Sol6Converter:
         self._handle_one_to_one()
         self._handle_virtual_compute()
         self._handle_virtual_link()
+        self._handle_connection_point()
 
         return self.vnfd
 
@@ -172,7 +174,9 @@ class Sol6Converter:
             return None
         # ------------------------------------------------------------------------------------------
 
+        df_inst_rm_path = KeyUtils.get_path_level(SOL6.df_inst_level)
         inst_parsed = []
+
         for inst_level in i_levels_data:
             cur_name = get_dict_key(inst_level)
             cur_level = get_dict_key(self.path_to_value(TOSCA.instan_levels.format(cur_name),
@@ -189,22 +193,22 @@ class Sol6Converter:
                 # Remove the vnfd.df.instantiation-level before the keys,
                 # since we're building a list and will put it in that location at the end
                 set_path_to(KeyUtils.remove_path_first(
-                    SOL6.df_inst_level_id, SOL6.df_inst_level_path_level),
+                    SOL6.df_inst_level_id, df_inst_rm_path),
                     c, cur_level, create_missing=True)
 
                 if cur_desc is not None:
                     set_path_to(KeyUtils.remove_path_first(
-                        SOL6.df_inst_level_desc, SOL6.df_inst_level_path_level),
+                        SOL6.df_inst_level_desc, df_inst_rm_path),
                         c, cur_desc, create_missing=True)
                 else:
                     print("A matching description was not found for {}.".format(cur_level))
 
                 set_path_to(KeyUtils.remove_path_first(
-                    SOL6.df_inst_level_vdu, SOL6.df_inst_level_path_level),
+                    SOL6.df_inst_level_vdu, df_inst_rm_path),
                     c, target, create_missing=True)
 
                 set_path_to(KeyUtils.remove_path_first(
-                    SOL6.df_inst_level_num, SOL6.df_inst_level_path_level),
+                    SOL6.df_inst_level_num, df_inst_rm_path),
                     c, cur_num_inst, create_missing=True)
 
                 inst_parsed.append(c)
@@ -226,6 +230,7 @@ class Sol6Converter:
         # Populate instantiation-level scaling info
         inst_scalings = []
         df_scalings = []
+        df_inst_rm_path = KeyUtils.get_path_level(SOL6.df_inst_level)
         for policy in scaling_props:
             policy_name = get_dict_key(policy)
             policy = policy[policy_name]
@@ -242,8 +247,9 @@ class Sol6Converter:
                 inst_entry = {}
 
                 # Define a lambda to remove the first bits of the path that we don't need rn
-                path_form = lambda x: KeyUtils.remove_path_first(x,
-                                                                 TOSCA.scaling_aspects_path_level)
+                path_form = lambda x: KeyUtils.remove_path_first(
+                    x, KeyUtils.get_path_level(TOSCA.scaling_aspects))
+
                 # Get the values for the paths
                 aspect_name = get_dict_key(aspect)
                 # For these two we have two values that need to be formatted, but we're immediately
@@ -256,25 +262,19 @@ class Sol6Converter:
                 inst_scale_level = 0
 
                 # Populate the instantiation scaling info
-                set_path_to(KeyUtils.remove_path_first(SOL6.df_inst_scale_aspect,
-                                                       SOL6.df_inst_level_path_level),
+                set_path_to(KeyUtils.remove_path_first(SOL6.df_inst_scale_aspect, df_inst_rm_path),
                             inst_entry, aspect_name, create_missing=True)
-                set_path_to(KeyUtils.remove_path_first(SOL6.df_inst_scale_level,
-                                                       SOL6.df_inst_level_path_level),
+                set_path_to(KeyUtils.remove_path_first(SOL6.df_inst_scale_level, df_inst_rm_path),
                             inst_entry, inst_scale_level, create_missing=True)
 
                 # Populate the entries for the scaling-aspect entries
-                set_path_to(KeyUtils.remove_path_first(SOL6.df_scaling_id,
-                                                       SOL6.df_scaling_aspect_path_level),
+                set_path_to(KeyUtils.remove_path_first(SOL6.df_scaling_id, df_inst_rm_path),
                             scale_entry, aspect_name, create_missing=True)
-                set_path_to(KeyUtils.remove_path_first(SOL6.df_scaling_name,
-                                                       SOL6.df_scaling_aspect_path_level),
+                set_path_to(KeyUtils.remove_path_first(SOL6.df_scaling_name, df_inst_rm_path),
                             scale_entry, aspect_name, create_missing=True)
-                set_path_to(KeyUtils.remove_path_first(SOL6.df_scaling_desc,
-                                                       SOL6.df_scaling_aspect_path_level),
+                set_path_to(KeyUtils.remove_path_first(SOL6.df_scaling_desc, df_inst_rm_path),
                             scale_entry, cur_desc, create_missing=True)
-                set_path_to(KeyUtils.remove_path_first(SOL6.df_scaling_max_scale,
-                                                       SOL6.df_scaling_aspect_path_level),
+                set_path_to(KeyUtils.remove_path_first(SOL6.df_scaling_max_scale, df_inst_rm_path),
                             scale_entry, max_scale, create_missing=True)
 
                 inst_scalings.append(inst_entry)
@@ -485,10 +485,39 @@ class Sol6Converter:
         pass
 
     def _handle_connection_point(self):
-        pass
+        """
+        Read the substitution_mappings, determine which connection points are management and
+        which are not.
+        
+        """
+        # Read substitution_mappings
+        sub_mappings = self.path_to_value(TOSCA.substitution_mappings, self.tosca_vnf)
+        # Read the entries that match the keys in TOSCA.sub_link_types
+        # The entry should be a list [endpoint_name, endpoint_type]
+        accepted_cps = [sub[get_dict_key(sub)] for sub in sub_mappings
+                        if get_dict_key(sub) in TOSCA.sub_link_types]
 
-    def _handle_external_connection_point(self):
-        pass
+        # Set up management and vim_orchestration slots
+        self.connection_points[SOL6.cp_mgmt_key] = []
+        self.connection_points[SOL6.cp_vim_orch_key] = []
+
+        # Read the connection point info
+        for cp in accepted_cps:
+            cp_info = self.path_to_value(TOSCA.connection_point.format(cp[0]), self.tosca_vnf)
+            is_mgmt = self.path_to_value(KeyUtils.remove_path_level(
+                TOSCA.cp_management, TOSCA.connection_point), cp_info)
+
+            # Just in case it's a string for some reason
+            if type(is_mgmt) is not bool:
+                is_mgmt = (is_mgmt == "True")
+
+            if is_mgmt:
+                k = SOL6.cp_mgmt_key
+            else:
+                k = SOL6.cp_vim_orch_key
+            self.connection_points[k].append(cp_info)
+
+        print(self.connection_points)
 
     def _handle_vdu(self):
         pass
