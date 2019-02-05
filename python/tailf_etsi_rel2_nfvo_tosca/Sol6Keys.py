@@ -182,8 +182,15 @@ class SOL6:
     vld_desc                        = virtual_link_desc + ".description"
     vld_protocol                    = virtual_link_desc + ".connectivity-type.layer-protocol"
 
+    ext_cp                          = _vnfd + ".ext-cpd"
+    ext_cp_id                       = ext_cp + ".id"
+    ext_cp_int_cp                   = ext_cp + ".int-virtual-link-desc"
+
+    ext_cp_mgmt_id                  = "VIM_NETWORK_MANAGEMENT"
+    ext_cp_orch_id                  = "VIM_NETWORK_ORCHESTRATION"
+
     # -- Internal --
-    cp_mgmt_key                 = "management"
+    cp_mgmt_key                 = "vim_management"
     cp_vim_orch_key             = "vim_orchestration"
 
 
