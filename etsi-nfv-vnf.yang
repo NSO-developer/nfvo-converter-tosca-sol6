@@ -82,10 +82,10 @@ submodule etsi-nfv-vnf {
       }
 
       leaf niclo-requirements {
-	type leafref {
-	  path "/nfv/vnfd/virtual-compute-descriptor/id";
-	}
-	description
+        type leafref {
+          path "/nfv/vnfd/virtual-compute-descriptor/id";
+        }
+        description
           "This references (couples) the CPD with any logical node
            I/O requirements (for network devices) that may have been
            created. Linking these attributes is necessary so that
@@ -113,9 +113,9 @@ submodule etsi-nfv-vnf {
     leaf id {
       type string;
       description
-	"Identifier of this Cpd information element.";
+        "Identifier of this Cpd information element.";
       reference
-	"GS NFV IFA011: Section 7.1.6.3, Cpd information element.";
+        "GS NFV IFA011: Section 7.1.6.3, Cpd information element.";
     }
     leaf layer-protocol {
       default Ethernet;
@@ -123,59 +123,59 @@ submodule etsi-nfv-vnf {
         base layer-protocol;
       }
       description
-	"Identifies which protocol the CP uses for connectivity
+        "Identifies which protocol the CP uses for connectivity
          purposes (Ethernet, MPLS, ODU2, IPV4, IPV6, Pseudo-Wire,
          etc.).";
       reference
-	"GS NFV IFA011: Section 7.1.6.3, Cpd information element.";
+        "GS NFV IFA011: Section 7.1.6.3, Cpd information element.";
     }
     leaf role {
       type identityref {
-	base cp-role;
+        base cp-role;
       }
       description
-	"Identifies the role of the port in the context of the
+        "Identifies the role of the port in the context of the
          traffic flow patterns in the VNF or parent NS. For example a
          VNF with a tree flow pattern within the VNF will have legal
          cpRoles of ROOT and LEAF.";
       reference
-	"GS NFV IFA011: Section 7.1.6.3, Cpd information element.";
+        "GS NFV IFA011: Section 7.1.6.3, Cpd information element.";
     }
     leaf description {
       type string;
       description
-	"Human readable description of the connection point";
+        "Human readable description of the connection point";
       reference
-	"GS NFV IFA011: Section 7.1.6.3, Cpd information element.";
+        "GS NFV IFA011: Section 7.1.6.3, Cpd information element.";
     }
     container protocol {
       description
-	"Identifies the protocol layering information the CP uses for
+        "Identifies the protocol layering information the CP uses for
          connectivity purposes and associated information. There shall
          be one cpProtocol for each layer protocol as indicated by the
          attribute layerProtocol.";
       reference
-	"GS NFV IFA011: Section 7.1.6.3, Cpd information element.";
+        "GS NFV IFA011: Section 7.1.6.3, Cpd information element.";
       leaf associated-layer-protocol {
-	type identityref {
-	  base layer-protocol;
-	}
-	description
-	  "One of the values of the attribute layerProtocol of the Cpd
+        type identityref {
+          base layer-protocol;
+        }
+        description
+          "One of the values of the attribute layerProtocol of the Cpd
            IE.";
-	reference
-	  "GS NFV IFA011: Section 7.1.6.8, CpProtocolData information
+        reference
+          "GS NFV IFA011: Section 7.1.6.8, CpProtocolData information
            element.";
       }
 
       list address-data {
-	key "address-type";
-	leaf address-type {
-	  type identityref {
-	    base address-type;
-	  }
-	  description
-	    "Describes the type of the address to be assigned to the CP
+        key "address-type";
+        leaf address-type {
+          type identityref {
+            base address-type;
+          }
+          description
+            "Describes the type of the address to be assigned to the CP
              instantiated from the parent CPD.
              Value:
              • MAC address.
@@ -183,74 +183,74 @@ submodule etsi-nfv-vnf {
              • …
              The content type shall be aligned with the address type
              supported by the layerProtocol attribute of the parent CPD.";
-	  reference
-	    "GS NFV IFA011: Section 7.1.3.3, AddressData information
+          reference
+            "GS NFV IFA011: Section 7.1.3.3, AddressData information
              element.";
-	}
-	container l2-address-data {
-	  when "../address-type='mac-address'";
-	}
-	container l3-address-data {
-	  when "../address-type='ip-address'";
-	  leaf ip-address-assignment {
-	    type boolean;
-	    description
-	      "Specify if the address assignment is the responsibility
+        }
+        container l2-address-data {
+          when "../address-type='mac-address'";
+        }
+        container l3-address-data {
+          when "../address-type='ip-address'";
+          leaf ip-address-assignment {
+            type boolean;
+            description
+              "Specify if the address assignment is the responsibility
                of management and orchestration function or not. If it
                is set to True, it is the management and orchestration
                function responsibility. ";
-	    reference
-	      "GS NFV IFA011: Section 7.1.3.4, L3AddressData
+            reference
+              "GS NFV IFA011: Section 7.1.3.4, L3AddressData
                information element.";
-	  }
-	  leaf floating-ip-activated {
-	    type boolean;
-	    description
-	      "Specify if the floating IP scheme is activated on the CP
+          }
+          leaf floating-ip-activated {
+            type boolean;
+            description
+              "Specify if the floating IP scheme is activated on the CP
                or not.";
-	    reference
-	      "GS NFV IFA011: Section 7.1.3.4, L3AddressData
+            reference
+              "GS NFV IFA011: Section 7.1.3.4, L3AddressData
                information element.";
-	  }
-	  leaf ip-address-type {
-	    type enumeration {
-	      enum "ipv4";
-	      enum "ipv6";
-	    }
-	    description
-	      "Define address type. The address type should be aligned
+          }
+          leaf ip-address-type {
+            type enumeration {
+              enum "ipv4";
+              enum "ipv6";
+            }
+            description
+              "Define address type. The address type should be aligned
                with the address type supported by the layerProtocol
                attribute of the parent VnfExtCpd.";
-	    reference
-	      "GS NFV IFA011: Section 7.1.3.4, L3AddressData
+            reference
+              "GS NFV IFA011: Section 7.1.3.4, L3AddressData
                information element.";
-	  }
-	  leaf number-of-ip-addresses {
-	    type uint32;
-	    description
-	      "Minimum number of IP addresses to be assigned based on
+          }
+          leaf number-of-ip-addresses {
+            type uint32;
+            description
+              "Minimum number of IP addresses to be assigned based on
                this L3AddressData information element.";
-	    reference
-	      "GS NFV IFA011: Section 7.1.3.4, L3AddressData
+            reference
+              "GS NFV IFA011: Section 7.1.3.4, L3AddressData
                information element.";
-	  }
-	}
-	description
-	  "The AddressData information element supports providing
+          }
+        }
+        description
+          "The AddressData information element supports providing
            information about the addressing scheme and parameters
            applicable to a CP.";
-	reference
-	  "GS NFV IFA011: Section 7.1.3.3, AddressData information
+        reference
+          "GS NFV IFA011: Section 7.1.3.3, AddressData information
            element.";
       }
     }
     leaf trunk-mode {
       type boolean;
       description
-	"Information about whether the CP instantiated from this CPD
+        "Information about whether the CP instantiated from this CPD
          is in Trunk mode (802.1Q or other).";
       reference
-	"GS NFV IFA011: Section 7.1.6.3, Cpd information element.";
+        "GS NFV IFA011: Section 7.1.6.3, Cpd information element.";
     }
   }
 
@@ -395,30 +395,18 @@ submodule etsi-nfv-vnf {
           reference
             "GS NFV IFA011: Section 7.1.6.2, Vdu information element";
 
-          choice cp-connection {
-            mandatory true;
+          leaf int-virtual-link-desc {
+            type leafref {
+              path "../../../nfv:int-virtual-link-desc/nfv:id";
+            }
             description
-              "A connection point must either connect to an internal
-               virtual link or to an external connection points.";
-            leaf int-virtual-link-desc {
-              type leafref {
-                path "../../../nfv:int-virtual-link-desc/nfv:id";
-              }
-              description
-                "Reference of the internal VLD which this internal CPD
+              "Reference of the internal VLD which this internal CPD
                  connects to.";
-              reference
-                "GS NFV IFA011: Section 7.1.6.4, VduCpd information
+            reference
+              "GS NFV IFA011: Section 7.1.6.4, VduCpd information
                  element";
-            }
-            leaf ext-cpd {
-              description
-                "Connect to an external connection point";
-              type leafref {
-                path "../../../nfv:ext-cpd/nfv:id";
-              }
-            }
           }
+
           leaf bitrate-requirement {
             type uint64;
             units "Mbps";
@@ -1270,21 +1258,34 @@ submodule etsi-nfv-vnf {
         reference
           "GS NFV IFA011: Section 7.1.2, VNFD information element.";
 
-        leaf int-virtual-link-desc {
-          description
-            "Reference to the internal Virtual Link Descriptor (VLD)
+        choice cp-connection {
+          leaf int-virtual-link-desc {
+            description
+              "Reference to the internal Virtual Link Descriptor (VLD)
              to which CPs instantiated from this external CP
              Descriptor (CPD) connect. Either intVirtualLinkDesc or
              intCpd shall be present.";
-          type leafref {
-            path "../../nfv:int-virtual-link-desc/nfv:id";
+            type leafref {
+              path "../../nfv:int-virtual-link-desc/nfv:id";
+            }
+          }
+          container int-cpd {
+            presence "Direct pointer to an intCpd";
+            leaf vdu {
+              type leafref {
+                path "../../../nfv:vdu/nfv:id";
+              }
+              mandatory true;
+            }
+            leaf cpd {
+              type leafref {
+                path "deref(../vdu)/../nfv:int-cpd/nfv:id";
+              }
+              mandatory true;
+            }
+            must "not(deref(cpd)/../int-virtual-link-desc)" ;
           }
         }
-        /*
-          intCpd
-          we reference from the VDU's CP to the ext-CP instead of the
-          ext-CP to the VDU's CP.
-        */
         uses virtual-network-interface-requirements;
         uses vnf-cpd;
       }
