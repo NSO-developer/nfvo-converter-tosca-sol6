@@ -623,7 +623,6 @@ def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
             cur_context = cur_context[values[i]]
 
         else:  # Enforce strict structure
-
             if create_missing:  # If we want to create the keys as we find they are missing
                 cur_context[values[i]] = ''
                 i -= 1  # Put the loop back by 1
@@ -636,7 +635,6 @@ def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
 def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key=None,
                           internal_call=False, agg=None):
     """
-    Probably going to change the name of this.
     We need to be able to get root elements based on some interior condition, for example:
     
     VDU c1 has a type of 'cisco.nodes.nfv.Vdu.Compute', so we need to be able to get all the VDUs
@@ -678,19 +676,18 @@ def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key
         # We call this in two different places, which is why it's extracted into a method
         # There is probably a better way to do this than to have another internal method, though
 
-        # Handle if we have a list of dicts, which is very common
+        # Handle if we have a list of dicts
         if type(value) is list:
             for i in range(len(value)):
                 r = get_roots_from_filter(value[i], child_key, child_value,
                                           internal_call=True, agg=agg)
-                # Prevent adding to the results list if we do not have a valid output
+                # Only add to the results list if we have a valid output
                 if r:
                     agg.append(r)
         else:
             if type(value) is dict:
                 res = get_roots_from_filter(cur_dict[key], child_key, child_value, key,
                                             internal_call=True, agg=agg)
-
                 if type(res) is dict:
                     agg.append(res)
                 elif type(res) is list and len(res) > 0:
