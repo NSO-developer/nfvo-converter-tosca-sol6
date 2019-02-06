@@ -85,6 +85,11 @@ class TOSCA:
     connection_point            = _nodes + ".{}"
     cp_properties               = connection_point + ".properties"
     cp_management               = cp_properties + ".management"
+    cp_req                      = connection_point + ".requirements"
+    cp_virt_binding             = cp_req + ".virtual_binding"
+    cp_virt_link                = cp_req + ".virtual_link"
+    cp_virt_link_id_key         = "id"
+    cp_virt_link_desc_key       = "id"
 
     group_affinity_type         = "tosca.groups.nfv.PlacementGroup"
     # TODO: Handle Affinity as well
@@ -95,14 +100,17 @@ class TOSCA:
     cp_link_key                 = "link_type"
 
 
+
 class SOL6:
     """
     The proper paths for SOL6 yang locations
     The values are SOL6 paths
     """
-    _vnfd = "vnfd"
-    vnfd = _vnfd
-
+    _vnfd                           = "vnfd"
+    vnfd                            = _vnfd
+    # We build the VDUs out of place, then put in at the end, so we don't need the full path
+    _vdu                            = "{}"
+    vdu_loc                         = vnfd + ".vdu"
     # value_key is for if we have a default value we want to assign, the program can handle
     # assigning it automatically for basic keys
     # The variable must be postfixed with the value of 'value_key'
@@ -185,6 +193,10 @@ class SOL6:
     ext_cp                          = _vnfd + ".ext-cpd"
     ext_cp_id                       = ext_cp + ".id"
     ext_cp_int_cp                   = ext_cp + ".int-virtual-link-desc"
+
+    int_cp                          = _vdu + ".int-cpd"
+    int_cp_id                       = int_cp + ".id"
+    int_cp_link_desc                = int_cp + ".int-virtual-link-desc"
 
     ext_cp_mgmt_id                  = "VIM_NETWORK_MANAGEMENT"
     ext_cp_orch_id                  = "VIM_NETWORK_ORCHESTRATION"

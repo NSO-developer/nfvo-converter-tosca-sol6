@@ -32,6 +32,7 @@ class Sol6Converter:
         self._handle_one_to_one()
         self._handle_virtual_compute()
         self._handle_virtual_link()
+        self._write_vdu()
         self._handle_connection_point()
 
         return self.vnfd
@@ -430,6 +431,7 @@ class Sol6Converter:
         """
 
         # Now get the rest of the configurable parameters
+        # TODO
 
     def _virtual_storage_set_capabilities(self):
         """
@@ -473,9 +475,11 @@ class Sol6Converter:
             if type(protocols) is list:
                 protocol = protocols.pop()
 
-            dic = {KeyUtils.get_path_last(SOL6.vld_id): name,
-                   KeyUtils.get_path_last(SOL6.vld_desc): desc,
-                   KeyUtils.get_path_last(SOL6.vld_protocol, 2): protocol}
+            dic = {}
+            set_path_to(KeyUtils.get_path_last(SOL6.vld_id), dic, name, create_missing=True)
+            set_path_to(KeyUtils.get_path_last(SOL6.vld_desc), dic, desc, create_missing=True)
+            set_path_to(KeyUtils.get_path_last(
+                SOL6.vld_protocol, 2), dic, protocol, create_missing=True)
 
             res_list.append(dic)
 
@@ -517,10 +521,66 @@ class Sol6Converter:
                 k = SOL6.cp_vim_orch_key
             self.connection_points[k].append(cp_info)
 
-        print(self.connection_points)
+        # We have already populated the virtual link description fields
+        # Now we need to create internal CPs that link to the VLs, and external CPs that also
+        # link to the VLs, so that way we can have multiple int-cpd mapped to one ext-cpd
 
-    def _handle_vdu(self):
-        pass
+        virtual_links = self.path_to_value(SOL6.virtual_link_desc, self.vnfd)
+
+        if type(virtual_links) is not list or len(virtual_links) < 2:
+            self.log.error("There are not enough virtual links defnied in the TOSCA file to map"
+                           "the required internal/external connection points.")
+            raise KeyError("There are not enough virtual links defnied in the TOSCA file to map"
+                           "the required internal/external connection points.")
+
+        # We will take the first link for use in management
+        mgmt_link = virtual_links[0]
+        # And the second for orchestration
+        orch_link = virtual_links[1]
+
+        def _populate_cp_type(cp_list, link):
+            # Loop through the mgmt connection points
+            for int_cp in cp_list:
+                cur_path = KeyUtils.remove_path_level(TOSCA.cp_virt_binding, TOSCA.connection_point)
+                assoc_vdu = self.path_to_value(cur_path, int_cp)
+                # Get the VDU dict
+                cur_vdu = None
+                for vdu in self.vdus:
+                    if assoc_vdu in vdu:
+                        cur_vdu = vdu
+                        break
+                if not cur_vdu:
+                    raise KeyError("VDU {} not found in VDUList {}".format(assoc_vdu, self.vdus))
+
+                # Handle adding multiple links
+                cur_value = None
+                try:
+                    cur_value = self.path_to_value(SOL6.int_cp.format(assoc_vdu), cur_vdu)
+                except KeyError:
+                    pass
+                if type(cur_value) is not list:
+                    cur_value = []
+                # Populate the connection point info
+                cur_id = assoc_vdu + "_" + link[TOSCA.cp_virt_link_id_key]
+                cur_link_desc = link[TOSCA.cp_virt_link_desc_key]
+                formatted_link = {KeyUtils.get_path_last(SOL6.int_cp_id): cur_id,
+                                  KeyUtils.get_path_last(SOL6.int_cp_link_desc): cur_link_desc}
+
+                # Check if the current id is already present in the values of the current list
+                if not any(cur_id in y for y in (list(x.values()) for x in cur_value)):
+                    cur_value.append(formatted_link)
+
+                set_path_to(SOL6.int_cp.format(assoc_vdu), cur_vdu, cur_value,
+                            create_missing=True)
+
+        _populate_cp_type(self.connection_points[SOL6.cp_mgmt_key], mgmt_link)
+        _populate_cp_type(self.connection_points[SOL6.cp_vim_orch_key], orch_link)
+
+    def _write_vdu(self):
+        """
+        Write the populated VDU information into the final dict
+        """
+        set_path_to(SOL6.vdu_loc, self.vnfd, self.vdus)
 
     def _handle_vnf_nfvo(self):
         pass
