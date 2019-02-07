@@ -249,7 +249,7 @@ class KeyUtils:
         Get the n last elements of the path, with their separators between them
         """
         paths = path.split(".")
-        if not paths:
+        if len(paths) > 0:
             return ".".join(paths[len(paths) - n:len(paths)])
         raise KeyError("Path {} is an invalid path to use in this method.".format(path))
 

@@ -16,6 +16,8 @@ class Sol6Converter:
         # Set this up for _virtual_get_flavor_names
         self.flavor_names = []
         self.connection_points = {}
+        self.tosca_vdus = {}
+        self.flavor_vars = {}
 
     def parse(self):
         """
@@ -162,7 +164,7 @@ class Sol6Converter:
                                                 nfv_p)
                 # We want to loop over all the levels, but if there's only one element it's a dict
                 # so if there is only 1, make it into a list
-                if type(nfv_levels) is not list:
+                if not isinstance(nfv_levels, list):
                     # Convert a dict with multiple keys into a list of multiple dicts
                     nfv_levels = [{k: v} for k, v in nfv_levels.items()]
 
@@ -472,7 +474,7 @@ class Sol6Converter:
             protocol = protocols
 
             # The normal type of protocols is list, so get the first element for now
-            if type(protocols) is list:
+            if isinstance(protocol, list):
                 protocol = protocols.pop()
 
             dic = {}
@@ -492,7 +494,6 @@ class Sol6Converter:
         """
         Read the substitution_mappings, determine which connection points are management and
         which are not.
-        
         """
         # Read substitution_mappings
         sub_mappings = self.path_to_value(TOSCA.substitution_mappings, self.tosca_vnf)
@@ -512,7 +513,7 @@ class Sol6Converter:
                 TOSCA.cp_management, TOSCA.connection_point), cp_info)
 
             # Just in case it's a string for some reason
-            if type(is_mgmt) is not bool:
+            if not isinstance(is_mgmt, bool):
                 is_mgmt = (is_mgmt == "True")
 
             if is_mgmt:
@@ -527,7 +528,7 @@ class Sol6Converter:
 
         virtual_links = self.path_to_value(SOL6.virtual_link_desc, self.vnfd)
 
-        if type(virtual_links) is not list or len(virtual_links) < 2:
+        if not isinstance(virtual_links, list) or len(virtual_links) < 2:
             raise KeyError("There are not enough virtual links defnied in the TOSCA file to map"
                            "the required internal/external connection points.")
 
@@ -548,7 +549,8 @@ class Sol6Converter:
                         cur_vdu = vdu
                         break
                 if not cur_vdu:
-                    raise KeyError("VDU {} not found in VDUList {}".format(assoc_vdu, self.tosca_vdus))
+                    raise KeyError("VDU {} not found in VDUList {}".format(assoc_vdu,
+                                                                           self.tosca_vdus))
 
                 # Handle adding multiple links
                 cur_value = None
@@ -556,7 +558,7 @@ class Sol6Converter:
                     cur_value = self.path_to_value(SOL6.int_cp.format(assoc_vdu), cur_vdu)
                 except KeyError:
                     pass
-                if type(cur_value) is not list:
+                if not isinstance(cur_value, list):
                     cur_value = []
                 # Populate the connection point info
                 cur_id = assoc_vdu + "_" + link[TOSCA.cp_virt_link_id_key]
@@ -644,7 +646,7 @@ class Sol6Converter:
         cur_context = cur_dict
 
         for i in range(len(values)):
-            if type(cur_context) is list:
+            if isinstance(cur_context, list):
                 cur_context = cur_context[0]
 
             if values[i] in cur_context:
@@ -656,7 +658,7 @@ class Sol6Converter:
         # We're only going to support automatically mapping get_inputs when they are the final value
         if map_inputs and is_tosca_input(cur_context):
             # For now, just return the name and not the data of the variable.
-            name, data = self.tosca_get_input(cur_context)
+            name, _ = self.tosca_get_input(cur_context)
             cur_context = name
 
         return cur_context
@@ -683,7 +685,7 @@ def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
     i = 0
     while i < len(values):
         # When we encounter a list, get the list_elem (default the first) and continue
-        if type(cur_context) is list:
+        if isinstance(cur_context, list):
             cur_context = cur_context[list_elem]
 
         if values[i] in cur_context:
@@ -724,7 +726,7 @@ def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key
         agg = []
 
     # Stop if we get too far in to the data and don't know how to handle it
-    if not type(cur_dict) is dict:
+    if not isinstance(cur_dict, dict):
         return None
 
     for key, value in cur_dict.items():
@@ -732,17 +734,15 @@ def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key
         # Base cases
         # TODO: Simplify
         if child_key and child_key == key:
-                if not child_value:
-                    if parent_key:
-                        return {parent_key: cur_dict}
-                    else:
-                        return cur_dict
-                else:
-                    if child_value == value:
-                        if parent_key:
-                            return {parent_key: cur_dict}
-                        else:
-                            return cur_dict
+            if not child_value:
+                if parent_key:
+                    return {parent_key: cur_dict}
+                return cur_dict
+            # else
+            if child_value == value:
+                if parent_key:
+                    return {parent_key: cur_dict}
+                return cur_dict
 
         # This is the actual recursion and aggregation bit, a list is kept and passed
         # around that only has dicts in it, and eventually it gets to the top and is returned
@@ -750,7 +750,7 @@ def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key
         # There is probably a better way to do this than to have another internal method, though
 
         # Handle if we have a list of dicts
-        if type(value) is list:
+        if isinstance(value, list):
             for i in range(len(value)):
                 r = get_roots_from_filter(value[i], child_key, child_value,
                                           internal_call=True, agg=agg)
@@ -758,12 +758,12 @@ def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key
                 if r:
                     agg.append(r)
         else:
-            if type(value) is dict:
+            if isinstance(value, dict):
                 res = get_roots_from_filter(cur_dict[key], child_key, child_value, key,
                                             internal_call=True, agg=agg)
-                if type(res) is dict:
+                if isinstance(res, dict):
                     agg.append(res)
-                elif type(res) is list and len(res) > 0:
+                elif isinstance(res, list) and len(res) > 0:
                     for e in res:
                         if e:
                             agg.append(e)
