@@ -62,9 +62,9 @@ class Sol6Converter:
         """
 
         # Get the information about the VDUs into a list of dicts
-        self.vdus = get_roots_from_filter(self.tosca_vnf, child_key='type',
-                                          child_value=TOSCA.vdu_type)
-        for vdu in self.vdus:
+        self.tosca_vdus = get_roots_from_filter(self.tosca_vnf, child_key='type',
+                                                child_value=TOSCA.vdu_type)
+        for vdu in self.tosca_vdus:
             # First, get the value of the vim_flavor for this VDU, don't parse it yet
             vim_flavor = self.path_to_value(TOSCA.vdu_vim_flavor.format(get_dict_key(vdu)),
                                             self.tosca_vnf)
@@ -120,7 +120,7 @@ class Sol6Converter:
         anti_affinity_policies = get_roots_from_filter(self.tosca_vnf, child_key="type",
                                                        child_value=TOSCA.anti_affinity_type)
 
-        for vdu in self.vdus:
+        for vdu in self.tosca_vdus:
             vdu_name = get_dict_key(vdu)
 
             # Populate the configurable properties
@@ -528,8 +528,6 @@ class Sol6Converter:
         virtual_links = self.path_to_value(SOL6.virtual_link_desc, self.vnfd)
 
         if type(virtual_links) is not list or len(virtual_links) < 2:
-            self.log.error("There are not enough virtual links defnied in the TOSCA file to map"
-                           "the required internal/external connection points.")
             raise KeyError("There are not enough virtual links defnied in the TOSCA file to map"
                            "the required internal/external connection points.")
 
@@ -545,12 +543,12 @@ class Sol6Converter:
                 assoc_vdu = self.path_to_value(cur_path, int_cp)
                 # Get the VDU dict
                 cur_vdu = None
-                for vdu in self.vdus:
+                for vdu in self.tosca_vdus:
                     if assoc_vdu in vdu:
                         cur_vdu = vdu
                         break
                 if not cur_vdu:
-                    raise KeyError("VDU {} not found in VDUList {}".format(assoc_vdu, self.vdus))
+                    raise KeyError("VDU {} not found in VDUList {}".format(assoc_vdu, self.tosca_vdus))
 
                 # Handle adding multiple links
                 cur_value = None
@@ -576,11 +574,33 @@ class Sol6Converter:
         _populate_cp_type(self.connection_points[SOL6.cp_mgmt_key], mgmt_link)
         _populate_cp_type(self.connection_points[SOL6.cp_vim_orch_key], orch_link)
 
+        # Now write the ext-cpd with the SOL6.ext_cp_mgmt_id
+        ext_cps = [{
+            KeyUtils.get_path_last(SOL6.ext_cp_id): SOL6.ext_cp_mgmt_id,
+            KeyUtils.get_path_last(SOL6.ext_cp_int_cp): mgmt_link[TOSCA.cp_virt_link_desc_key],
+            KeyUtils.get_path_last(SOL6.ext_cp_layer_protocol): SOL6.ext_cp_layer_protocol_value
+        }, {
+            KeyUtils.get_path_last(SOL6.ext_cp_id): SOL6.ext_cp_orch_id,
+            KeyUtils.get_path_last(SOL6.ext_cp_int_cp): orch_link[TOSCA.cp_virt_link_desc_key],
+            KeyUtils.get_path_last(SOL6.ext_cp_layer_protocol): SOL6.ext_cp_layer_protocol_value
+        }]
+
+        set_path_to(SOL6.ext_cp, self.vnfd, ext_cps)
+
+
     def _write_vdu(self):
         """
         Write the populated VDU information into the final dict
         """
-        set_path_to(SOL6.vdu_loc, self.vnfd, self.vdus)
+        # This means that the id is at the bottom of the dict, which is kinda weird
+        final_list = []
+        for vdu in self.tosca_vdus:
+            vdu_name = get_dict_key(vdu)
+            vdu = vdu[vdu_name]
+            set_path_to(KeyUtils.get_path_last(SOL6.vdu_id), vdu, vdu_name, create_missing=True)
+            final_list.append(vdu)
+
+        set_path_to(SOL6.vdu_loc, self.vnfd, final_list)
 
     def _handle_vnf_nfvo(self):
         pass
