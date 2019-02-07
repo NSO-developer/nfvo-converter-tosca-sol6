@@ -1,5 +1,5 @@
 import copy
-from Sol6Keys import TOSCA, SOL6, KeyUtils
+from sol6_keys import TOSCA, SOL6, KeyUtils
 
 
 class Sol6Converter:
@@ -32,7 +32,7 @@ class Sol6Converter:
         self._handle_one_to_one()
         self._handle_virtual_compute()
         self._handle_virtual_link()
-        self._write_vdu()
+        self._remap_vdus()
         self._handle_connection_point()
 
         return self.vnfd
@@ -587,20 +587,13 @@ class Sol6Converter:
 
         set_path_to(SOL6.ext_cp, self.vnfd, ext_cps)
 
-
-    def _write_vdu(self):
+    def _remap_vdus(self):
         """
-        Write the populated VDU information into the final dict
+        Remap self.tosca_vdus into SOL6 format
+        Currently they all have the data loaded in as YAML format
         """
-        # This means that the id is at the bottom of the dict, which is kinda weird
-        final_list = []
-        for vdu in self.tosca_vdus:
-            vdu_name = get_dict_key(vdu)
-            vdu = vdu[vdu_name]
-            set_path_to(KeyUtils.get_path_last(SOL6.vdu_id), vdu, vdu_name, create_missing=True)
-            final_list.append(vdu)
 
-        set_path_to(SOL6.vdu_loc, self.vnfd, final_list)
+
 
     def _handle_vnf_nfvo(self):
         pass

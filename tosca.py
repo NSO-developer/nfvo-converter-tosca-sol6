@@ -4,7 +4,7 @@ import argparse
 import json
 import yaml
 from YangToDict import YangToDict, count_empty_fields
-from Sol6Converter import Sol6Converter
+from sol6_converter import Sol6Converter
 import nso as nso
 import logging
 

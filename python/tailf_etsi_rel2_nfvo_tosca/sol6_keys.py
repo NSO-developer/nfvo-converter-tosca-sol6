@@ -110,8 +110,6 @@ class SOL6:
     vnfd                            = _vnfd
     # We build the VDUs out of place, then put in at the end, so we don't need the full path
     _vdu                            = "{}"
-    vdu_loc                         = vnfd + ".vdu"
-    vdu_id                          = _vdu + ".id"
 
     # value_key is for if we have a default value we want to assign, the program can handle
     # assigning it automatically for basic keys
@@ -210,17 +208,50 @@ class SOL6:
     cp_vim_orch_key             = "vim_orchestration"
 
 
+class VDUMapping:
+    """
+    I'm going to try another idea for mapping values with the VDUs, since they can be
+    considered their own, effectively separate, subsection of the entire data structures
+
+    The problem:
+    There is data embedded in a structure in a multi-tiered dict T, we need to move the data
+    from its' current location and rearrange it into new locations, sometimes in very different
+    locations, and sometimes not.
+
+    YAML does not specify that the keys of dicts or lists need to be predefined or consistent
+    in any way.
+    Thus we can only occasionally assume that the structure can be known.
+    More often, there are other, interior, values that are better for identification of certain
+    types of data, most used are the 'type' field.
+
+    For example, connection points:
+    c1_nic0:
+      type: cisco.nodes.nfv.VduCp
+
+    The name is arbitrary, but the type is not.
+
+    It might be that making an automatic mapping that is able to handle this kind of complicated
+    behavior would just be better represented in raw code, but there are a lot of duplicate
+    parts of code in what I have already written, and there must be a better way to do this.
+
+
+    """
+
+
 class KeyUtils:
+    """
+    General utility methods to use on paths from this file
+
+    """
     @staticmethod
     def get_path_last(path, n=1):
         """
         Get the n last elements of the path, with their separators between them
         """
         paths = path.split(".")
-        if len(paths) > 0:
+        if not paths:
             return ".".join(paths[len(paths) - n:len(paths)])
-        else:
-            raise KeyError("Path {} is an invalid path to use in this method.".format(path))
+        raise KeyError("Path {} is an invalid path to use in this method.".format(path))
 
     @staticmethod
     def remove_path_first(path, n=1):
@@ -228,8 +259,7 @@ class KeyUtils:
         paths = path.split(".")
         if len(paths) > 0:
             return ".".join(paths[n:len(paths)])
-        else:
-            raise KeyError("Path {} is an invalid path to use in this method.".format(path))
+        raise KeyError("Path {} is an invalid path to use in this method.".format(path))
 
     @staticmethod
     def remove_path_level(path, path_level):
