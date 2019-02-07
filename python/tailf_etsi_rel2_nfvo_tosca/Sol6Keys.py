@@ -111,6 +111,8 @@ class SOL6:
     # We build the VDUs out of place, then put in at the end, so we don't need the full path
     _vdu                            = "{}"
     vdu_loc                         = vnfd + ".vdu"
+    vdu_id                          = _vdu + ".id"
+
     # value_key is for if we have a default value we want to assign, the program can handle
     # assigning it automatically for basic keys
     # The variable must be postfixed with the value of 'value_key'
@@ -193,6 +195,8 @@ class SOL6:
     ext_cp                          = _vnfd + ".ext-cpd"
     ext_cp_id                       = ext_cp + ".id"
     ext_cp_int_cp                   = ext_cp + ".int-virtual-link-desc"
+    ext_cp_layer_protocol           = ext_cp + ".layer_protocol"
+    ext_cp_layer_protocol_value     = "etsi-nfv:Ethernet"
 
     int_cp                          = _vdu + ".int-cpd"
     int_cp_id                       = int_cp + ".id"
