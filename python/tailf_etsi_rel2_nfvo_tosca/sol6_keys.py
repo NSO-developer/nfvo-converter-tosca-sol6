@@ -3,7 +3,7 @@ These are automatically used without having to update anything else.
 The TOSCA variables are mapped to the SOL6 ones, they must have the same names.
 The program does not attempt to map variables beginning with '_'
 """
-
+from mapping_v2 import V2Mapping
 
 class TOSCA:
     """
@@ -208,16 +208,44 @@ class SOL6:
     cp_vim_orch_key             = "vim_orchestration"
 
 
-class VDUMapping:
+class TOSCAv2:
     """
-    See documentation/VDUMapping.md
+    Second version of the definitions
     """
+    node_template                   = "topology_template.node_template"
+
+    vdu_name                        = node_template + ".{}.properties.name"
+    vdu_identifier                  = ["type", "cisco.nodes.nfv.Vdu.Compute"]
+
+
+class SOL6v2:
+    """
+    Second version of the definitions
+    """
+    vnfd                            = "vnfd"
+    vdus                            = vnfd + ".vdu"
+    vdu_name                        = vdus + ".{}.name"
+
+
+class V2Map(V2Mapping):
+    """
+
+    """
+
+    def __init__(self, dict_tosca, dict_sol6):
+        super().__init__(dict_tosca, dict_sol6)
+
+        T = TOSCAv2
+        S = SOL6v2
+        # Generate VDU map
+        vdu_map = self.generate_map(T.vdu_name, T.vdu_identifier[0], T.vdu_identifier[1])
+        print("vdu map", vdu_map)
 
 
 class KeyUtils:
     """
     General utility methods to use on paths from this file
-
+    
     """
     @staticmethod
     def get_path_last(path, n=1):
