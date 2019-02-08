@@ -645,15 +645,15 @@ class Sol6Converter:
         values = path.split(".")
         cur_context = cur_dict
 
-        for i in range(len(values)):
+        for val in values:
             if isinstance(cur_context, list):
                 cur_context = cur_context[0]
 
-            if values[i] in cur_context:
-                cur_context = cur_context[values[i]]
+            if val in cur_context:
+                cur_context = cur_context[val]
             else:
                 raise KeyError("Specified path/key '{}' "
-                               "not found in '{}'".format(values[i], list(cur_dict.keys())[0]))
+                               "not found in '{}'".format(val, list(cur_dict.keys())[0]))
 
         # We're only going to support automatically mapping get_inputs when they are the final value
         if map_inputs and is_tosca_input(cur_context):

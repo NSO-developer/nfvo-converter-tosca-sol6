@@ -210,31 +210,7 @@ class SOL6:
 
 class VDUMapping:
     """
-    I'm going to try another idea for mapping values with the VDUs, since they can be
-    considered their own, effectively separate, subsection of the entire data structures
-
-    The problem:
-    There is data embedded in a structure in a multi-tiered dict T, we need to move the data
-    from its' current location and rearrange it into new locations, sometimes in very different
-    locations, and sometimes not.
-
-    YAML does not specify that the keys of dicts or lists need to be predefined or consistent
-    in any way.
-    Thus we can only occasionally assume that the structure can be known.
-    More often, there are other, interior, values that are better for identification of certain
-    types of data, most used are the 'type' field.
-
-    For example, connection points:
-    c1_nic0:
-      type: cisco.nodes.nfv.VduCp
-
-    The name is arbitrary, but the type is not.
-
-    It might be that making an automatic mapping that is able to handle this kind of complicated
-    behavior would just be better represented in raw code, but there are a lot of duplicate
-    parts of code in what I have already written, and there must be a better way to do this.
-
-
+    See documentation/VDUMapping.md
     """
 
 
