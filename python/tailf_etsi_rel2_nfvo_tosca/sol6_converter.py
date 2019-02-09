@@ -32,14 +32,40 @@ class Sol6Converter:
 
         keys = V2Map(self.tosca_vnf, self.vnfd)
 
+        for map_tosca, map_sol6 in keys.mapping.items():
+            # Check if map_tosca is a list, which means we want the key of the final element
+            # as the value, not the actual value
+            key = False
+            if isinstance(map_tosca, tuple):
+                key = True
+                map_tosca = map_tosca[0]
+            # Check if there is a mapping needed
+            if isinstance(map_sol6, list):
+                mapping_list = map_sol6[1]
+                map_sol6 = map_sol6[0]
+                print(mapping_list, map_sol6)
+
+                for tosca, sol6 in mapping_list.items():
+                    if key:
+                        value = KeyUtils.get_path_last(map_tosca.format(tosca))
+                    else:
+                        value = get_path_value(map_tosca.format(tosca), self.tosca_vnf,
+                                               must_exist=False)
+                    # If the value doesn't exist, don't write it
+                    if value:
+                        set_path_to(map_sol6.format(sol6), self.vnfd, value, create_missing=True)
+
+        print(self.vnfd)
+
+
         # Get all of the inputs from tosca
         self.template_inputs = get_path_value(TOSCA.inputs, self.tosca_vnf)
 
-        self._handle_one_to_one()
-        self._handle_virtual_compute()
-        self._handle_virtual_link()
-        self._remap_vdus()
-        self._handle_connection_point()
+        # self._handle_one_to_one()
+        # self._handle_virtual_compute()
+        # self._handle_virtual_link()
+        # self._remap_vdus()
+        # self._handle_connection_point()
 
         return self.vnfd
 

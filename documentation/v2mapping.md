@@ -76,7 +76,7 @@ maps = {tosca_vdu_name: sol6_vdu_name
 
 Then to apply the mapping
 ```
-for map_tosca, map_sol6 in maps, if valid map:
+for map_tosca, map_sol6 in maps:
     for tosca, sol6 in vdu_mapping:
         set_path_to(map_tosca.format(tosca), path_to_value(map_sol6.format(sol6)))
 
@@ -87,7 +87,14 @@ for map_tosca, map_sol6 in maps, if valid map:
                     path_to_value("vnfd.vdu.{}.name".format("0")))
 ```
 
-The key difficulties in this approach would be
-1) Determining if the mapping is valid for the given path/value in the TOSCA YAML
-2) Ensuring mapping between tosca and sol6 always made sense
-3) Handling if the mapping is not valid for all elements
+Some extensions I have made:
+1. If the entry in maps needs something like vdu_mapping applied to it, you set the entry in maps as
+`{tosca_vdu_name: [sol6_vdu_name, vdu_map]}`
+2. If the entry is supposed to get the value of the key in the TOSCA file, and not the actual data
+at that point, make the key a tuple
+`{(tosca_vdu_name, self.SET_VALUE_KEY), sol6_vdu_name}`
+
+These can be combined as well
+```
+{(tosca_vdu_name, self.SET_VALUE_KEY), [sol6_vdu_name, vdu_mapping]}
+```

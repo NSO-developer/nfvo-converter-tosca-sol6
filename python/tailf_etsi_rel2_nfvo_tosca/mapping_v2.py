@@ -15,26 +15,31 @@ class V2Mapping:
     @staticmethod
     def map_ints(map1_list, start_num=0):
         """
-        Inputs: list of strings,
+        Example input: ["c1", "c2", "s3", "s4"], 0
         Example output: {"c1": 0, "c2": 1, "s3": 2, "s4": 3}
-        :return: Dict
+        :param map1_list: A list of strirngs
+        :param start_num: The number to start mapping values to
+        :return: A dict
         """
         result = {}
+        cur_num = start_num
         for item_1 in map1_list:
             try:
                 if item_1 in result:
                     print("Dict slot {} is already full with {}".format(item_1, result[item_1]))
 
-                result[item_1] = start_num
-                start_num += 1
+                result[item_1] = cur_num
+                cur_num += 1
             except KeyError:
                 print("Key error")
         return result
 
     def generate_map(self, path, field, field_value, map_type=int, map_start=0,
-                     map_function=map_ints):
+                     map_function=None):
         """
-
+        If map_function is not defined, look at map_type to determine what predefined mapping
+        function to be used.
+        Else, use the provided mapping functoin
         :param path:
         :param field:
         :param field_value:
@@ -46,7 +51,29 @@ class V2Mapping:
 
         # Get the value at path
         p_val = get_path_value(path, self.dict_tosca)
-        print(p_val)
-        #return map_function.__func__(t)
-        return 0
+        # Get the relevant nodes based on field and field_value
+        filtered = get_roots_from_filter(p_val, field, field_value)
+
+        if not isinstance(filtered, list):
+            raise TypeError("Expected type to be list, was {}".format(type(filtered)))
+
+        # We now have a list of dicts
+        # Get the names of each element in the lists
+        names = []
+
+        for elem in filtered:
+            if not isinstance(elem, dict):
+                raise TypeError("Expected type to be dict, was {}".format(type(elem)))
+
+            names.append(get_dict_key(elem))
+
+        mapped = None
+
+        if map_function:
+            mapped = map_function(names, map_start)
+        else:
+            if map_type is int:
+                mapped = V2Mapping.map_ints(names, map_start)
+
+        return mapped
 
