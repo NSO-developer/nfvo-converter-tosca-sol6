@@ -98,3 +98,8 @@ These can be combined as well
 ```
 {(tosca_vdu_name, self.SET_VALUE_KEY), [sol6_vdu_name, vdu_mapping]}
 ```
+
+Another update. I'll finalize this document eventually, but for now it's just notes.
+
+The first parameter in the mapping is always a tuple, and the second parameter is the flags required
+for the mapping. FLAG_BLANK must be set if there are no flags desired.

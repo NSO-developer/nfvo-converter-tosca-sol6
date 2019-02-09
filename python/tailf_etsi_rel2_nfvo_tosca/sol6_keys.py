@@ -237,8 +237,9 @@ class V2Map(V2Mapping):
     """
 
     """
-    # Make a tuple of the key with this if you want the value to be the key at the path
-    SET_VALUE_KEY = True
+    # Pass this flag if you want to set the value with the key and not the value
+    FLAG_KEY_SET_VALUE = "SVK"
+    FLAG_BLANK = ""
 
     mapping = {}
 
@@ -251,11 +252,16 @@ class V2Map(V2Mapping):
         # Generate VDU map
         vdu_map = self.generate_map(T.node_template, T.vdu_identifier[0], T.vdu_identifier[1])
 
+        # TODO: Allow arbitrary depth of mapping
+        # We need to be able to set lists inside of lists, so might as well just generalize that
+
         # If there is a mapping function needed, the second parameter is a list with the mapping
         # as the second parameter
-        self.mapping = {T.vdu_name: [S.vdu_name, vdu_map],
-                        (T.vdu, self.SET_VALUE_KEY): [S.vdu_id, vdu_map],
-                        T.vdu_boot: [S.vdu_boot, vdu_map]
+        # The first parameteer is always a tuple
+        self.mapping = {(T.vdu_name, self.FLAG_BLANK):          [S.vdu_name, vdu_map],
+                        (T.vdu, self.FLAG_KEY_SET_VALUE):       [S.vdu_id, vdu_map],
+                        (T.vdu_boot, self.FLAG_BLANK):          [S.vdu_boot, vdu_map],
+
         }
 
 
