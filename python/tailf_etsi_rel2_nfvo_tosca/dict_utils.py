@@ -1,5 +1,5 @@
 
-def get_path_value(path, cur_dict):
+def get_path_value(path, cur_dict, must_exist=True):
     """
     topology_template.node_templates.vnf.properties.descriptor_id
     Pass in a path and a dict the path applies to and get the value of the key
@@ -19,8 +19,12 @@ def get_path_value(path, cur_dict):
         if val in cur_context:
             cur_context = cur_context[val]
         else:
-            raise KeyError("Specified path/key '{}' "
-                           "not found in '{}'".format(val, list(cur_dict.keys())[0]))
+            if must_exist:
+                raise KeyError("Specified path/key '{}' "
+                               "not found in '{}'".format(val, list(cur_dict.keys())[0]))
+            else:
+                return False
+    return cur_context
 
 
 def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
@@ -35,30 +39,56 @@ def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
     cur_context = cur_dict
     i = 0
     while i < len(values):
+        if values[i].isdigit() and not isinstance(cur_context, list):
+            cur_context = [cur_context]
+
         # When we encounter a list, get the list_elem (default the first) and continue
         if isinstance(cur_context, list):
-            cur_context = cur_context[list_elem]
-
-        if values[i] in cur_context:
-            if values[i] == values[-1]:
-                cur_context[values[i]] = value
-                break
-
-            if not cur_context[values[i]] and create_missing:
-                cur_context[values[i]] = {}
-            cur_context = cur_context[values[i]]
-
-        else:  # Enforce strict structure
-            if create_missing:  # If we want to create the keys as we find they are missing
-                cur_context[values[i]] = ''
-                i -= 1  # Put the loop back by 1
+            # If our value is a list index
+            if values[i].isdigit():
+                try:
+                    cur_context = cur_context[int(values[i])]
+                    i += 1
+                except IndexError:
+                    list_insert_padding(cur_context, int(values[i]), {})
             else:
-                raise KeyError("Specified path/key {} not found in {}"
-                               .format(values[i], list(cur_dict.keys())[0]))
-        i += 1
+                cur_context = cur_context[list_elem]
+        else:
+            if values[i] in cur_context:
+                if values[i] == values[-1]:
+                    cur_context[values[i]] = value
+                    break
+
+                if not cur_context[values[i]] and create_missing:
+                    cur_context[values[i]] = {}
+                cur_context = cur_context[values[i]]
+
+            else:  # Enforce strict structure
+                if create_missing:  # If we want to create the keys as we find they are missing
+                    cur_context[values[i]] = ''
+                    i -= 1  # Put the loop back by 1
+                else:
+                    raise KeyError("Specified path/key {} not found in {}"
+                                   .format(values[i], list(cur_dict.keys())[0]))
+            i += 1
 
 
-@staticmethod
+def list_insert_padding(lst, index, value):
+    """
+    Like list.insert, excpet if the value of index is greater than the length, it will append
+    blank elements until it reaches the relevant index
+    :param lst:
+    :param index:
+    :param value:
+    :return:
+    """
+    if len(lst) > index:
+        lst.insert(index, value)
+    else:
+        while len(lst) < index:
+            lst.append(None)
+        lst.append(value)
+
 def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key=None,
                           internal_call=False, agg=None):
     """
@@ -128,7 +158,6 @@ def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key
         return agg
 
 
-@staticmethod
 def get_dict_key(dic, n=0):
     """
     Return the first (or nth) key name from a dict

@@ -212,10 +212,13 @@ class TOSCAv2:
     """
     Second version of the definitions
     """
-    node_template                   = "topology_template.node_template"
+    node_template                   = "topology_template.node_templates"
 
-    vdu_name                        = node_template + ".{}.properties.name"
+    vdu                             = node_template + ".{}"
     vdu_identifier                  = ["type", "cisco.nodes.nfv.Vdu.Compute"]
+    vdu_props                       = vdu + ".properties"
+    vdu_name                        = vdu_props + ".name"
+    vdu_boot                        = vdu_props + ".boot_order"
 
 
 class SOL6v2:
@@ -224,22 +227,36 @@ class SOL6v2:
     """
     vnfd                            = "vnfd"
     vdus                            = vnfd + ".vdu"
-    vdu_name                        = vdus + ".{}.name"
+    vdu                             = vdus + ".{}"
+    vdu_name                        = vdu + ".name"
+    vdu_id                          = vdu + ".id"
+    vdu_boot                        = vdu + ".boot-order.value"
 
 
 class V2Map(V2Mapping):
     """
 
     """
+    # Make a tuple of the key with this if you want the value to be the key at the path
+    SET_VALUE_KEY = True
+
+    mapping = {}
 
     def __init__(self, dict_tosca, dict_sol6):
         super().__init__(dict_tosca, dict_sol6)
 
         T = TOSCAv2
         S = SOL6v2
+
         # Generate VDU map
-        vdu_map = self.generate_map(T.vdu_name, T.vdu_identifier[0], T.vdu_identifier[1])
-        print("vdu map", vdu_map)
+        vdu_map = self.generate_map(T.node_template, T.vdu_identifier[0], T.vdu_identifier[1])
+
+        # If there is a mapping function needed, the second parameter is a list with the mapping
+        # as the second parameter
+        self.mapping = {T.vdu_name: [S.vdu_name, vdu_map],
+                        (T.vdu, self.SET_VALUE_KEY): [S.vdu_id, vdu_map],
+                        T.vdu_boot: [S.vdu_boot, vdu_map]
+        }
 
 
 class KeyUtils:
