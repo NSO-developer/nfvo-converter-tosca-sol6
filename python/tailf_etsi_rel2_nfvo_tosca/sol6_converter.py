@@ -32,21 +32,24 @@ class Sol6Converter:
 
         keys = V2Map(self.tosca_vnf, self.vnfd)
 
-        for map_tosca, map_sol6 in keys.mapping.items():
-            # Check if map_tosca is a list, which means we want the key of the final element
-            # as the value, not the actual value
-            key = False
-            if isinstance(map_tosca, tuple):
-                key = True
-                map_tosca = map_tosca[0]
+        # The first parameter is always a tuple, with the flags as the second parameter
+        # If there are multiple flags, they will be grouped in a tuple as well
+        for (map_tosca, flags), map_sol6 in keys.mapping.items():
+            key_as_value = False
+
+            if not isinstance(flags, tuple):
+                flags = [flags]
+            for flag in flags:
+                if flag == keys.FLAG_KEY_SET_VALUE:
+                    key_as_value = True
+
             # Check if there is a mapping needed
             if isinstance(map_sol6, list):
                 mapping_list = map_sol6[1]
                 map_sol6 = map_sol6[0]
-                print(mapping_list, map_sol6)
 
                 for tosca, sol6 in mapping_list.items():
-                    if key:
+                    if key_as_value:
                         value = KeyUtils.get_path_last(map_tosca.format(tosca))
                     else:
                         value = get_path_value(map_tosca.format(tosca), self.tosca_vnf,
@@ -55,17 +58,14 @@ class Sol6Converter:
                     if value:
                         set_path_to(map_sol6.format(sol6), self.vnfd, value, create_missing=True)
 
-        print(self.vnfd)
-
-
         # Get all of the inputs from tosca
         self.template_inputs = get_path_value(TOSCA.inputs, self.tosca_vnf)
 
-        # self._handle_one_to_one()
-        # self._handle_virtual_compute()
-        # self._handle_virtual_link()
-        # self._remap_vdus()
-        # self._handle_connection_point()
+        self._handle_one_to_one()
+        self._handle_virtual_compute()
+        self._handle_virtual_link()
+        self._remap_vdus()
+        self._handle_connection_point()
 
         return self.vnfd
 
