@@ -3,7 +3,8 @@ These are automatically used without having to update anything else.
 The TOSCA variables are mapped to the SOL6 ones, they must have the same names.
 The program does not attempt to map variables beginning with '_'
 """
-from mapping_v2 import V2Mapping
+from mapping_v2 import V2Mapping, MapElem
+from dict_utils import *
 
 class TOSCA:
     """
@@ -219,6 +220,11 @@ class TOSCAv2:
     vdu_props                       = vdu + ".properties"
     vdu_name                        = vdu_props + ".name"
     vdu_boot                        = vdu_props + ".boot_order"
+    int_cpd                         = node_template + ".{}"
+    int_cpd_identifier              = ["type", "cisco.nodes.nfv.VduCp"]
+    int_cpd_props                   = int_cpd + ".properties"
+    int_cpd_virt_binding            = int_cpd + ".requirements.virtual_binding"
+    int_cpd_layer_prot              = int_cpd_props + ".layer_protocols"
 
 
 class SOL6v2:
@@ -232,14 +238,19 @@ class SOL6v2:
     vdu_id                          = vdu + ".id"
     vdu_boot                        = vdu + ".boot-order.value"
 
+    int_cpd                         = vdu + ".int-cpd.{}"
+    int_cpd_id                      = int_cpd + ".id"
+    int_cpd_layer_prot              = int_cpd + ".layer-protocol"
+
 
 class V2Map(V2Mapping):
     """
 
     """
+    FLAG_BLANK                      = ""
     # Pass this flag if you want to set the value with the key and not the value
-    FLAG_KEY_SET_VALUE = "SVK"
-    FLAG_BLANK = ""
+    FLAG_KEY_SET_VALUE              = "KSV"
+    FLAG_INTERNAL_LOOP              = "IL"
 
     mapping = {}
 
@@ -252,8 +263,11 @@ class V2Map(V2Mapping):
         # Generate VDU map
         vdu_map = self.generate_map(T.node_template, T.vdu_identifier[0], T.vdu_identifier[1])
 
-        # TODO: Allow arbitrary depth of mapping
-        # We need to be able to set lists inside of lists, so might as well just generalize that
+        # Map internal connection points to their VDUs
+        cps_map = self.generate_map(T.node_template, T.int_cpd_identifier[0],
+                                    T.int_cpd_identifier[1],
+                                    map_function=V2Map.int_cp_mapping,
+                                    map_args={"vdu_map": vdu_map})
 
         # If there is a mapping function needed, the second parameter is a list with the mapping
         # as the second parameter
@@ -261,8 +275,51 @@ class V2Map(V2Mapping):
         self.mapping = {(T.vdu_name, self.FLAG_BLANK):          [S.vdu_name, vdu_map],
                         (T.vdu, self.FLAG_KEY_SET_VALUE):       [S.vdu_id, vdu_map],
                         (T.vdu_boot, self.FLAG_BLANK):          [S.vdu_boot, vdu_map],
+                        (T.int_cpd, self.FLAG_KEY_SET_VALUE):   [S.int_cpd_id, cps_map],
+                        (T.int_cpd_layer_prot, self.FLAG_BLANK): [S.int_cpd_layer_prot, cps_map]
 
         }
+
+    @staticmethod
+    def int_cp_mapping(names, map_start, **kwargs):
+        if "filtered" not in kwargs or "vdu_map" not in kwargs:
+            raise KeyError("The proper arguments haven't been passed for this method")
+
+        mapping = []
+        filtered = kwargs["filtered"]
+        vdu_mappings = kwargs["vdu_map"]
+        cur_num = map_start
+        last_vdu = None
+
+        # Loop through the CP names
+        for name in names:
+            # Get the dict that's related to this name
+            # There should only be one element in the list
+            entry = [x for x in filtered if get_dict_key(x) == name].pop()
+
+            # Get the virtual_binding for this element from the filtered list
+            # Remove the beginning of the path since we aren't dealing with the entire dict here
+            path_lvl = KeyUtils.remove_path_level(TOSCAv2.int_cpd_virt_binding,
+                                                  TOSCAv2.node_template)
+            vdu = get_path_value(path_lvl.format(name), entry)
+
+            # We need to find the parent mapping so we can include it in the map definition
+            cur_vdu_map = None
+            for v_map in vdu_mappings:
+                if v_map.name == vdu:
+                    cur_vdu_map = v_map
+
+            # Iterate the map number if we've seen this vdu before, otherwise start over from 0
+            if last_vdu == vdu:
+                cur_num += 1
+            else:
+                cur_num = map_start
+                last_vdu = vdu
+
+            # Build the MapElem object, this stores all the parent mappings as well
+            mapping.append(MapElem(name, cur_num, cur_vdu_map))
+
+        return mapping
 
 
 class KeyUtils:

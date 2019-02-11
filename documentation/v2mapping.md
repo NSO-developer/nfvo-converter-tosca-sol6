@@ -103,3 +103,61 @@ Another update. I'll finalize this document eventually, but for now it's just no
 
 The first parameter in the mapping is always a tuple, and the second parameter is the flags required
 for the mapping. FLAG_BLANK must be set if there are no flags desired.
+
+
+###Mapping arbitrary number of variables
+The problem that I've just run into is the need to map lists inside of VDUs. There is currently not a way
+to do that with the system I have set up.
+
+Example problem
+```
+<vdu>
+    <id>c1</id>
+    <int-cpd>
+        <id>c1_nic0</id>
+        <virtual-link-descriptor>etsi-vpc-di-internal1</virtual-link-descriptor>
+        <layer-protocol>IPv4</layer-protocol>
+        <interface-id xmlns="http://tail-f.com/pkg/tailf-etsi-rel3-nfvo-vnfm">0</interface-id>
+        <additional-parameters xmlns="http://tail-f.com/pkg/tailf-etsi-rel3-nfvo-vnfm">
+        <allowed-address-variable>C1_NICID_0_ALLOWED_ADDRS</allowed-address-variable>
+        </additional-parameters>
+    </int-cpd>
+</vdu>
+```
+
+Where there need to be multiple internal connection point descriptors.
+
+```
+# Generate VDU map
+vdu_map = self.generate_map(T.node_template, T.vdu_identifier[0], T.vdu_identifier[1])
+    -> {'c1': 0, 'c2': 1, 's3': 2, 's4': 3}
+    
+tosca_int_cpd_id = "topology_template.node_template.{c1_nic0}"
+sol6_int_cpd_id  = "vnfd.vdu.[0].[0].id"
+    cp_to_vdu = c1_nic0.requirements.virtual_binding = c1
+    
+    vdu[vdu_map[cp_to_vdu]] (vdu[0]) ->
+        c1_nic0 -> [0]
+        c1_nic1 -> [1]
+    
+    vdu[1] ->
+        c2_nic0 -> [0]
+        c2_nic1 -> [1]
+    
+    loop over CPs:
+        map cp to vdu
+        cp_map = generate_map() 
+            -> "c1_nic0": "c1"
+               "c1_nic1": "c1"
+               "c2_nic0": "c2"
+               "c2_nic1": "c2"
+        
+    loop over vdus:
+        0:
+            find CPs for this vdu
+            cps = filter(cp_map if value == vdu_map[value=0])
+                -> "c1_nic0": "c1"
+                   "c1_nic1": "c1"
+```
+
+

@@ -1,6 +1,7 @@
 import copy
 from sol6_keys import *
 from dict_utils import *
+from string import Formatter
 
 
 class Sol6Converter:
@@ -34,9 +35,10 @@ class Sol6Converter:
 
         # The first parameter is always a tuple, with the flags as the second parameter
         # If there are multiple flags, they will be grouped in a tuple as well
-        for (map_tosca, flags), map_sol6 in keys.mapping.items():
+        for (tosca_path, flags), map_sol6 in keys.mapping.items():
             key_as_value = False
 
+            # Ensure flags is iterable
             if not isinstance(flags, tuple):
                 flags = [flags]
             for flag in flags:
@@ -45,27 +47,32 @@ class Sol6Converter:
 
             # Check if there is a mapping needed
             if isinstance(map_sol6, list):
-                mapping_list = map_sol6[1]
-                map_sol6 = map_sol6[0]
+                mapping_list = map_sol6[1]  # List of MapElems
+                sol6_path = map_sol6[0]
 
-                for tosca, sol6 in mapping_list.items():
+                for elem in mapping_list:
+                    f_tosca_path = MapElem.format_path(elem, tosca_path, use_value=False)
+                    f_sol6_path = MapElem.format_path(elem, sol6_path, use_value=True)
+
                     if key_as_value:
-                        value = KeyUtils.get_path_last(map_tosca.format(tosca))
+                        value = KeyUtils.get_path_last(f_tosca_path)
                     else:
-                        value = get_path_value(map_tosca.format(tosca), self.tosca_vnf,
-                                               must_exist=False)
+                        value = get_path_value(f_tosca_path, self.tosca_vnf, must_exist=False)
+
                     # If the value doesn't exist, don't write it
                     if value:
-                        set_path_to(map_sol6.format(sol6), self.vnfd, value, create_missing=True)
+                        set_path_to(f_sol6_path, self.vnfd, value, create_missing=True)
+            else:  # No mapping needed
+                pass
 
         # Get all of the inputs from tosca
-        self.template_inputs = get_path_value(TOSCA.inputs, self.tosca_vnf)
+        #self.template_inputs = get_path_value(TOSCA.inputs, self.tosca_vnf)
 
-        self._handle_one_to_one()
-        self._handle_virtual_compute()
-        self._handle_virtual_link()
-        self._remap_vdus()
-        self._handle_connection_point()
+        #self._handle_one_to_one()
+        #self._handle_virtual_compute()
+        #self._handle_virtual_link()
+        #self._remap_vdus()
+        #self._handle_connection_point()
 
         return self.vnfd
 

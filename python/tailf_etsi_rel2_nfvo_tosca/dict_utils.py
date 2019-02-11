@@ -89,6 +89,7 @@ def list_insert_padding(lst, index, value):
             lst.append(None)
         lst.append(value)
 
+
 def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key=None,
                           internal_call=False, agg=None):
     """
@@ -163,3 +164,12 @@ def get_dict_key(dic, n=0):
     Return the first (or nth) key name from a dict
     """
     return list(dic.keys())[n]
+
+
+def merge_two_dicts(x, y):
+    """
+    https://stackoverflow.com/questions/38987/how-to-merge-two-dictionaries-in-a-single-expression
+    """
+    z = x.copy()   # start with x's keys and values
+    z.update(y)    # modifies z with y's keys and values & returns None
+    return z
