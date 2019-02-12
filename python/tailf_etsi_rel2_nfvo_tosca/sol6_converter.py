@@ -1,7 +1,6 @@
 import copy
 from sol6_keys import *
 from dict_utils import *
-from string import Formatter
 
 
 class Sol6Converter:
