@@ -38,26 +38,28 @@ class V2Mapping:
                 print("Key error")
         return result
 
-    def generate_map(self, path, field, field_value, map_type="int", map_start=0,
+    def generate_map(self, path, field_conditions, map_type="int", map_start=0,
                      map_function=None, map_args=None):
         """
         If map_function is not defined, look at map_type to determine what predefined mapping
         function to be used.
-        Else, use the provided mapping functoin
+        Else, use the provided mapping function
         :param path:
-        :param field:
-        :param field_value:
+        :param field_conditions:
         :param map_type:
         :param map_start:
         :param map_function:
         :param map_args:
         :return:
         """
+        field = field_conditions[0]
+        field_value = field_conditions[1]
+        field_filter = None if len(field_conditions) < 3 else field_conditions[2]
 
         # Get the value at path
         p_val = get_path_value(path, self.dict_tosca)
         # Get the relevant nodes based on field and field_value
-        filtered = get_roots_from_filter(p_val, field, field_value)
+        filtered = get_roots_from_filter(p_val, field, field_value, user_filter=field_filter)
 
         if not isinstance(filtered, list):
             raise TypeError("Expected type to be list, was {}".format(type(filtered)))

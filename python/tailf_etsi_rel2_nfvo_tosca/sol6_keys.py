@@ -220,12 +220,22 @@ class TOSCAv2:
     vdu_props                       = vdu + ".properties"
     vdu_name                        = vdu_props + ".name"
     vdu_boot                        = vdu_props + ".boot_order"
+
     int_cpd                         = node_template + ".{}"
     int_cpd_identifier              = ["type", "cisco.nodes.nfv.VduCp"]
     int_cpd_props                   = int_cpd + ".properties"
     int_cpd_virt_binding            = int_cpd + ".requirements.virtual_binding"
     int_cpd_virt_link               = int_cpd + ".requirements.virtual_link"
     int_cpd_layer_prot              = int_cpd_props + ".layer_protocols"
+
+    @staticmethod
+    def virt_filter(item):
+        # Make sure that the virtual storage block we get has the {}.properties.sw_image_data field
+        return key_exists(item, "properties.sw_image_data")
+
+    virt_storage                    = node_template + ".{}"
+    virt_storage_identifier         = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage",
+                                       virt_filter.__func__]
 
 
 class SOL6v2:
@@ -243,6 +253,9 @@ class SOL6v2:
     int_cpd_id                      = int_cpd + ".id"
     int_cpd_layer_prot              = int_cpd + ".layer-protocol"
     int_cpd_virt_link_desc          = int_cpd + ".int-virtual-link-desc"
+
+    sw_img_desc                     = vnfd + ".sw-image-desc.{}"
+    sw_name                         = sw_img_desc + ".name"
 
 
 class V2Map(V2Mapping):
@@ -263,13 +276,16 @@ class V2Map(V2Mapping):
         S = SOL6v2
 
         # Generate VDU map
-        vdu_map = self.generate_map(T.node_template, T.vdu_identifier[0], T.vdu_identifier[1])
+        vdu_map = self.generate_map(T.node_template, T.vdu_identifier)
 
         # Map internal connection points to their VDUs
-        cps_map = self.generate_map(T.node_template, T.int_cpd_identifier[0],
-                                    T.int_cpd_identifier[1],
+        cps_map = self.generate_map(T.node_template, T.int_cpd_identifier,
                                     map_function=V2Map.int_cp_mapping,
                                     map_args={"vdu_map": vdu_map})
+
+        sw_map = self.generate_map(T.node_template, T.virt_storage_identifier)
+
+        print(sw_map)
 
         # If there is a mapping function needed, the second parameter is a list with the mapping
         # as the second parameter
@@ -278,7 +294,8 @@ class V2Map(V2Mapping):
                         (T.vdu, self.FLAG_KEY_SET_VALUE):       [S.vdu_id, vdu_map],
                         (T.vdu_boot, self.FLAG_BLANK):          [S.vdu_boot, vdu_map],
                         (T.int_cpd, self.FLAG_KEY_SET_VALUE):   [S.int_cpd_id, cps_map],
-                        (T.int_cpd_layer_prot, self.FLAG_BLANK): [S.int_cpd_layer_prot, cps_map]
+                        (T.int_cpd_layer_prot, self.FLAG_BLANK): [S.int_cpd_layer_prot, cps_map],
+                        (T.virt_storage, self.FLAG_KEY_SET_VALUE): [S.sw_img_desc, sw_map]
 
         }
 

@@ -40,7 +40,6 @@ class Sol6Converter:
         self._handle_one_to_one()
         self._handle_virtual_compute()
         self._handle_virtual_link()
-        self._remap_vdus()
         # self._handle_connection_point()
 
         return self.vnfd
@@ -627,15 +626,6 @@ class Sol6Converter:
         }]
 
         set_path_to(SOL6.ext_cp, self.vnfd, ext_cps)
-
-    def _remap_vdus(self):
-        """
-        Remap self.tosca_vdus into SOL6 format
-        Currently they all have the data loaded in as YAML format
-        """
-
-    def _handle_vnf_nfvo(self):
-        pass
 
     def _handle_one_to_one(self):
         """
