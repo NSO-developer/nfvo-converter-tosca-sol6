@@ -104,7 +104,7 @@ def list_insert_padding(lst, index, value):
 
 
 def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key=None,
-                          internal_call=False, agg=None):
+                          internal_call=False, agg=None, user_filter=None):
     """
     We need to be able to get root elements based on some interior condition, for example:
 
@@ -169,6 +169,13 @@ def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key
     # If that is the case then return our aggregated list, since we need to give it back to the
     # calling point
     if not internal_call:
+        if user_filter:
+            kept = []
+            for a in agg:
+                if user_filter(a):
+                    kept.append(a)
+            agg = kept
+
         return agg
 
 
@@ -208,3 +215,14 @@ def remove_empty_from_dict(d):
         return [remove_empty_from_dict(v) for v in d if v and remove_empty_from_dict(v)]
     else:
         return d
+
+
+def key_exists(item, path):
+    try:
+        item = item[get_dict_key(item)]
+        paths = path.split(".")
+        for p in paths:
+            item = item[p]
+    except KeyError:
+        return False
+    return True
