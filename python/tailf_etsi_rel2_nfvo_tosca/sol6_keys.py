@@ -224,6 +224,7 @@ class TOSCAv2:
     int_cpd_identifier              = ["type", "cisco.nodes.nfv.VduCp"]
     int_cpd_props                   = int_cpd + ".properties"
     int_cpd_virt_binding            = int_cpd + ".requirements.virtual_binding"
+    int_cpd_virt_link               = int_cpd + ".requirements.virtual_link"
     int_cpd_layer_prot              = int_cpd_props + ".layer_protocols"
 
 
@@ -241,6 +242,7 @@ class SOL6v2:
     int_cpd                         = vdu + ".int-cpd.{}"
     int_cpd_id                      = int_cpd + ".id"
     int_cpd_layer_prot              = int_cpd + ".layer-protocol"
+    int_cpd_virt_link_desc          = int_cpd + ".int-virtual-link-desc"
 
 
 class V2Map(V2Mapping):

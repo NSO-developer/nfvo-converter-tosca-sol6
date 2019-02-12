@@ -14,15 +14,25 @@ def get_path_value(path, cur_dict, must_exist=True):
 
     for val in values:
         if isinstance(cur_context, list):
-            cur_context = cur_context[0]
+            # Check if all the elements are dicts, if so just merge them
+            merge = True
+            for item in cur_context:
+                if not isinstance(item, dict):
+                    merge = False
+                    break
+
+            if merge and len(cur_context) > 1:
+                cur_context = merge_list_of_dicts(cur_context)
+            else:
+                cur_context = cur_context[0]
 
         if val in cur_context:
             cur_context = cur_context[val]
         else:
             if must_exist:
-                raise KeyError("Specified path/key '{}' "
-                               "not found in '{}'".format(val, list(cur_dict.keys())[0]))
+                raise KeyError("Path '{}' not found in {}".format(val, path))
             else:
+                print("{} not found in {}".format(val, path))
                 return False
     return cur_context
 
@@ -52,7 +62,9 @@ def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
                 except IndexError:
                     list_insert_padding(cur_context, int(values[i]), {})
             else:
-                cur_context = cur_context[list_elem]
+                if cur_context:
+                    cur_context = cur_context[list_elem]
+
         else:
             if values[i] in cur_context:
                 if values[i] == values[-1]:
@@ -69,7 +81,7 @@ def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
                     i -= 1  # Put the loop back by 1
                 else:
                     raise KeyError("Specified path/key {} not found in {}"
-                                   .format(values[i], list(cur_dict.keys())[0]))
+                                   .format(values[i], path))
             i += 1
 
 
@@ -173,3 +185,16 @@ def merge_two_dicts(x, y):
     z = x.copy()   # start with x's keys and values
     z.update(y)    # modifies z with y's keys and values & returns None
     return z
+
+
+def merge_list_of_dicts(lst):
+    hold = None
+    final = {}
+    if len(lst) % 2 != 0:
+        hold = lst.pop()
+
+    for count, item in enumerate(lst):
+        final = merge_two_dicts(final, item)
+    if hold:
+        final = merge_two_dicts(final, hold)
+    return final
