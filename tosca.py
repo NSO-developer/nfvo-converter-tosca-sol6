@@ -7,6 +7,7 @@ from YangToDict import YangToDict, count_empty_fields
 from sol6_converter import Sol6Converter
 import nso as nso
 import logging
+import dict_utils
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('-f', '--file', required=True, help="The TOSCA VNF")
@@ -41,6 +42,9 @@ cnfv = converter.parse()
 end_empty = count_empty_fields(cnfv)
 
 print("{}% of fields filled".format(round((end_empty / start_empty)*100, 2)))
+
+# Prune the empty fields
+dict_utils.prune_empty(cnfv)
 
 # Put the data:esti-nfv:vnf tags at the base
 cnfv = {'data': {'etsi-nfv:nfv': cnfv}}

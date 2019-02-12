@@ -33,6 +33,20 @@ class Sol6Converter:
 
         keys = V2Map(self.tosca_vnf, self.vnfd)
 
+        self.run_v2_mapping(keys)
+
+        # Get all of the inputs from tosca
+        self.template_inputs = get_path_value(TOSCA.inputs, self.tosca_vnf)
+
+        self._handle_one_to_one()
+        self._handle_virtual_compute()
+        self._handle_virtual_link()
+        self._remap_vdus()
+        # self._handle_connection_point()
+
+        return self.vnfd
+
+    def run_v2_mapping(self, keys):
         # The first parameter is always a tuple, with the flags as the second parameter
         # If there are multiple flags, they will be grouped in a tuple as well
         for (tosca_path, flags), map_sol6 in keys.mapping.items():
@@ -63,18 +77,8 @@ class Sol6Converter:
                     if value:
                         set_path_to(f_sol6_path, self.vnfd, value, create_missing=True)
             else:  # No mapping needed
+                # TODO
                 pass
-
-        # Get all of the inputs from tosca
-        #self.template_inputs = get_path_value(TOSCA.inputs, self.tosca_vnf)
-
-        #self._handle_one_to_one()
-        #self._handle_virtual_compute()
-        #self._handle_virtual_link()
-        #self._remap_vdus()
-        #self._handle_connection_point()
-
-        return self.vnfd
 
     def _handle_virtual_compute(self):
         """
@@ -565,7 +569,7 @@ class Sol6Converter:
         virtual_links = get_path_value(SOL6.virtual_link_desc, self.vnfd)
 
         if not isinstance(virtual_links, list) or len(virtual_links) < 2:
-            raise KeyError("There are not enough virtual links defnied in the TOSCA file to map"
+            raise KeyError("There are not enough virtual links defnied in the TOSCA file to map "
                            "the required internal/external connection points.")
 
         # We will take the first link for use in management
