@@ -20,6 +20,8 @@ parser.add_argument('-n', '--dry-run', action='store_true', help="Don't send VNF
 parser.add_argument('-y', '--yang-template', required=True, help="The yang specifications file")
 parser.add_argument('-g', '--no-grouping', action='store_false',
                     help="Specify if there are no grouping tags in the specifications file")
+parser.add_argument('-p', '--prune', action='store_true', help='Prune empty values from the dict'
+                                                               'at the end')
 
 args = parser.parse_args()
 
@@ -44,7 +46,8 @@ end_empty = count_empty_fields(cnfv)
 print("{}% of fields filled".format(round((end_empty / start_empty)*100, 2)))
 
 # Prune the empty fields
-dict_utils.prune_empty(cnfv)
+if args.prune:
+    cnfv = dict_utils.remove_empty_from_dict(cnfv)
 
 # Put the data:esti-nfv:vnf tags at the base
 cnfv = {'data': {'etsi-nfv:nfv': cnfv}}

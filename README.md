@@ -26,6 +26,7 @@ tosca.py is the entry point for the standalone version of the converter.
 - -y --yang-template (REQ): The given YANG specifications file for the tool to fill out
 - -g --no-grouping: If there are no grouping tags in the YANG specifications file give this tag,
                   otherwise it will fail to parse the file
+- -p --prune: Prune empty values from the dict at the end
 
 
 ### DATA STRUCTURES
