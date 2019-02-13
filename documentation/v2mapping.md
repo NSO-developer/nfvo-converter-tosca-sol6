@@ -23,7 +23,7 @@ It might be that making an automatic mapping that is able to handle this kind of
 behavior would just be better represented in raw code, but there are a lot of duplicate
 parts of code in what I have already written, and there must be a better way to do this.
 
-###Idea 1
+###V2 Mapping
 Have keys, as is given in current TOSCA and SOL6 classes, but instead of automatically mapping
 variables with the same name, be able to give a dict/some kind of relation between two arbitrary
 variables.
@@ -87,26 +87,15 @@ for map_tosca, map_sol6 in maps:
                     path_to_value("vnfd.vdu.{}.name".format("0")))
 ```
 
-Some extensions I have made:
-1. If the entry in maps needs something like vdu_mapping applied to it, you set the entry in maps as
-`{tosca_vdu_name: [sol6_vdu_name, vdu_map]}`
-2. If the entry is supposed to get the value of the key in the TOSCA file, and not the actual data
-at that point, make the key a tuple
-`{(tosca_vdu_name, self.SET_VALUE_KEY), sol6_vdu_name}`
-
-These can be combined as well
+####Mapping Syntax
 ```
-{(tosca_vdu_name, self.SET_VALUE_KEY), [sol6_vdu_name, vdu_mapping]}
+    (TOSCA_PATH, (Single flag or tuple of flags)):  SOL6_PATH [, MAPPING]
 ```
-
-Another update. I'll finalize this document eventually, but for now it's just notes.
-
-The first parameter in the mapping is always a tuple, and the second parameter is the flags required
-for the mapping. FLAG_BLANK must be set if there are no flags desired.
-
+The SOL6_PATH can be alone, but if a mapping is required then the value must be a list with the path as the first
+element and the mapping as the second.
 
 ###Mapping arbitrary number of variables
-The problem that I've just run into is the need to map lists inside of VDUs. There is currently not a way
+The problem is the need to map lists inside of VDUs. There is currently not a way
 to do that with the system I have set up.
 
 Example problem
@@ -161,3 +150,19 @@ sol6_int_cpd_id  = "vnfd.vdu.[0].[0].id"
 ```
 
 
+The solution for this is to change how maps are represented. The new map data structure is
+```
+    MapElem(name, cur_map, parent_map)
+```
+What this means is it is now possible to store an arbitrary amount of depth in a single map.
+
+For our previous example, the map would now look like this
+```
+    cp_map = generate_map()
+        ->  MapElem("c1_nic0", 0, parent=MapElem("c1", 0))
+            MapElem("c1_nic1", 1, parent=MapElem("c1", 0))
+            MapElem("c2_nic0", 0, parent=MapElem("c2", 1))
+            MapElem("c2_nic1", 1, parent=MapElem("c2", 1))
+```
+
+Which allows iterative behavior no matter how deep the mapping goes.
