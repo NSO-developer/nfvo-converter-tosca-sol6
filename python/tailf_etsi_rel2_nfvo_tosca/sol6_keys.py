@@ -281,6 +281,8 @@ class V2Map(V2Mapping):
     FLAG_BLANK                      = ""
     # Pass this flag if you want to set the value with the key and not the value
     FLAG_KEY_SET_VALUE              = "KSV"
+    # Will remove all non-numeric characters
+    FLAG_ONLY_NUMBERS               = "NUMBERS"
 
     mapping = {}
 
@@ -299,7 +301,7 @@ class V2Map(V2Mapping):
                                     map_args={"vdu_map": vdu_map})
 
         sw_map = self.generate_map(T.node_template, T.virt_storage_identifier)
-        print(sw_map)
+
         # If there is a mapping function needed, the second parameter is a list with the mapping
         # as the second parameter
         # The first parameteer is always a tuple
@@ -314,8 +316,8 @@ class V2Map(V2Mapping):
                         (T.sw_checksum, self.FLAG_BLANK): [S.sw_checksum, sw_map],
                         (T.sw_container_fmt, self.FLAG_BLANK): [S.sw_container_format, sw_map],
                         (T.sw_disk_fmt, self.FLAG_BLANK): [S.sw_disk_format, sw_map],
-                        (T.sw_min_disk, self.FLAG_BLANK): [S.sw_min_disk, sw_map],
-                        (T.sw_size, self.FLAG_BLANK): [S.sw_size, sw_map]
+                        (T.sw_min_disk, self.FLAG_ONLY_NUMBERS): [S.sw_min_disk, sw_map],
+                        (T.sw_size, self.FLAG_ONLY_NUMBERS): [S.sw_size, sw_map]
         }
 
     @staticmethod
