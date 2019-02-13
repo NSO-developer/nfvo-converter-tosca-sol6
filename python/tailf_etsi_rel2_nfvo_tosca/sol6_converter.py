@@ -47,7 +47,8 @@ class Sol6Converter:
     def run_v2_mapping(self, keys):
         # The first parameter is always a tuple, with the flags as the second parameter
         # If there are multiple flags, they will be grouped in a tuple as well
-        for (tosca_path, flags), map_sol6 in keys.mapping.items():
+        print(keys.mapping)
+        for ((tosca_path, flags), map_sol6) in keys.mapping:
             key_as_value = False
             only_number = False
 
