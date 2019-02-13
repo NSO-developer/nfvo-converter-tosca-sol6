@@ -214,6 +214,17 @@ class TOSCAv2:
     Second version of the definitions
     """
     node_template                   = "topology_template.node_templates"
+    desc                            = "description"
+
+    vnf                             = node_template + ".vnf"
+    vnf_prop                        = vnf + ".properties"
+    vnf_desc_id                     = vnf_prop + ".descriptor_id"
+    vnf_desc_ver                    = vnf_prop + ".descriptor_version"
+    vnf_provider                    = vnf_prop + ".provider"
+    vnf_product_name                = vnf_prop + ".product_name"
+    vnf_software_ver                = vnf_prop + ".software_version"
+    vnf_product_info_name           = vnf_prop + ".product_info_name"
+    vnf_vnfm_info                   = vnf_prop + ".vnfm_info"
 
     vdu                             = node_template + ".{}"
     vdu_identifier                  = ["type", "cisco.nodes.nfv.Vdu.Compute"]
@@ -241,6 +252,7 @@ class TOSCAv2:
     virt_vsb                        = virt_props + ".virtual_block_storage_data"
     virt_size                       = virt_props + ".size_of_storage"
     sw_image_data                   = virt_props + ".sw_image_data"
+    sw_name                         = sw_image_data + ".name"
     sw_version                      = sw_image_data + ".version"
     sw_checksum                     = sw_image_data + ".checksum"
     sw_container_fmt                = sw_image_data + ".container_format"
@@ -250,12 +262,20 @@ class TOSCAv2:
     sw_image_file                   = virt_artifacts + ".sw_image.file"
 
 
-
 class SOL6v2:
     """
     Second version of the definitions
     """
     vnfd                            = "vnfd"
+    vnfd_id                         = vnfd + ".id"
+    vnfd_provider                   = vnfd + ".provider"
+    vnfd_product                    = vnfd + ".product-name"
+    vnfd_software_ver               = vnfd + ".software-version"
+    vnfd_ver                        = vnfd + ".version"
+    vnfd_info_name                  = vnfd + ".product-info-name"
+    vnfd_info_desc                  = vnfd + ".product-info-description"
+    vnfd_vnfm_info                  = vnfd + ".vnfm-info"
+
     vdus                            = vnfd + ".vdu"
     vdu                             = vdus + ".{}"
     vdu_name                        = vdu + ".name"
@@ -294,10 +314,6 @@ class V2Map(V2Mapping):
     def __init__(self, dict_tosca, dict_sol6):
         super().__init__(dict_tosca, dict_sol6)
 
-        # Because I'm dumb, each key needs to be unique
-        self.counter = 0
-        c = lambda: self.count()
-
         T = TOSCAv2
         S = SOL6v2
 
@@ -318,21 +334,33 @@ class V2Map(V2Mapping):
         # tuples as entries. Then the structure is the same, so this now supports the same
         # value mapped to different locations
         self.mapping = \
-            [((T.vdu_name, self.FLAG_BLANK),                 [S.vdu_name, vdu_map]),
-             ((T.vdu, self.FLAG_KEY_SET_VALUE),              [S.vdu_id, vdu_map]),
-             ((T.vdu_boot, self.FLAG_BLANK),                 [S.vdu_boot, vdu_map]),
-             ((T.int_cpd, self.FLAG_KEY_SET_VALUE),          [S.int_cpd_id, cps_map]),
-             ((T.int_cpd_layer_prot, self.FLAG_BLANK),       [S.int_cpd_layer_prot, cps_map]),
+            [
+             # -- Metadata --
+             ((T.vnf_desc_id, self.FLAG_BLANK),                 S.vnfd_id),
+             ((T.vnf_provider, self.FLAG_BLANK),                S.vnfd_provider),
+             ((T.vnf_product_name, self.FLAG_BLANK),            S.vnfd_product),
+             ((T.vnf_software_ver, self.FLAG_BLANK),            S.vnfd_software_ver),
+             ((T.vnf_desc_ver, self.FLAG_BLANK),                S.vnfd_ver),
+             ((T.vnf_product_info_name, self.FLAG_BLANK),       S.vnfd_info_name),
+             ((T.desc, self.FLAG_BLANK),                        S.vnfd_info_desc),
+             ((T.vnf_vnfm_info, self.FLAG_BLANK),               S.vnfd_vnfm_info),
+             # -- End Metadata --
+             
+             ((T.vdu_name, self.FLAG_BLANK),                    [S.vdu_name, vdu_map]),
+             ((T.vdu, self.FLAG_KEY_SET_VALUE),                 [S.vdu_id, vdu_map]),
+             ((T.vdu_boot, self.FLAG_BLANK),                    [S.vdu_boot, vdu_map]),
+             ((T.int_cpd, self.FLAG_KEY_SET_VALUE),             [S.int_cpd_id, cps_map]),
+             ((T.int_cpd_layer_prot, self.FLAG_BLANK),          [S.int_cpd_layer_prot, cps_map]),
 
-             ((T.virt_storage, self.FLAG_KEY_SET_VALUE),     [S.sw_name, sw_map]),
-             ((T.virt_storage, self.FLAG_KEY_SET_VALUE),     [S.sw_id, sw_map]),
-             ((T.sw_version, self.FLAG_BLANK),               [S.sw_version, sw_map]),
-             ((T.sw_checksum, self.FLAG_BLANK),              [S.sw_checksum, sw_map]),
-             ((T.sw_container_fmt, self.FLAG_BLANK),         [S.sw_container_format, sw_map]),
-             ((T.sw_disk_fmt, self.FLAG_BLANK),              [S.sw_disk_format, sw_map]),
-             ((T.sw_min_disk, self.FLAG_ONLY_NUMBERS),       [S.sw_min_disk, sw_map]),
-             ((T.sw_size, self.FLAG_ONLY_NUMBERS),           [S.sw_size, sw_map]),
-             ((T.sw_image_file, self.FLAG_BLANK),            [S.sw_image, sw_map])
+             ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.sw_id, sw_map]),
+             ((T.sw_name, self.FLAG_BLANK),                     [S.sw_name, sw_map]),
+             ((T.sw_version, self.FLAG_BLANK),                  [S.sw_version, sw_map]),
+             ((T.sw_checksum, self.FLAG_BLANK),                 [S.sw_checksum, sw_map]),
+             ((T.sw_container_fmt, self.FLAG_BLANK),            [S.sw_container_format, sw_map]),
+             ((T.sw_disk_fmt, self.FLAG_BLANK),                 [S.sw_disk_format, sw_map]),
+             ((T.sw_min_disk, self.FLAG_ONLY_NUMBERS),          [S.sw_min_disk, sw_map]),
+             ((T.sw_size, self.FLAG_ONLY_NUMBERS),              [S.sw_size, sw_map]),
+             ((T.sw_image_file, self.FLAG_BLANK),               [S.sw_image, sw_map])
         ]
 
     def count(self):
