@@ -236,6 +236,16 @@ class TOSCAv2:
     virt_storage                    = node_template + ".{}"
     virt_storage_identifier         = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage",
                                        virt_filter.__func__]
+    virt_props                      = virt_storage + ".properties"
+    virt_vsb                        = virt_props + ".virtual_block_storage_data"
+    virt_size                       = virt_props + ".size_of_storage"
+    sw_image_data                   = virt_props + ".sw_image_data"
+    sw_version                      = sw_image_data + ".version"
+    sw_checksum                     = sw_image_data + ".checksum"
+    sw_container_fmt                = sw_image_data + ".container_format"
+    sw_disk_fmt                     = sw_image_data + ".disk_format"
+    sw_min_disk                     = sw_image_data + ".min_disk"
+    sw_size                         = sw_image_data + ".size"
 
 
 class SOL6v2:
@@ -256,6 +266,12 @@ class SOL6v2:
 
     sw_img_desc                     = vnfd + ".sw-image-desc.{}"
     sw_name                         = sw_img_desc + ".name"
+    sw_version                      = sw_img_desc + ".version"
+    sw_checksum                     = sw_img_desc + ".checksum"
+    sw_container_format             = sw_img_desc + ".container-format"
+    sw_disk_format                  = sw_img_desc + ".disk-format"
+    sw_min_disk                     = sw_img_desc + ".min-disk"
+    sw_size                         = sw_img_desc + ".size"
 
 
 class V2Map(V2Mapping):
@@ -265,7 +281,6 @@ class V2Map(V2Mapping):
     FLAG_BLANK                      = ""
     # Pass this flag if you want to set the value with the key and not the value
     FLAG_KEY_SET_VALUE              = "KSV"
-    FLAG_INTERNAL_LOOP              = "IL"
 
     mapping = {}
 
@@ -284,9 +299,7 @@ class V2Map(V2Mapping):
                                     map_args={"vdu_map": vdu_map})
 
         sw_map = self.generate_map(T.node_template, T.virt_storage_identifier)
-
         print(sw_map)
-
         # If there is a mapping function needed, the second parameter is a list with the mapping
         # as the second parameter
         # The first parameteer is always a tuple
@@ -295,8 +308,14 @@ class V2Map(V2Mapping):
                         (T.vdu_boot, self.FLAG_BLANK):          [S.vdu_boot, vdu_map],
                         (T.int_cpd, self.FLAG_KEY_SET_VALUE):   [S.int_cpd_id, cps_map],
                         (T.int_cpd_layer_prot, self.FLAG_BLANK): [S.int_cpd_layer_prot, cps_map],
-                        (T.virt_storage, self.FLAG_KEY_SET_VALUE): [S.sw_img_desc, sw_map]
 
+                        (T.virt_storage, self.FLAG_KEY_SET_VALUE): [S.sw_name, sw_map],
+                        (T.sw_version, self.FLAG_BLANK): [S.sw_version, sw_map],
+                        (T.sw_checksum, self.FLAG_BLANK): [S.sw_checksum, sw_map],
+                        (T.sw_container_fmt, self.FLAG_BLANK): [S.sw_container_format, sw_map],
+                        (T.sw_disk_fmt, self.FLAG_BLANK): [S.sw_disk_format, sw_map],
+                        (T.sw_min_disk, self.FLAG_BLANK): [S.sw_min_disk, sw_map],
+                        (T.sw_size, self.FLAG_BLANK): [S.sw_size, sw_map]
         }
 
     @staticmethod
