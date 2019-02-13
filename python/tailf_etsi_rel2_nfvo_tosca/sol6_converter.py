@@ -37,7 +37,7 @@ class Sol6Converter:
         # Get all of the inputs from tosca
         self.template_inputs = get_path_value(TOSCA.inputs, self.tosca_vnf)
 
-        self._handle_one_to_one()
+        # self._handle_one_to_one()
         self._handle_virtual_compute()
         self._handle_virtual_link()
         # self._handle_connection_point()
@@ -78,7 +78,7 @@ class Sol6Converter:
                     if value:
                         set_path_to(f_sol6_path, self.vnfd, value, create_missing=True)
             else:  # No mapping needed
-                sol6_path = map_sol6[0]
+                sol6_path = map_sol6
 
                 # Handle the various flags
                 value = self._key_as_value(key_as_value, tosca_path)
