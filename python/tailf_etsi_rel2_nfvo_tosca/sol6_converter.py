@@ -1,4 +1,4 @@
-import copy
+import re
 from sol6_keys import *
 from dict_utils import *
 
@@ -49,6 +49,7 @@ class Sol6Converter:
         # If there are multiple flags, they will be grouped in a tuple as well
         for (tosca_path, flags), map_sol6 in keys.mapping.items():
             key_as_value = False
+            only_number = False
 
             # Ensure flags is iterable
             if not isinstance(flags, tuple):
@@ -56,6 +57,8 @@ class Sol6Converter:
             for flag in flags:
                 if flag == keys.FLAG_KEY_SET_VALUE:
                     key_as_value = True
+                if flag == keys.FLAG_ONLY_NUMBERS:
+                    only_number = True
 
             # Check if there is a mapping needed
             if isinstance(map_sol6, list):
@@ -66,17 +69,36 @@ class Sol6Converter:
                     f_tosca_path = MapElem.format_path(elem, tosca_path, use_value=False)
                     f_sol6_path = MapElem.format_path(elem, sol6_path, use_value=True)
 
-                    if key_as_value:
-                        value = KeyUtils.get_path_last(f_tosca_path)
-                    else:
-                        value = get_path_value(f_tosca_path, self.tosca_vnf, must_exist=False)
-                    print(f_sol6_path, value)
+                    # Handle the various flags
+                    value = self._key_as_value(key_as_value, f_tosca_path)
+                    value = Sol6Converter._only_number(only_number, value)
+
                     # If the value doesn't exist, don't write it
                     if value:
                         set_path_to(f_sol6_path, self.vnfd, value, create_missing=True)
             else:  # No mapping needed
-                # TODO
-                pass
+                sol6_path = map_sol6[0]
+
+                # Handle the various flags
+                value = self._key_as_value(key_as_value, tosca_path)
+                value = Sol6Converter._only_number(only_number, value)
+
+                set_path_to(sol6_path, self.vnfd, value, create_missing=True)
+
+    # Flag option formatting methods
+    def _key_as_value(self, option, path):
+        if option:
+            return KeyUtils.get_path_last(path)
+        else:
+            return get_path_value(path, self.tosca_vnf, must_exist=False)
+
+    @staticmethod
+    def _only_number(option, value):
+        if not option:
+            return value
+        return re.sub('[^0-9]', '', value)
+
+    # ----------------------------------------------------------------------------------------------
 
     def _handle_virtual_compute(self):
         """
