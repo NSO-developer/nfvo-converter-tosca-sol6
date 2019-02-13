@@ -237,6 +237,7 @@ class TOSCAv2:
     virt_storage_identifier         = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage",
                                        virt_filter.__func__]
     virt_props                      = virt_storage + ".properties"
+    virt_artifacts                  = virt_storage + ".artifacts"
     virt_vsb                        = virt_props + ".virtual_block_storage_data"
     virt_size                       = virt_props + ".size_of_storage"
     sw_image_data                   = virt_props + ".sw_image_data"
@@ -246,6 +247,8 @@ class TOSCAv2:
     sw_disk_fmt                     = sw_image_data + ".disk_format"
     sw_min_disk                     = sw_image_data + ".min_disk"
     sw_size                         = sw_image_data + ".size"
+    sw_image_file                   = virt_artifacts + ".sw_image.file"
+
 
 
 class SOL6v2:
@@ -265,6 +268,7 @@ class SOL6v2:
     int_cpd_virt_link_desc          = int_cpd + ".int-virtual-link-desc"
 
     sw_img_desc                     = vnfd + ".sw-image-desc.{}"
+    sw_id                           = sw_img_desc + ".id"
     sw_name                         = sw_img_desc + ".name"
     sw_version                      = sw_img_desc + ".version"
     sw_checksum                     = sw_img_desc + ".checksum"
@@ -272,6 +276,7 @@ class SOL6v2:
     sw_disk_format                  = sw_img_desc + ".disk-format"
     sw_min_disk                     = sw_img_desc + ".min-disk"
     sw_size                         = sw_img_desc + ".size"
+    sw_image                        = sw_img_desc + ".image"
 
 
 class V2Map(V2Mapping):
@@ -289,6 +294,10 @@ class V2Map(V2Mapping):
     def __init__(self, dict_tosca, dict_sol6):
         super().__init__(dict_tosca, dict_sol6)
 
+        # Because I'm dumb, each key needs to be unique
+        self.counter = 0
+        c = lambda: self.count()
+
         T = TOSCAv2
         S = SOL6v2
 
@@ -305,20 +314,30 @@ class V2Map(V2Mapping):
         # If there is a mapping function needed, the second parameter is a list with the mapping
         # as the second parameter
         # The first parameteer is always a tuple
-        self.mapping = {(T.vdu_name, self.FLAG_BLANK):          [S.vdu_name, vdu_map],
-                        (T.vdu, self.FLAG_KEY_SET_VALUE):       [S.vdu_id, vdu_map],
-                        (T.vdu_boot, self.FLAG_BLANK):          [S.vdu_boot, vdu_map],
-                        (T.int_cpd, self.FLAG_KEY_SET_VALUE):   [S.int_cpd_id, cps_map],
-                        (T.int_cpd_layer_prot, self.FLAG_BLANK): [S.int_cpd_layer_prot, cps_map],
+        # Since I forgot dicts can't have duplicate keys, I've switched this to a list with
+        # tuples as entries. Then the structure is the same, so this now supports the same
+        # value mapped to different locations
+        self.mapping = \
+            [((T.vdu_name, self.FLAG_BLANK),                 [S.vdu_name, vdu_map]),
+             ((T.vdu, self.FLAG_KEY_SET_VALUE),              [S.vdu_id, vdu_map]),
+             ((T.vdu_boot, self.FLAG_BLANK),                 [S.vdu_boot, vdu_map]),
+             ((T.int_cpd, self.FLAG_KEY_SET_VALUE),          [S.int_cpd_id, cps_map]),
+             ((T.int_cpd_layer_prot, self.FLAG_BLANK),       [S.int_cpd_layer_prot, cps_map]),
 
-                        (T.virt_storage, self.FLAG_KEY_SET_VALUE): [S.sw_name, sw_map],
-                        (T.sw_version, self.FLAG_BLANK): [S.sw_version, sw_map],
-                        (T.sw_checksum, self.FLAG_BLANK): [S.sw_checksum, sw_map],
-                        (T.sw_container_fmt, self.FLAG_BLANK): [S.sw_container_format, sw_map],
-                        (T.sw_disk_fmt, self.FLAG_BLANK): [S.sw_disk_format, sw_map],
-                        (T.sw_min_disk, self.FLAG_ONLY_NUMBERS): [S.sw_min_disk, sw_map],
-                        (T.sw_size, self.FLAG_ONLY_NUMBERS): [S.sw_size, sw_map]
-        }
+             ((T.virt_storage, self.FLAG_KEY_SET_VALUE),     [S.sw_name, sw_map]),
+             ((T.virt_storage, self.FLAG_KEY_SET_VALUE),     [S.sw_id, sw_map]),
+             ((T.sw_version, self.FLAG_BLANK),               [S.sw_version, sw_map]),
+             ((T.sw_checksum, self.FLAG_BLANK),              [S.sw_checksum, sw_map]),
+             ((T.sw_container_fmt, self.FLAG_BLANK),         [S.sw_container_format, sw_map]),
+             ((T.sw_disk_fmt, self.FLAG_BLANK),              [S.sw_disk_format, sw_map]),
+             ((T.sw_min_disk, self.FLAG_ONLY_NUMBERS),       [S.sw_min_disk, sw_map]),
+             ((T.sw_size, self.FLAG_ONLY_NUMBERS),           [S.sw_size, sw_map]),
+             ((T.sw_image_file, self.FLAG_BLANK),            [S.sw_image, sw_map])
+        ]
+
+    def count(self):
+        self.counter += 1
+        return self.counter
 
     @staticmethod
     def int_cp_mapping(names, map_start, **kwargs):
