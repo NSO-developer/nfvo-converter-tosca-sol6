@@ -70,7 +70,7 @@ class Sol6Converter:
                         value = KeyUtils.get_path_last(f_tosca_path)
                     else:
                         value = get_path_value(f_tosca_path, self.tosca_vnf, must_exist=False)
-
+                    print(f_sol6_path, value)
                     # If the value doesn't exist, don't write it
                     if value:
                         set_path_to(f_sol6_path, self.vnfd, value, create_missing=True)
