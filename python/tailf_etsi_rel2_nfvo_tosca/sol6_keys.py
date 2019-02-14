@@ -231,6 +231,7 @@ class TOSCAv2:
     vdu_props                       = vdu + ".properties"
     vdu_name                        = vdu_props + ".name"
     vdu_boot                        = vdu_props + ".boot_order"
+    vdu_desc                        = vdu_props + ".description"
 
     int_cpd                         = node_template + ".{}"
     int_cpd_identifier              = ["type", "cisco.nodes.nfv.VduCp"]
@@ -279,8 +280,11 @@ class SOL6v2:
     vdus                            = vnfd + ".vdu"
     vdu                             = vdus + ".{}"
     vdu_name                        = vdu + ".name"
+    vdu_desc                        = vdu + ".description"
     vdu_id                          = vdu + ".id"
-    vdu_boot                        = vdu + ".boot-order.value"
+    vdu_boot_order                  = vdu + ".boot-order"
+    vdu_boot_key                    = vdu_boot_order + ".key"
+    vdu_boot_value                  = vdu_boot_order + ".value"
 
     int_cpd                         = vdu + ".int-cpd.{}"
     int_cpd_id                      = int_cpd + ".id"
@@ -290,6 +294,7 @@ class SOL6v2:
     sw_img_desc                     = vnfd + ".sw-image-desc.{}"
     sw_id                           = sw_img_desc + ".id"
     sw_name                         = sw_img_desc + ".name"
+    sw_image_name_var               = sw_img_desc + ".image_name_variable"
     sw_version                      = sw_img_desc + ".version"
     sw_checksum                     = sw_img_desc + ".checksum"
     sw_container_format             = sw_img_desc + ".container-format"
@@ -308,6 +313,7 @@ class V2Map(V2Mapping):
     FLAG_KEY_SET_VALUE              = "KSV"
     # Will remove all non-numeric characters
     FLAG_ONLY_NUMBERS               = "NUMBERS"
+    FLAG_APPEND_LIST                = "APPENDLIST"
 
     mapping = {}
 
@@ -319,7 +325,7 @@ class V2Map(V2Mapping):
 
         # Generate VDU map
         vdu_map = self.generate_map(T.node_template, T.vdu_identifier)
-
+        
         # Map internal connection points to their VDUs
         cps_map = self.generate_map(T.node_template, T.int_cpd_identifier,
                                     map_function=V2Map.int_cp_mapping,
@@ -345,15 +351,20 @@ class V2Map(V2Mapping):
              ((T.desc, self.FLAG_BLANK),                        S.vnfd_info_desc),
              ((T.vnf_vnfm_info, self.FLAG_BLANK),               S.vnfd_vnfm_info),
              # -- End Metadata --
-             
+
              ((T.vdu_name, self.FLAG_BLANK),                    [S.vdu_name, vdu_map]),
              ((T.vdu, self.FLAG_KEY_SET_VALUE),                 [S.vdu_id, vdu_map]),
-             ((T.vdu_boot, self.FLAG_BLANK),                    [S.vdu_boot, vdu_map]),
+             ((T.vdu_desc, self.FLAG_BLANK),                    [S.vdu_desc, vdu_map]),
+
+             # ((T.vdu_boot, self.FLAG_BLANK),                    [S.vdu_boot_key, vdu_map]),
+             ((T.vdu_boot, self.FLAG_BLANK),                    [S.vdu_boot_value, vdu_map]),
+
              ((T.int_cpd, self.FLAG_KEY_SET_VALUE),             [S.int_cpd_id, cps_map]),
              ((T.int_cpd_layer_prot, self.FLAG_BLANK),          [S.int_cpd_layer_prot, cps_map]),
 
              ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.sw_id, sw_map]),
              ((T.sw_name, self.FLAG_BLANK),                     [S.sw_name, sw_map]),
+             ((T.sw_name, self.FLAG_BLANK),                     [S.sw_image_name_var, sw_map]),
              ((T.sw_version, self.FLAG_BLANK),                  [S.sw_version, sw_map]),
              ((T.sw_checksum, self.FLAG_BLANK),                 [S.sw_checksum, sw_map]),
              ((T.sw_container_fmt, self.FLAG_BLANK),            [S.sw_container_format, sw_map]),

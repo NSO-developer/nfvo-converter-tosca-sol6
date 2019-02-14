@@ -14,20 +14,29 @@ def get_path_value(path, cur_dict, must_exist=True):
     cur_context = cur_dict
 
     for val in values:
+        if val.isdigit() and not isinstance(cur_context, list):
+            cur_context = [cur_context]
+
         if isinstance(cur_context, list):
-            # Check if all the elements are dicts, if so just merge them
-            merge = True
-            for item in cur_context:
-                if not isinstance(item, dict):
-                    merge = False
-                    break
+            if not val.isdigit():
+                # Check if all the elements are dicts, if so just merge them
+                merge = True
+                for item in cur_context:
+                    if not isinstance(item, dict):
+                        merge = False
+                        break
 
-            if merge and len(cur_context) > 1:
-                cur_context = merge_list_of_dicts(cur_context)
-            else:
-                cur_context = cur_context[0]
+                if merge and len(cur_context) > 1:
+                    cur_context = merge_list_of_dicts(cur_context)
+                else:
+                    cur_context = cur_context[0]
 
-        if val in cur_context:
+        if val.isdigit():
+            try:
+                cur_context = cur_context[int(val)]
+            except IndexError:
+                raise
+        elif val in cur_context:
             cur_context = cur_context[val]
         else:
             if must_exist:
@@ -43,8 +52,8 @@ def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
     Sets the value of path inside of cur_dict to value
     If create_missing is set then it will create all the required dicts to make the assignment true
 
-    If a list is encountered and set_all_lists is false, then the method will pick list_elem
-    in the list and continue with that as the context.
+    If a list is encountered and the current value is not a number, then the method will
+    pick list_elem in the list and continue with that as the context.
     """
     values = path.split(".")
     cur_context = cur_dict

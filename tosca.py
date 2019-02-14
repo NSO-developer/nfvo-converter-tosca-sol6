@@ -54,6 +54,7 @@ cnfv = {'data': {'etsi-nfv:nfv': cnfv}}
 
 json_output = json.dumps(cnfv, indent=2)
 
+
 if args.output:
     with open(args.output, 'w') as f:
         f.writelines(json_output)
