@@ -1,4 +1,5 @@
 import re
+
 from sol6_keys import *
 from dict_utils import *
 
@@ -115,7 +116,7 @@ class Sol6Converter:
         """
         Get the list of vim flavor names that are in use, and find their properties
         """
-        self._virtual_get_flavor_names()
+        #self._virtual_get_flavor_names()
         self._process_vdus()
         self._populate_init_level()
         self._populate_scaling_aspects()
@@ -150,9 +151,9 @@ class Sol6Converter:
         # Flavor names and information can be either a variable (from inputs) or it can be hardcoded
         # which means that we need to handle getting data from both inputs and also locally
         for flavor in self.flavor_names:
-            if is_tosca_input(flavor):
+            if V2Mapping.is_tosca_input(flavor):
                 # Get the variable name + flavor data from the template inputs
-                name, data = self.tosca_get_input(flavor)
+                name, data = V2Mapping.tosca_get_input(flavor, self.template_inputs)
             else:
                 # The information is not coming from an input, so handle it all here
                 # This works if it's formatted as follows:
@@ -657,28 +658,8 @@ class Sol6Converter:
 
         set_path_to(SOL6.ext_cp, self.vnfd, ext_cps)
 
-    def tosca_get_input(self, input_name):
-        """
-        Attempt to locate and return the value of the given input from the tosca vnf file
-        :param input_name: { 'get_input': 'VAR_NAME' }
-        :returns: (var_name, data) or (None, None)
-        """
-        if not is_tosca_input(input_name):
-            return None, None
-
-        data = self.template_inputs[input_name[TOSCA.from_input]]
-        name = input_name[TOSCA.from_input]
-
-        return name, data
 
 # ******* Static Methods ********
-
-
-def is_tosca_input(val):
-    try:
-        return TOSCA.from_input in val
-    except TypeError:
-        return False
 
 
 def get_object_keys(obj):

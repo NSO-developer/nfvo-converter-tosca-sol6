@@ -92,7 +92,6 @@ class TOSCA:
     cp_link_key                 = "link_type"
 
 
-
 class SOL6:
     """
     The proper paths for SOL6 yang locations
@@ -196,7 +195,12 @@ class TOSCAv2:
     """
     node_template                   = "topology_template.node_templates"
     desc                            = "description"
+    inputs                          = "topology_template.inputs"
+    input_key                       = "get_input"
 
+    # **************
+    # ** Metadata **
+    # **************
     vnf                             = node_template + ".vnf"
     vnf_prop                        = vnf + ".properties"
     vnf_desc_id                     = vnf_prop + ".descriptor_id"
@@ -207,13 +211,22 @@ class TOSCAv2:
     vnf_product_info_name           = vnf_prop + ".product_info_name"
     vnf_vnfm_info                   = vnf_prop + ".vnfm_info"
 
+    # *********
+    # ** VDU **
+    # *********
     vdu                             = node_template + ".{}"
     vdu_identifier                  = ["type", "cisco.nodes.nfv.Vdu.Compute"]
     vdu_props                       = vdu + ".properties"
     vdu_name                        = vdu_props + ".name"
     vdu_boot                        = vdu_props + ".boot_order"
     vdu_desc                        = vdu_props + ".description"
+    vdu_conf_props                  = vdu_props + ".configurable_properties." \
+                                                  "additional_vnfc_configurable_properties"
+    vdu_vim_flavor                  = vdu_conf_props + ".vim_flavor"
 
+    # *********************************
+    # ** Internal Connectiion Points **
+    # *********************************
     int_cpd                         = node_template + ".{}"
     int_cpd_identifier              = ["type", "cisco.nodes.nfv.VduCp"]
     int_cpd_props                   = int_cpd + ".properties"
@@ -248,6 +261,9 @@ class SOL6v2:
     """
     Second version of the definitions
     """
+    # **********
+    # ** VNFD **
+    # **********
     vnfd                            = "vnfd"
     vnfd_id                         = vnfd + ".id"
     vnfd_provider                   = vnfd + ".provider"
@@ -257,7 +273,11 @@ class SOL6v2:
     vnfd_info_name                  = vnfd + ".product-info-name"
     vnfd_info_desc                  = vnfd + ".product-info-description"
     vnfd_vnfm_info                  = vnfd + ".vnfm-info"
+    vnfd_virt_compute_desc          = vnfd + ".virtual-compute-desc"
 
+    # *********
+    # ** VDU **
+    # *********
     vdus                            = vnfd + ".vdu"
     vdu                             = vdus + ".{}"
     vdu_name                        = vdu + ".name"
@@ -266,12 +286,19 @@ class SOL6v2:
     vdu_boot_order                  = vdu + ".boot-order"
     vdu_boot_key                    = vdu_boot_order + ".key"
     vdu_boot_value                  = vdu_boot_order + ".value"
+    vdu_vc_desc                     = vdu + ".virtual-compute-desc"
 
+    # *********************************
+    # ** Internal Connectiion Points **
+    # *********************************
     int_cpd                         = vdu + ".int-cpd.{}"
     int_cpd_id                      = int_cpd + ".id"
     int_cpd_layer_prot              = int_cpd + ".layer-protocol"
     int_cpd_virt_link_desc          = int_cpd + ".int-virtual-link-desc"
 
+    # *******************************
+    # ** Software Image Descriptor **
+    # *******************************
     sw_img_desc                     = vnfd + ".sw-image-desc.{}"
     sw_id                           = sw_img_desc + ".id"
     sw_name                         = sw_img_desc + ".name"
@@ -314,11 +341,16 @@ class V2Map(V2Mapping):
 
         sw_map = self.generate_map(T.node_template, T.virt_storage_identifier)
 
+        vim_flavors = self.get_items_from_map(T.vdu_vim_flavor, vdu_map, dict_tosca)
+        vim_flavors = self.get_input_values(vim_flavors, T.inputs, dict_tosca)
+
+        flavor_map = self.generate_map_from_list(vim_flavors)
+        print(flavor_map)
+
         # If there is a mapping function needed, the second parameter is a list with the mapping
         # as the second parameter
         # The first parameteer is always a tuple
-        # Since I forgot dicts can't have duplicate keys, I've switched this to a list with
-        # tuples as entries. Then the structure is the same, so this now supports the same
+        # This now supports the same
         # value mapped to different locations
         self.mapping = \
             [
