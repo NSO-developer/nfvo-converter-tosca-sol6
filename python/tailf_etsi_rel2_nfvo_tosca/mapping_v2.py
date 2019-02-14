@@ -61,14 +61,18 @@ class V2Mapping:
         # Get the relevant nodes based on field and field_value
         filtered = get_roots_from_filter(p_val, field, field_value, user_filter=field_filter)
 
-        if not isinstance(filtered, list):
-            raise TypeError("Expected type to be list, was {}".format(type(filtered)))
+        return self.generate_map_from_list(filtered, map_type, map_start, map_function, map_args)
+
+    def generate_map_from_list(self, to_map, map_type="int", map_start=0,
+                               map_function=None, map_args=None):
+        if not isinstance(to_map, list):
+            raise TypeError("Expected type to be list, was {}".format(type(to_map)))
 
         # We now have a list of dicts
         # Get the names of each element in the lists
         names = []
 
-        for elem in filtered:
+        for elem in to_map:
             if not isinstance(elem, dict):
                 raise TypeError("Expected type to be dict, was {}".format(type(elem)))
 
@@ -77,7 +81,7 @@ class V2Mapping:
         mapped = None
 
         kwargs = {self.KEY_TOSCA: self.dict_tosca, self.KEY_SOL6: self.dict_sol6,
-                  "filtered": filtered}
+                  "filtered": to_map}
         if map_args:
             kwargs = merge_two_dicts(kwargs, map_args)
 
@@ -88,6 +92,48 @@ class V2Mapping:
             if map_type == "int":
                 mapped = V2Mapping.map_ints(names, map_start, **kwargs)
         return mapped
+
+    @staticmethod
+    def get_items_from_map(path, mapping, cur_dict):
+        return [get_path_value(path.format(c_map.name), cur_dict) for c_map in mapping]
+
+    @staticmethod
+    def get_input_values(in_list, input_path, dict_tosca):
+        tosca_inputs = get_path_value(input_path, dict_tosca)
+        return [{item["get_input"]: V2Mapping.get_input_value(item, tosca_inputs=tosca_inputs)} for item in in_list]
+
+    @staticmethod
+    def get_input_value(item, input_path=None, dict_tosca=None, tosca_inputs=None):
+        if input_path and dict_tosca and not tosca_inputs:
+            tosca_inputs = get_path_value(input_path, dict_tosca)
+
+        if V2Mapping.is_tosca_input(item):
+            return tosca_inputs[item["get_input"]]
+
+    @staticmethod
+    def is_tosca_input(val):
+        try:
+            return "get_input" in val
+        except TypeError:
+            return False
+
+    @staticmethod
+    def tosca_get_input(input_name, tosca_inputs, dict_tosca):
+        """
+        Attempt to locate and return the value of the given input from the tosca vnf file
+        :param tosca_inputs:
+        :param dict_tosca:
+        :param input_name: { 'get_input': 'VAR_NAME' }
+        :returns: (var_name, data) or (None, None)
+        """
+        if not V2Mapping.is_tosca_input(input_name):
+            return None, None
+
+        template_inputs = get_path_value(tosca_inputs, dict_tosca)
+        data = template_inputs[input_name["get_input"]]
+        name = input_name["get_input"]
+
+        return name, data
 
 
 class MapElem:
