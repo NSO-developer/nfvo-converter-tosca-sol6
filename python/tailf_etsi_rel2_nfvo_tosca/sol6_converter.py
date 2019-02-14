@@ -37,10 +37,8 @@ class Sol6Converter:
         # Get all of the inputs from tosca
         self.template_inputs = get_path_value(TOSCA.inputs, self.tosca_vnf)
 
-        # self._handle_one_to_one()
         self._handle_virtual_compute()
         self._handle_virtual_link()
-        # self._handle_connection_point()
 
         return self.vnfd
 
@@ -560,9 +558,6 @@ class Sol6Converter:
 
         set_path_to(SOL6.virtual_link_desc, self.vnfd, res_list, create_missing=True)
 
-    def _handle_deployment_flavor(self):
-        pass
-
     def _handle_connection_point(self):
         """
         Read the substitution_mappings, determine which connection points are management and
@@ -661,24 +656,6 @@ class Sol6Converter:
         }]
 
         set_path_to(SOL6.ext_cp, self.vnfd, ext_cps)
-
-    def _handle_one_to_one(self):
-        """
-        Locate and assign the strict 1-to-1 value mappings
-        """
-
-        tosca_members = get_object_keys(TOSCA)
-        sol6_members = get_object_keys(SOL6)
-        # Get the intersection of the two sets of members
-        valid_keys = [key for key in tosca_members if key in sol6_members]
-        value_keys = [key for key in sol6_members if key + SOL6.value_key in sol6_members]
-
-        for key in valid_keys:
-            set_path_to(getattr(SOL6, key), self.vnfd,
-                        get_path_value(getattr(TOSCA, key), self.tosca_vnf))
-
-        for key in value_keys:
-            set_path_to(getattr(SOL6, key), self.vnfd, getattr(SOL6, key + SOL6.value_key))
 
     def tosca_get_input(self, input_name):
         """

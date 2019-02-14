@@ -6,6 +6,7 @@ The program does not attempt to map variables beginning with '_'
 from mapping_v2 import V2Mapping, MapElem
 from dict_utils import *
 
+
 class TOSCA:
     """
     The proper paths for the tosca values
@@ -18,16 +19,6 @@ class TOSCA:
     _policies       = "tosca.policies"
     _nfv_policies   = _policies + ".nvf"
     from_input      = "get_input"
-    # --------------------------------
-
-    id                              = _properties + ".descriptor_id"
-    provider                        = _properties + ".provider"
-    product_name                    = _properties + ".product_name"
-    software_version                = _properties + ".software_version"
-    version                         = _properties + ".descriptor_version"
-    product_info_name               = _properties + ".product_info_name"
-    # product_info_description        = _properties + ".product_info_description"
-    vnfm_info                       = _properties + ".vnfm_info"
     # --------------------------------
     # Deployment Flavor
     df_id                           = _properties + ".flavour_id"
@@ -116,16 +107,6 @@ class SOL6:
     # assigning it automatically for basic keys
     # The variable must be postfixed with the value of 'value_key'
     value_key = "_VAL"
-    # --------------------------------
-    id                              = _vnfd + ".id"
-    provider                        = _vnfd + ".provider"
-    product_name                    = _vnfd + ".product-name"
-    software_version                = _vnfd + ".software-version"
-    version                         = _vnfd + ".version"
-    product_info_name               = _vnfd + ".product-info-name"
-    product_info_description        = _vnfd + ".product-info-description"
-    vnfm_info                       = _vnfd + ".vnfm-info"
-    # --------------------------------
     # Deployment Flavor
     _deployment_flavor               = _vnfd + ".df"
     df_id                            = _deployment_flavor + ".id"
@@ -325,7 +306,7 @@ class V2Map(V2Mapping):
 
         # Generate VDU map
         vdu_map = self.generate_map(T.node_template, T.vdu_identifier)
-        
+
         # Map internal connection points to their VDUs
         cps_map = self.generate_map(T.node_template, T.int_cpd_identifier,
                                     map_function=V2Map.int_cp_mapping,
@@ -373,10 +354,6 @@ class V2Map(V2Mapping):
              ((T.sw_size, self.FLAG_ONLY_NUMBERS),              [S.sw_size, sw_map]),
              ((T.sw_image_file, self.FLAG_BLANK),               [S.sw_image, sw_map])
         ]
-
-    def count(self):
-        self.counter += 1
-        return self.counter
 
     @staticmethod
     def int_cp_mapping(names, map_start, **kwargs):
