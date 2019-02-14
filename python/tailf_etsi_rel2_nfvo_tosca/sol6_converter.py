@@ -47,10 +47,11 @@ class Sol6Converter:
     def run_v2_mapping(self, keys):
         # The first parameter is always a tuple, with the flags as the second parameter
         # If there are multiple flags, they will be grouped in a tuple as well
-        print(keys.mapping)
+
         for ((tosca_path, flags), map_sol6) in keys.mapping:
             key_as_value = False
             only_number = False
+            append_list = False
 
             # Ensure flags is iterable
             if not isinstance(flags, tuple):
@@ -60,6 +61,8 @@ class Sol6Converter:
                     key_as_value = True
                 if flag == keys.FLAG_ONLY_NUMBERS:
                     only_number = True
+                if flag == keys.FLAG_APPEND_LIST:
+                    append_list = True
 
             # Check if there is a mapping needed
             if isinstance(map_sol6, list):
@@ -73,6 +76,7 @@ class Sol6Converter:
                     # Handle the various flags
                     value = self._key_as_value(key_as_value, f_tosca_path)
                     value = Sol6Converter._only_number(only_number, value)
+                    value = self._append_to_list(append_list, f_sol6_path, value)
 
                     # If the value doesn't exist, don't write it
                     if value:
@@ -87,11 +91,19 @@ class Sol6Converter:
                 set_path_to(sol6_path, self.vnfd, value, create_missing=True)
 
     # Flag option formatting methods
+    def _append_to_list(self, option, path, value):
+        if not option:
+            return value
+        cur_list = get_path_value(path, self.vnfd, must_exist=False)
+        if cur_list:
+            if not isinstance(cur_list, list):
+                raise TypeError("{} is not a list".format(cur_list))
+            cur_list.append(value)
+
     def _key_as_value(self, option, path):
         if option:
             return KeyUtils.get_path_last(path)
-        else:
-            return get_path_value(path, self.tosca_vnf, must_exist=False)
+        return get_path_value(path, self.tosca_vnf, must_exist=False)
 
     @staticmethod
     def _only_number(option, value):
