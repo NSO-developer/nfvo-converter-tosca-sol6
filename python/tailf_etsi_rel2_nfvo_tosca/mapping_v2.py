@@ -25,6 +25,13 @@ class V2Mapping:
         :param start_num: The number to start mapping values to
         :return: A dict
         """
+        parent_map = None
+        if "parent_map" in kwargs:
+            parent_map = kwargs["parent_map"]
+        value_map = None
+        if "value_map" in kwargs:
+            value_map = kwargs["value_map"]
+
         result = []
         cur_num = start_num
         for item_1 in map1_list:
@@ -32,7 +39,24 @@ class V2Mapping:
                 if item_1 in result:
                     print("Dict slot {} is already full with {}".format(item_1, result[item_1]))
 
-                result.append(MapElem(item_1, cur_num))
+                # We need to find the parent mapping so we can include it in the map definition
+                final_parent_map = None
+                if parent_map:
+                    # Find the element in the parent map that the cur element is mapped to
+                    # For example [c1_nic0 -> c1] and [c1 -> 0]
+                    for p_map in parent_map:
+                        if p_map.name == item_1:
+                            final_parent_map = p_map
+                            break
+                elif value_map:
+                    for v_map in value_map:
+                        if v_map.name == cur_num:
+                            final_parent_map = v_map
+                            break
+
+                map_elem = MapElem(item_1, cur_num, final_parent_map)
+
+                result.append(map_elem)
                 cur_num += 1
             except KeyError:
                 print("Key error")
@@ -73,15 +97,18 @@ class V2Mapping:
         names = []
 
         for elem in to_map:
-            if not isinstance(elem, dict):
-                raise TypeError("Expected type to be dict, was {}".format(type(elem)))
-
-            names.append(get_dict_key(elem))
+            if isinstance(elem, dict):
+                names.append(get_dict_key(elem))
+            elif isinstance(elem, str):
+                names.append(elem)
+            else:
+                raise TypeError("Unhandled type {}".format(type(elem)))
 
         mapped = None
 
         kwargs = {self.KEY_TOSCA: self.dict_tosca, self.KEY_SOL6: self.dict_sol6,
                   "filtered": to_map}
+
         if map_args:
             kwargs = merge_two_dicts(kwargs, map_args)
 
@@ -94,8 +121,15 @@ class V2Mapping:
         return mapped
 
     @staticmethod
-    def get_items_from_map(path, mapping, cur_dict):
-        return [get_path_value(path.format(c_map.name), cur_dict) for c_map in mapping]
+    def get_items_from_map(path, mapping, cur_dict, link_list=False):
+        res = [get_path_value(path.format(c_map.name), cur_dict) for c_map in mapping]
+        # We need the VDU names that are linked with the flavors, so get them this way
+        if link_list:
+            temp = []
+            for i, c_map in enumerate(mapping):
+                temp.append([c_map.name, res[i]])
+            res = temp
+        return res
 
     @staticmethod
     def get_input_values(in_list, input_path, dict_tosca):
@@ -144,6 +178,14 @@ class MapElem:
         self.name = name
         self.cur_map = cur_map
         self.parent_map = parent_map
+
+    @staticmethod
+    def basic_map(num):
+        return MapElem(num, num)
+
+    @staticmethod
+    def basic_map_list(num):
+        return [MapElem.basic_map(n) for n in range(num)]
 
     @staticmethod
     def format_path(elem, path, use_value=True):

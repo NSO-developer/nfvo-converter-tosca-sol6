@@ -223,6 +223,9 @@ class TOSCAv2:
     vdu_conf_props                  = vdu_props + ".configurable_properties." \
                                                   "additional_vnfc_configurable_properties"
     vdu_vim_flavor                  = vdu_conf_props + ".vim_flavor"
+    vdu_cap_props                   = vdu + ".capabilities.virtual_compute.properties"
+    vdu_virt_cpu_num                = vdu_cap_props + ".virtual_cpu.num_virtual_cpu"
+    vdu_virt_mem_size               = vdu_cap_props + ".virtual_memory.virtual_mem_size"
 
     # *********************************
     # ** Internal Connectiion Points **
@@ -273,7 +276,9 @@ class SOL6v2:
     vnfd_info_name                  = vnfd + ".product-info-name"
     vnfd_info_desc                  = vnfd + ".product-info-description"
     vnfd_vnfm_info                  = vnfd + ".vnfm-info"
-    vnfd_virt_compute_desc          = vnfd + ".virtual-compute-desc"
+    vnfd_virt_compute_desc          = vnfd + ".virtual-compute-descriptor.{}"
+    vnfd_vc_flavor_name              = vnfd_virt_compute_desc + ".flavor-name-variable"
+    vnfd_vd_cpu_num                  = vnfd_virt_compute_desc + ".virtual-cpu.num-virtual-cpu"
 
     # *********
     # ** VDU **
@@ -286,7 +291,7 @@ class SOL6v2:
     vdu_boot_order                  = vdu + ".boot-order"
     vdu_boot_key                    = vdu_boot_order + ".key"
     vdu_boot_value                  = vdu_boot_order + ".value"
-    vdu_vc_desc                     = vdu + ".virtual-compute-desc"
+    vdu_vc_desc                     = vdu + ".virtual-compute-desc.{}"
 
     # *********************************
     # ** Internal Connectiion Points **
@@ -341,17 +346,31 @@ class V2Map(V2Mapping):
 
         sw_map = self.generate_map(T.node_template, T.virt_storage_identifier)
 
-        vim_flavors = self.get_items_from_map(T.vdu_vim_flavor, vdu_map, dict_tosca)
+        # This list has the VDUs the flavors are attached to
+        vdu_vim_flavors = self.get_items_from_map(T.vdu_vim_flavor, vdu_map, dict_tosca,
+                                                  link_list=True)
+        # [VDU, {"get_input": FLAVOR_NAME}], so get the dicts
+        vim_flavors = [x[1] for x in vdu_vim_flavors]
         vim_flavors = self.get_input_values(vim_flavors, T.inputs, dict_tosca)
 
-        flavor_map = self.generate_map_from_list(vim_flavors)
-        print(flavor_map)
+        vim_flavors = [{vdu_vim_flavors[i][0]: get_dict_key(item)} for i, item in
+                       enumerate(vim_flavors)]
+        # We might have duplicate values in the dictionary. Use a reverse dict and remove them
+        result = {}
+        for key, value in merge_list_of_dicts(vim_flavors).items():
+            if value not in result.values():
+                result[key] = value
+        vim_flavors = list(result.keys())
 
+        flavor_map = self.generate_map_from_list(vim_flavors,
+                                                 map_args={"value_map": MapElem.basic_map_list(
+                                                     len(vim_flavors))})
+
+        print(flavor_map)
         # If there is a mapping function needed, the second parameter is a list with the mapping
         # as the second parameter
         # The first parameteer is always a tuple
-        # This now supports the same
-        # value mapped to different locations
+        # This now supports the same value mapped to different locations
         self.mapping = \
             [
              # -- Metadata --
@@ -371,6 +390,8 @@ class V2Map(V2Mapping):
 
              # ((T.vdu_boot, self.FLAG_BLANK),                    [S.vdu_boot_key, vdu_map]),
              ((T.vdu_boot, self.FLAG_BLANK),                    [S.vdu_boot_value, vdu_map]),
+
+             ((T.vdu_virt_cpu_num, self.FLAG_BLANK),            [S.vnfd_vd_cpu_num, flavor_map]),
 
              ((T.int_cpd, self.FLAG_KEY_SET_VALUE),             [S.int_cpd_id, cps_map]),
              ((T.int_cpd_layer_prot, self.FLAG_BLANK),          [S.int_cpd_layer_prot, cps_map]),
@@ -394,7 +415,7 @@ class V2Map(V2Mapping):
 
         mapping = []
         filtered = kwargs["filtered"]
-        vdu_mappings = kwargs["vdu_map"]
+        vdu_mappings = list(kwargs["vdu_map"])
         cur_num = map_start
         last_vdu = None
 
@@ -415,6 +436,7 @@ class V2Map(V2Mapping):
             for v_map in vdu_mappings:
                 if v_map.name == vdu:
                     cur_vdu_map = v_map
+                    break
 
             # Iterate the map number if we've seen this vdu before, otherwise start over from 0
             if last_vdu == vdu:
