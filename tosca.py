@@ -35,11 +35,13 @@ logging.basicConfig(level=args.log_level)
 log = logging.getLogger(__name__)
 
 # Parse the yang specifications file into an empty dictionary
+print("Parsing YANG file {}".format(args.yang_template))
 ytd = YangToDict(file=args.yang_template, log=log, g_req=args.no_grouping)
 parsed_dict = ytd.parse_yang()
 start_empty = count_empty_fields(parsed_dict)
 
 # Read the tosca vnf into a dict from yaml format
+print("Reading TOSCA YAML file {}".format(args.file))
 with open(args.file, 'rb') as f:
     tosca_vnf = yaml.load(f.read())
 

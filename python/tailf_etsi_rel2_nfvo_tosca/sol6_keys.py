@@ -230,8 +230,15 @@ class TOSCAv2:
     # *********************************
     # ** Internal Connectiion Points **
     # *********************************
+    @staticmethod
+    def int_cp_mgmt(item):
+        """Return if the current cp is assigned to management or not"""
+        return key_exists(item, "properties.management") and \
+            get_path_value("properties.management", item[get_dict_key(item)], must_exist=False)
+
     int_cpd                         = node_template + ".{}"
     int_cpd_identifier              = ["type", "cisco.nodes.nfv.VduCp"]
+    int_cpd_mgmt_identifier         = ["type", "cisco.nodes.nfv.VduCp", int_cp_mgmt.__func__]
     int_cpd_props                   = int_cpd + ".properties"
     int_cpd_virt_binding            = int_cpd + ".requirements.virtual_binding"
     int_cpd_virt_link               = int_cpd + ".requirements.virtual_link"
@@ -277,8 +284,17 @@ class SOL6v2:
     vnfd_info_desc                  = vnfd + ".product-info-description"
     vnfd_vnfm_info                  = vnfd + ".vnfm-info"
     vnfd_virt_compute_desc          = vnfd + ".virtual-compute-descriptor.{}"
-    vnfd_vc_flavor_name              = vnfd_virt_compute_desc + ".flavor-name-variable"
-    vnfd_vd_cpu_num                  = vnfd_virt_compute_desc + ".virtual-cpu.num-virtual-cpu"
+    vnfd_vc_flavor_name             = vnfd_virt_compute_desc + ".flavor-name-variable"
+    vnfd_vd_cpu_num                 = vnfd_virt_compute_desc + ".virtual-cpu.num-virtual-cpu"
+
+    # ****************************
+    # ** Virtual/External Links **
+    # ****************************
+    virt_link_desc_id               = vnfd + ".int-virtual-link-desc.{}.id"
+
+    ext_cpd                         = vnfd + ".ext-cpd.{}"
+    ext_cpd_id                      = ext_cpd + ".id"
+    ext_cpd_virt_link               = ext_cpd + ".int-virtual-link-desc"
 
     # *********
     # ** VDU **
@@ -294,12 +310,18 @@ class SOL6v2:
     vdu_vc_desc                     = vdu + ".virtual-compute-desc.{}"
 
     # *********************************
-    # ** Internal Connectiion Points **
+    # ** Internal Connection Points **
     # *********************************
     int_cpd                         = vdu + ".int-cpd.{}"
     int_cpd_id                      = int_cpd + ".id"
     int_cpd_layer_prot              = int_cpd + ".layer-protocol"
     int_cpd_virt_link_desc          = int_cpd + ".int-virtual-link-desc"
+
+    KEY_VIRT_LINK_MGMT              = "CP_MGMT"
+    KEY_VIRT_LINK_ORCH              = "CP_ORCH"
+    KEY_EXT_CP_MGMT                 = "CP_EXT_MGMT"
+    KEY_EXT_CP_ORCH                 = "CP_EXT_ORCH"
+
 
     # *******************************
     # ** Software Image Descriptor **
@@ -339,34 +361,49 @@ class V2Map(V2Mapping):
         # Generate VDU map
         vdu_map = self.generate_map(T.node_template, T.vdu_identifier)
 
-        # Map internal connection points to their VDUs
-        cps_map = self.generate_map(T.node_template, T.int_cpd_identifier,
-                                    map_function=V2Map.int_cp_mapping,
-                                    map_args={"vdu_map": vdu_map})
-
         sw_map = self.generate_map(T.node_template, T.virt_storage_identifier)
 
         # This list has the VDUs the flavors are attached to
         vdu_vim_flavors = self.get_items_from_map(T.vdu_vim_flavor, vdu_map, dict_tosca,
                                                   link_list=True)
-        # [VDU, {"get_input": FLAVOR_NAME}], so get the dicts
+        # ** VDU Flavors **
+        # vim_flavors = [VDU, {"get_input": FLAVOR_NAME}], so get the dicts
         vim_flavors = [x[1] for x in vdu_vim_flavors]
         vim_flavors = self.get_input_values(vim_flavors, T.inputs, dict_tosca)
 
         vim_flavors = [{vdu_vim_flavors[i][0]: get_dict_key(item)} for i, item in
                        enumerate(vim_flavors)]
         # We might have duplicate values in the dictionary. Use a reverse dict and remove them
-        result = {}
-        for key, value in merge_list_of_dicts(vim_flavors).items():
-            if value not in result.values():
-                result[key] = value
-        vim_flavors = list(result.keys())
+        vim_flavors = remove_duplicates(vim_flavors)
 
         flavor_map = self.generate_map_from_list(vim_flavors,
                                                  map_args={"value_map": MapElem.basic_map_list(
                                                      len(vim_flavors))})
+        # ** End VDU Flavors **
 
-        print(cps_map)
+        # ** Connection Point mappings
+        # Map internal connection points to their VDUs
+        cps_map = self.generate_map(T.node_template, T.int_cpd_identifier,
+                                    map_function=V2Map.int_cp_mapping,
+                                    map_args={"vdu_map": vdu_map})
+        # Filter internal connection points that are assigned to management
+        mgmt_cps_map = self.generate_map(T.node_template, T.int_cpd_mgmt_identifier,
+                                         map_function=V2Map.int_cp_mapping,
+                                         map_args={"vdu_map": vdu_map})
+        # These are not going to be correctly mapped, so get the mapping from cps_map where
+        # the names are the same
+        # Every int-cpd will have a virtual-link-desc field, just if it's MGMT or ORCH is the
+        # difference
+        mgmt_cps_map = [x for x in cps_map if any(x.name == i.name for i in mgmt_cps_map)]
+        # Get the opposite set for the orch cps. Note: this can be sped up by putting both of these
+        # in a single loop
+        orch_cps_map = [x for x in cps_map if not any(x.name == i.name for i in mgmt_cps_map)]
+
+        virt_link_defs = [S.KEY_VIRT_LINK_MGMT, S.KEY_VIRT_LINK_ORCH]
+        virt_link_map = self.generate_map_from_list(virt_link_defs)
+        print(virt_link_map)
+        # ** End Connection Point mapping
+
         # If there is a mapping function needed, the second parameter is a list with the mapping
         # as the second parameter
         # The first parameteer is always a tuple
@@ -395,6 +432,10 @@ class V2Map(V2Mapping):
 
              ((T.int_cpd, self.FLAG_KEY_SET_VALUE),             [S.int_cpd_id, cps_map]),
              ((T.int_cpd_layer_prot, self.FLAG_BLANK),          [S.int_cpd_layer_prot, cps_map]),
+             ((S.KEY_VIRT_LINK_MGMT, self.FLAG_KEY_SET_VALUE),  [S.int_cpd_virt_link_desc,
+                                                                 mgmt_cps_map]),
+             ((S.KEY_VIRT_LINK_ORCH, self.FLAG_KEY_SET_VALUE),  [S.int_cpd_virt_link_desc,
+                                                                 orch_cps_map]),
 
              ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.sw_id, sw_map]),
              ((T.sw_name, self.FLAG_BLANK),                     [S.sw_name, sw_map]),
@@ -405,8 +446,21 @@ class V2Map(V2Mapping):
              ((T.sw_disk_fmt, self.FLAG_BLANK),                 [S.sw_disk_format, sw_map]),
              ((T.sw_min_disk, self.FLAG_ONLY_NUMBERS),          [S.sw_min_disk, sw_map]),
              ((T.sw_size, self.FLAG_ONLY_NUMBERS),              [S.sw_size, sw_map]),
-             ((T.sw_image_file, self.FLAG_BLANK),               [S.sw_image, sw_map])
-        ]
+             ((T.sw_image_file, self.FLAG_BLANK),               [S.sw_image, sw_map]),
+
+             # Setting specific values at specific indexes
+             # These are currently only the two virtual links and external links
+             (self.set_value(S.KEY_VIRT_LINK_MGMT, S.virt_link_desc_id, 0)),
+             (self.set_value(S.KEY_VIRT_LINK_ORCH, S.virt_link_desc_id, 1)),
+
+             (self.set_value(S.KEY_EXT_CP_MGMT, S.ext_cpd_id, 0)),
+             (self.set_value(S.KEY_VIRT_LINK_MGMT, S.ext_cpd_virt_link, 0)),
+             (self.set_value(S.KEY_VIRT_LINK_ORCH, S.ext_cpd_virt_link, 1)),
+             (self.set_value(S.KEY_EXT_CP_ORCH, S.ext_cpd_id, 1)),
+            ]
+
+    def set_value(self, val, path, index):
+        return (val, self.FLAG_KEY_SET_VALUE), [path, [MapElem(val, index)]]
 
     @staticmethod
     def int_cp_mapping(names, map_start, **kwargs):

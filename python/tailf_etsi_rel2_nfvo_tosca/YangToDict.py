@@ -45,7 +45,7 @@ class YangToDict:
         used = sum(self.lines_used)
         # print("Used {} lines out of {} = {}%".format(used, len(self.lines),
         #                                             round((used/len(self.lines))*100, 2)))
-        print("{}% of SOL6 YANG used".format(round((used/len(self.lines))*100, 2)))
+        print("{}% of YANG used".format(round((used/len(self.lines))*100, 2)))
 
         return self.dict_result
 

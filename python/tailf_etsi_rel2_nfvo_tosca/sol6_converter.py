@@ -1,3 +1,6 @@
+"""
+
+"""
 import re
 
 from sol6_keys import *
@@ -5,6 +8,8 @@ from dict_utils import *
 
 
 class Sol6Converter:
+    SUPPORTED_SOL6_VERSION = "1.1"
+
     tosca_vnf = None
     parsed_dict = None
     vnfd = None
@@ -28,12 +33,14 @@ class Sol6Converter:
         Currently only handles converting a single VNF to VNFD
         """
         # TODO: Handle multiple vnfds
+        print("Starting TOSCA -> SOL6 (v{}) converter.".format(self.SUPPORTED_SOL6_VERSION))
         # First, get the vnfd specifications model
         self.vnfd = copy.deepcopy(self.parsed_dict[SOL6.vnfd])
 
         keys = V2Map(self.tosca_vnf, self.vnfd)
 
         self.run_v2_mapping(keys)
+        self.create_virt_links(keys)
 
         # Get all of the inputs from tosca
         self.template_inputs = get_path_value(TOSCA.inputs, self.tosca_vnf)
@@ -103,6 +110,15 @@ class Sol6Converter:
         if option:
             return KeyUtils.get_path_last(path)
         return get_path_value(path, self.tosca_vnf, must_exist=False)
+
+    def create_virt_links(self, keys):
+        """
+        There is nothing to map from TOSCA, not really, here.
+        So we are going to create the virtual links from scratch
+        """
+        print(SOL6v2.KEY_VIRT_LINK_ORCH, SOL6v2.KEY_VIRT_LINK_MGMT)
+        # set_path_to(SOL6v2.)
+
 
     @staticmethod
     def _only_number(option, value):
