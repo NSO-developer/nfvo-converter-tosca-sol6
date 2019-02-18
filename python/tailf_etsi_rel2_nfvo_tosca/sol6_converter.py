@@ -77,6 +77,9 @@ class Sol6Converter:
                     value = Sol6Converter._only_number(only_number, value)
                     value = self._append_to_list(append_list, f_sol6_path, value)
 
+                    # If a value exists here already, then we are going to convert it into a list
+
+
                     # If the value doesn't exist, don't write it
                     if value:
                         set_path_to(f_sol6_path, self.vnfd, value, create_missing=True)
