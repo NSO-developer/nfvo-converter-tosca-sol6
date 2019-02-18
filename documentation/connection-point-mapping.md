@@ -56,16 +56,16 @@ assigned to ORCH_CP.
     
         VDU 1
             int-cpd: int_1
-                management: true
+                #TOSCA YAML: management: true
                 int-virtual-link-desc: MGMT_CP
             int-cpd: int_2
-                management: false
+                #TOSCA YAML: management: false
                 int-virtual-link-desc: ORCH_CP
         VDU 2
             int-cpd: int_1
-                management: false
+                #TOSCA YAML: management: false
                 int-virtual-link-desc: ORCH_CP
             int-cpd: int_2
-                management: true
+                #TOSCA YAML: management: true
                 int-virtual-link-desc: MGMT_CP
 ```
