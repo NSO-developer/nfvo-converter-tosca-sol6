@@ -1,4 +1,7 @@
-
+#!/usr/bin/env python3
+"""
+Input a yang file and this script will output an empty dict with the fields of the yang populated.
+"""
 
 GROUPING = 'grouping '
 LEAF = 'leaf '

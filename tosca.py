@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+
+"""
+__author__ = "Aaron Steele, Niraj Chandak"
+__credits__ = ["Frederick Jansson"]
+__version__ = "0.0.1"
 
 import argparse
 import json

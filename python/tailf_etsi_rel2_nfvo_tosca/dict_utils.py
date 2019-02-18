@@ -1,5 +1,6 @@
 import copy
 
+
 def get_path_value(path, cur_dict, must_exist=True):
     """
     topology_template.node_templates.vnf.properties.descriptor_id
