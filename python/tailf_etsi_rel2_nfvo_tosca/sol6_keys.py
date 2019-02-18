@@ -394,7 +394,7 @@ class V2Map(V2Mapping):
              ((T.vdu_virt_cpu_num, self.FLAG_BLANK),            [S.vnfd_vd_cpu_num, flavor_map]),
 
              ((T.int_cpd, self.FLAG_KEY_SET_VALUE),             [S.int_cpd_id, cps_map]),
-             #((T.int_cpd_layer_prot, self.FLAG_BLANK),          [S.int_cpd_layer_prot, cps_map]),
+             ((T.int_cpd_layer_prot, self.FLAG_BLANK),          [S.int_cpd_layer_prot, cps_map]),
 
              ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.sw_id, sw_map]),
              ((T.sw_name, self.FLAG_BLANK),                     [S.sw_name, sw_map]),

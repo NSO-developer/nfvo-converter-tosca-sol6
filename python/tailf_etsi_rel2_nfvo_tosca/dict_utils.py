@@ -61,13 +61,15 @@ def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
     values = path.split(".")
     cur_context = cur_dict
     i = 0
-    print("spt: {} --> {}".format(path, value))
     while i < len(values):
         if values[i].isdigit() and not isinstance(cur_context, list):
-            # This does not convert the entry in the dict into a list
+            # This does not convert the entry in the dict into a list, just the current value
             cur_context = [cur_context]
             # So, we need to set the new value explicitly
+            # Concat the paths up to this point into a full path
             path_to_set = ".".join(values[0:i])
+            # Use that path to recurse and set the value that we're about to work on in here
+            # This will update the dict in our current method, because of how python works
             set_path_to(path_to_set, cur_dict, cur_context, create_missing=True)
 
         # When we encounter a list, get the list_elem (default the first) and continue
