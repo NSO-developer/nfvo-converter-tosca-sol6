@@ -236,12 +236,22 @@ def remove_empty_from_dict(d):
         return d
 
 
-def key_exists(item, path):
+def key_exists(item, path, strip_first=True):
     try:
-        item = item[get_dict_key(item)]
+        if strip_first:
+            item = item[get_dict_key(item)]
         paths = path.split(".")
         for p in paths:
             item = item[p]
     except KeyError:
         return False
     return True
+
+
+def remove_duplicates(dic):
+    """Use a reverse dict to ensure there are no duplicate values"""
+    result = {}
+    for key, value in merge_list_of_dicts(dic).items():
+        if value not in result.values():
+            result[key] = value
+    return list(result.keys())
