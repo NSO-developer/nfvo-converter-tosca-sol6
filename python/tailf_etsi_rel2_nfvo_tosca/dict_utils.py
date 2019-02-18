@@ -36,7 +36,9 @@ def get_path_value(path, cur_dict, must_exist=True):
             try:
                 cur_context = cur_context[int(val)]
             except IndexError:
-                raise
+                if must_exist:
+                    raise
+                return False
         elif val in cur_context:
             cur_context = cur_context[val]
         else:
@@ -59,9 +61,14 @@ def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
     values = path.split(".")
     cur_context = cur_dict
     i = 0
+    print("spt: {} --> {}".format(path, value))
     while i < len(values):
         if values[i].isdigit() and not isinstance(cur_context, list):
+            # This does not convert the entry in the dict into a list
             cur_context = [cur_context]
+            # So, we need to set the new value explicitly
+            path_to_set = ".".join(values[0:i])
+            set_path_to(path_to_set, cur_dict, cur_context, create_missing=True)
 
         # When we encounter a list, get the list_elem (default the first) and continue
         if isinstance(cur_context, list):
