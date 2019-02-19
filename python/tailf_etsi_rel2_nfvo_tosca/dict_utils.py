@@ -248,10 +248,23 @@ def key_exists(item, path, strip_first=True):
     return True
 
 
-def remove_duplicates(dic):
-    """Use a reverse dict to ensure there are no duplicate values"""
+def remove_duplicates(dic, only_keys=True):
+    """
+    Use a reverse dict to ensure there are no duplicate values
+    If only_keys is false, it will return the dict of unique values
+    """
     result = {}
     for key, value in merge_list_of_dicts(dic).items():
         if value not in result.values():
             result[key] = value
-    return list(result.keys())
+    if only_keys:
+        return list(result.keys())
+    return result
+
+
+def reverse_dict(dic):
+    return {v: k for k, v in dic.items()}
+
+
+def listify(dic):
+    return [{k: v} for k, v in dic.items()]

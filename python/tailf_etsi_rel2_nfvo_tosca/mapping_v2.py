@@ -17,13 +17,48 @@ class V2Mapping:
         self.dict_sol6 = dict_sol6
 
     @staticmethod
+    def parent_match(map1_list, start_num=0, **kwargs):
+        """
+
+        :param map1_list:
+        :param start_num:
+        :param kwargs:
+        :return:
+        """
+        if "parent_map" not in kwargs:
+            raise KeyError("parent_map not included in kwargs")
+        if "value_dict" not in kwargs:
+            raise KeyError("value_dict not included in kwargs")
+        value_dict = kwargs["value_dict"]
+        parent_map = kwargs["parent_map"]
+
+        result = []
+        for key in map1_list:
+            value = value_dict[key]
+            final_parent_map = None
+
+            # Find the element in the parent map that the cur element is mapped to
+            # For example [c1_nic0 -> c1] and [c1 -> 0]
+            for p_map in parent_map:
+                if p_map.name == value:
+                    final_parent_map = p_map
+                    break
+
+            map_elem = MapElem(key, value, final_parent_map)
+            result.append(map_elem)
+
+        return result
+
+    @staticmethod
     def map_ints(map1_list, start_num=0, **kwargs):
         """
         Example input: ["c1", "c2", "s3", "s4"], 0
         Example output: {"c1": 0, "c2": 1, "s3": 2, "s4": 3}
         :param map1_list: A list of strirngs
         :param start_num: The number to start mapping values to
-        :return: A dict
+        :optional parent_map:
+        :optional value_map:
+        :return: A dict of the mappings
         """
         parent_map = None
         if "parent_map" in kwargs:
@@ -101,6 +136,8 @@ class V2Mapping:
                 names.append(get_dict_key(elem))
             elif isinstance(elem, str):
                 names.append(elem)
+            elif isinstance(elem, tuple):
+                names.append(elem[0])
             else:
                 raise TypeError("Unhandled type {}".format(type(elem)))
 
@@ -118,6 +155,8 @@ class V2Mapping:
         else:
             if map_type == "int":
                 mapped = V2Mapping.map_ints(names, map_start, **kwargs)
+            elif map_type == "parent_match":
+                mapped = V2Mapping.parent_match(names, map_start, **kwargs)
         return mapped
 
     @staticmethod

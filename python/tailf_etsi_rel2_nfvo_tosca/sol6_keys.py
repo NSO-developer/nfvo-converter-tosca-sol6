@@ -284,8 +284,9 @@ class SOL6v2:
     vnfd_info_desc                  = vnfd + ".product-info-description"
     vnfd_vnfm_info                  = vnfd + ".vnfm-info"
     vnfd_virt_compute_desc          = vnfd + ".virtual-compute-descriptor.{}"
-    vnfd_vc_flavor_name             = vnfd_virt_compute_desc + ".flavor-name-variable"
-    vnfd_vd_cpu_num                 = vnfd_virt_compute_desc + ".virtual-cpu.num-virtual-cpu"
+    vnfd_vcd_id                     = vnfd_virt_compute_desc + ".id"
+    vnfd_vcd_flavor_name            = vnfd_virt_compute_desc + ".flavor-name-variable"
+    vnfd_vcd_cpu_num                = vnfd_virt_compute_desc + ".virtual-cpu.num-virtual-cpu"
 
     # ****************************
     # ** Virtual/External Links **
@@ -321,7 +322,6 @@ class SOL6v2:
     KEY_VIRT_LINK_ORCH              = "CP_ORCH"
     KEY_EXT_CP_MGMT                 = "CP_EXT_MGMT"
     KEY_EXT_CP_ORCH                 = "CP_EXT_ORCH"
-
 
     # *******************************
     # ** Software Image Descriptor **
@@ -373,12 +373,33 @@ class V2Map(V2Mapping):
 
         vim_flavors = [{vdu_vim_flavors[i][0]: get_dict_key(item)} for i, item in
                        enumerate(vim_flavors)]
-        # We might have duplicate values in the dictionary. Use a reverse dict and remove them
-        vim_flavors = remove_duplicates(vim_flavors)
+
+        # We might have duplicate values in the dictionary. Use a reverse dict and get the unique
+        # elements
+        # Turn the resulting dict back into a list of dicts
+        vim_flavors = remove_duplicates(vim_flavors, only_keys=False)
+        vim_flavors_rev = reverse_dict(vim_flavors)
+        vim_flavors = listify(vim_flavors)
 
         flavor_map = self.generate_map_from_list(vim_flavors,
                                                  map_args={"value_map": MapElem.basic_map_list(
                                                      len(vim_flavors))})
+
+        # From the mapping
+        # [c1 -> 0, parent=(0 -> 0, parent=(None)), s3 -> 1, parent=(1 -> 1, parent=(None))]
+        # and the value_dict
+        # {'VIM_FLAVOR_CF': 'c1', 'VIM_FLAVOR_SF': 's3'}
+        # generate the mapping
+        # [VIM_FLAVOR_CF -> c1, parent=(c1 -> 0, parent=(0 -> 0, parent=(None))),
+        #   VIM_FLAVOR_SF -> s3, parent=(s3 -> 1, parent=(1 -> 1, parent=(None)))]
+        vim_flavors_map = self.generate_map_from_list(list(vim_flavors_rev.keys()),
+                                                      map_type="parent_match",
+                                                      map_args={"parent_map": flavor_map,
+                                                                "value_dict": vim_flavors_rev})
+        print(vim_flavors_rev)
+        print(vim_flavors_map)
+        print(flavor_map)
+
         # ** End VDU Flavors **
 
         # ** Connection Point mappings
@@ -398,10 +419,6 @@ class V2Map(V2Mapping):
         # Get the opposite set for the orch cps. Note: this can be sped up by putting both of these
         # in a single loop
         orch_cps_map = [x for x in cps_map if not any(x.name == i.name for i in mgmt_cps_map)]
-
-        virt_link_defs = [S.KEY_VIRT_LINK_MGMT, S.KEY_VIRT_LINK_ORCH]
-        virt_link_map = self.generate_map_from_list(virt_link_defs)
-        print(virt_link_map)
         # ** End Connection Point mapping
 
         # If there is a mapping function needed, the second parameter is a list with the mapping
@@ -428,7 +445,8 @@ class V2Map(V2Mapping):
              # ((T.vdu_boot, self.FLAG_BLANK),                    [S.vdu_boot_key, vdu_map]),
              ((T.vdu_boot, self.FLAG_BLANK),                    [S.vdu_boot_value, vdu_map]),
 
-             ((T.vdu_virt_cpu_num, self.FLAG_BLANK),            [S.vnfd_vd_cpu_num, flavor_map]),
+             (("", self.FLAG_KEY_SET_VALUE),                  [S.vnfd_vcd_id, flavor_map]),
+             ((T.vdu_virt_cpu_num, self.FLAG_BLANK),            [S.vnfd_vcd_cpu_num, flavor_map]),
 
              ((T.int_cpd, self.FLAG_KEY_SET_VALUE),             [S.int_cpd_id, cps_map]),
              ((T.int_cpd_layer_prot, self.FLAG_BLANK),          [S.int_cpd_layer_prot, cps_map]),
@@ -437,6 +455,7 @@ class V2Map(V2Mapping):
              ((S.KEY_VIRT_LINK_ORCH, self.FLAG_KEY_SET_VALUE),  [S.int_cpd_virt_link_desc,
                                                                  orch_cps_map]),
 
+             # -- Software Image --
              ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.sw_id, sw_map]),
              ((T.sw_name, self.FLAG_BLANK),                     [S.sw_name, sw_map]),
              ((T.sw_name, self.FLAG_BLANK),                     [S.sw_image_name_var, sw_map]),
@@ -447,6 +466,7 @@ class V2Map(V2Mapping):
              ((T.sw_min_disk, self.FLAG_ONLY_NUMBERS),          [S.sw_min_disk, sw_map]),
              ((T.sw_size, self.FLAG_ONLY_NUMBERS),              [S.sw_size, sw_map]),
              ((T.sw_image_file, self.FLAG_BLANK),               [S.sw_image, sw_map]),
+             # -- End Software Image --
 
              # Setting specific values at specific indexes
              # These are currently only the two virtual links and external links

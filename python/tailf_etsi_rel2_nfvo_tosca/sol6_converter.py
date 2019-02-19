@@ -43,10 +43,10 @@ class Sol6Converter:
         self.create_virt_links(keys)
 
         # Get all of the inputs from tosca
-        self.template_inputs = get_path_value(TOSCA.inputs, self.tosca_vnf)
+        #self.template_inputs = get_path_value(TOSCA.inputs, self.tosca_vnf)
 
-        self._handle_virtual_compute()
-        self._handle_virtual_link()
+        #self._handle_virtual_compute()
+        #self._handle_virtual_link()
 
         return self.vnfd
 
