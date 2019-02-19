@@ -227,6 +227,10 @@ class TOSCAv2:
     vdu_virt_cpu_num                = vdu_cap_props + ".virtual_cpu.num_virtual_cpu"
     vdu_virt_mem_size               = vdu_cap_props + ".virtual_memory.virtual_mem_size"
 
+    vdu_profile                     = vdu_props + ".vdu_profile"
+    vdu_prof_inst_min               = vdu_profile + ".min_number_of_instances"
+    vdu_prof_inst_max               = vdu_profile + ".max_number_of_instances"
+
     # *********************************
     # ** Internal Connectiion Points **
     # *********************************
@@ -266,6 +270,11 @@ class TOSCAv2:
     sw_size                         = sw_image_data + ".size"
     sw_image_file                   = virt_artifacts + ".sw_image.file"
 
+    # ** Deployment Flavor **
+
+    df_id                           = vnf_prop + ".flavour_id"
+    df_desc                         = vnf_prop + ".flavour_description"
+
 
 class SOL6v2:
     """
@@ -288,6 +297,17 @@ class SOL6v2:
     vnfd_vcd_flavor_name            = vnfd_virt_compute_desc + ".flavor-name-variable"
     vnfd_vcd_cpu_num                = vnfd_virt_compute_desc + ".virtual-cpu.num-virtual-cpu"
     vnfd_vcd_mem_size               = vnfd_virt_compute_desc + ".virtual-memory.virtual-memory-size"
+
+    # ***********************
+    # ** Deployment Flavor **
+    # ***********************
+    deployment_flavor               = vnfd + ".df"
+    df_id                           = deployment_flavor + ".id"
+    df_desc                         = deployment_flavor + ".description"
+    df_vdu_profile                  = deployment_flavor + ".vdu-profile.{}"
+    df_vdu_prof_id                  = df_vdu_profile + ".id"
+    df_vdu_prof_inst_min            = df_vdu_profile + ".min-number-of-instances"
+    df_vdu_prof_inst_max            = df_vdu_profile + ".max-number-of-instances"
 
     # ****************************
     # ** Virtual/External Links **
@@ -465,6 +485,15 @@ class V2Map(V2Mapping):
              ((T.sw_size, self.FLAG_ONLY_NUMBERS),              [S.sw_size, sw_map]),
              ((T.sw_image_file, self.FLAG_BLANK),               [S.sw_image, sw_map]),
              # -- End Software Image --
+
+             # -- Deployment Flavor --
+             ((T.df_id, self.FLAG_BLANK),                       S.df_id),
+             ((T.df_desc, self.FLAG_BLANK),                     S.df_desc),
+             ((T.vdu, self.FLAG_KEY_SET_VALUE),                 [S.df_vdu_prof_id, vdu_map]),
+             ((T.vdu_prof_inst_min, self.FLAG_BLANK),           [S.df_vdu_prof_inst_min, vdu_map]),
+             ((T.vdu_prof_inst_max, self.FLAG_BLANK),           [S.df_vdu_prof_inst_max, vdu_map]),
+
+             # -- End Deployment Flavor --
 
              # Setting specific values at specific indexes
              # These are currently only the two virtual links and external links
