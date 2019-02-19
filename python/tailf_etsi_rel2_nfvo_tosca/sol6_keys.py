@@ -287,6 +287,7 @@ class SOL6v2:
     vnfd_vcd_id                     = vnfd_virt_compute_desc + ".id"
     vnfd_vcd_flavor_name            = vnfd_virt_compute_desc + ".flavor-name-variable"
     vnfd_vcd_cpu_num                = vnfd_virt_compute_desc + ".virtual-cpu.num-virtual-cpu"
+    vnfd_vcd_mem_size               = vnfd_virt_compute_desc + ".virtual-memory.virtual-memory-size"
 
     # ****************************
     # ** Virtual/External Links **
@@ -348,6 +349,7 @@ class V2Map(V2Mapping):
     FLAG_KEY_SET_VALUE              = "KSV"
     # Will remove all non-numeric characters
     FLAG_ONLY_NUMBERS               = "NUMBERS"
+    FLAG_ONLY_NUMBERS_FLOAT         = "NUMBERS_FLOAT"
     FLAG_APPEND_LIST                = "APPENDLIST"
 
     mapping = {}
@@ -385,20 +387,14 @@ class V2Map(V2Mapping):
                                                  map_args={"value_map": MapElem.basic_map_list(
                                                      len(vim_flavors))})
 
-        # From the mapping
-        # [c1 -> 0, parent=(0 -> 0, parent=(None)), s3 -> 1, parent=(1 -> 1, parent=(None))]
-        # and the value_dict
-        # {'VIM_FLAVOR_CF': 'c1', 'VIM_FLAVOR_SF': 's3'}
-        # generate the mapping
-        # [VIM_FLAVOR_CF -> c1, parent=(c1 -> 0, parent=(0 -> 0, parent=(None))),
-        #   VIM_FLAVOR_SF -> s3, parent=(s3 -> 1, parent=(1 -> 1, parent=(None)))]
-        vim_flavors_map = self.generate_map_from_list(list(vim_flavors_rev.keys()),
-                                                      map_type="parent_match",
-                                                      map_args={"parent_map": flavor_map,
-                                                                "value_dict": vim_flavors_rev})
-        print(vim_flavors_rev)
-        print(vim_flavors_map)
-        print(flavor_map)
+        # From the mapping      [c1 -> 0, parent=(0 -> 0, parent=(None))]
+        # and the value_dict    {'VIM_FLAVOR_CF': 'c1'}
+        # generate the mapping  [VIM_FLAVOR_CF -> 0, parent=(None)]
+        vim_flavors_map = []
+        for k, v in vim_flavors_rev.items():
+            for m in flavor_map:
+                if m.name == v:
+                    vim_flavors_map.append(MapElem(k, m.cur_map))
 
         # ** End VDU Flavors **
 
@@ -445,8 +441,10 @@ class V2Map(V2Mapping):
              # ((T.vdu_boot, self.FLAG_BLANK),                    [S.vdu_boot_key, vdu_map]),
              ((T.vdu_boot, self.FLAG_BLANK),                    [S.vdu_boot_value, vdu_map]),
 
-             (("", self.FLAG_KEY_SET_VALUE),                  [S.vnfd_vcd_id, flavor_map]),
-             ((T.vdu_virt_cpu_num, self.FLAG_BLANK),            [S.vnfd_vcd_cpu_num, flavor_map]),
+             # The first value in the map is what we want to set, so insert that into the 'key'
+             (("{}", self.FLAG_KEY_SET_VALUE),                  [S.vnfd_vcd_id, vim_flavors_map]),
+             ((T.vdu_virt_cpu_num, self.FLAG_ONLY_NUMBERS),     [S.vnfd_vcd_cpu_num, flavor_map]),
+             ((T.vdu_virt_mem_size, self.FLAG_ONLY_NUMBERS),    [S.vnfd_vcd_mem_size, flavor_map]),
 
              ((T.int_cpd, self.FLAG_KEY_SET_VALUE),             [S.int_cpd_id, cps_map]),
              ((T.int_cpd_layer_prot, self.FLAG_BLANK),          [S.int_cpd_layer_prot, cps_map]),
