@@ -40,7 +40,6 @@ class Sol6Converter:
         keys = V2Map(self.tosca_vnf, self.vnfd)
 
         self.run_v2_mapping(keys)
-        self.create_virt_links(keys)
 
         # Get all of the inputs from tosca
         #self.template_inputs = get_path_value(TOSCA.inputs, self.tosca_vnf)
@@ -110,15 +109,6 @@ class Sol6Converter:
         if option:
             return KeyUtils.get_path_last(path)
         return get_path_value(path, self.tosca_vnf, must_exist=False)
-
-    def create_virt_links(self, keys):
-        """
-        There is nothing to map from TOSCA, not really, here.
-        So we are going to create the virtual links from scratch
-        """
-        print(SOL6v2.KEY_VIRT_LINK_ORCH, SOL6v2.KEY_VIRT_LINK_MGMT)
-        # set_path_to(SOL6v2.)
-
 
     @staticmethod
     def _only_number(option, value):

@@ -9,11 +9,11 @@ __version__ = "0.0.1"
 import argparse
 import json
 import yaml
-from YangToDict import YangToDict, count_empty_fields
-from sol6_converter import Sol6Converter
-import nso as nso
 import logging
 import dict_utils
+import nso as nso
+from YangToDict import YangToDict, count_empty_fields
+from sol6_converter import Sol6Converter
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('-f', '--file', required=True, help="The TOSCA VNF")
