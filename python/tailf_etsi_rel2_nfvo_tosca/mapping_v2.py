@@ -116,7 +116,9 @@ class V2Mapping:
         field_filter = None if len(field_conditions) < 3 else field_conditions[2]
 
         # Get the value at path
-        p_val = get_path_value(path, self.dict_tosca)
+        p_val = get_path_value(path, self.dict_tosca, ensure_dict=True)
+        #if isinstance(p_val, list):
+
         # Get the relevant nodes based on field and field_value
         filtered = get_roots_from_filter(p_val, field, field_value, user_filter=field_filter)
 
@@ -238,9 +240,14 @@ class MapElem:
             # Get the index of the last occurrence of a formattable entry
             index = max(idx for idx, val in enumerate(path_list)
                         if val == '{}')
-
-            val = elem.cur_map if use_value else elem.name
+            if elem:
+                val = elem.cur_map if use_value else elem.name
+            else:
+                val = ""
             path_list[index] = path_list[index].format(val)
+
+            if not elem:
+                break
 
             elem = elem.parent_map
 

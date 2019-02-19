@@ -193,8 +193,10 @@ class TOSCAv2:
     """
     Second version of the definitions
     """
-    node_template                   = "topology_template.node_templates"
+    topology_template               = "topology_template"
+    node_template                   = topology_template + ".node_templates"
     desc                            = "description"
+    policies                        = topology_template + ".policies"
     inputs                          = "topology_template.inputs"
     input_key                       = "get_input"
 
@@ -275,6 +277,10 @@ class TOSCAv2:
     df_id                           = vnf_prop + ".flavour_id"
     df_desc                         = vnf_prop + ".flavour_description"
 
+    def_inst_level                  = policies + ".instantiation_levels"
+    def_inst_key                    = "default"
+    inst_level_identifier           = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
+
 
 class SOL6v2:
     """
@@ -308,6 +314,8 @@ class SOL6v2:
     df_vdu_prof_id                  = df_vdu_profile + ".id"
     df_vdu_prof_inst_min            = df_vdu_profile + ".min-number-of-instances"
     df_vdu_prof_inst_max            = df_vdu_profile + ".max-number-of-instances"
+    df_inst_level                   = deployment_flavor + ".instantiation-level"
+    df_inst_id                      = df_inst_level + ".id"
 
     # ****************************
     # ** Virtual/External Links **
@@ -388,7 +396,7 @@ class V2Map(V2Mapping):
         # This list has the VDUs the flavors are attached to
         vdu_vim_flavors = self.get_items_from_map(T.vdu_vim_flavor, vdu_map, dict_tosca,
                                                   link_list=True)
-        # ** VDU Flavors **
+        # *** VDU Flavors ***
         # vim_flavors = [VDU, {"get_input": FLAVOR_NAME}], so get the dicts
         vim_flavors = [x[1] for x in vdu_vim_flavors]
         vim_flavors = self.get_input_values(vim_flavors, T.inputs, dict_tosca)
@@ -416,9 +424,9 @@ class V2Map(V2Mapping):
                 if m.name == v:
                     vim_flavors_map.append(MapElem(k, m.cur_map))
 
-        # ** End VDU Flavors **
+        # *** End VDU Flavors ***
 
-        # ** Connection Point mappings
+        # *** Connection Point mappings ***
         # Map internal connection points to their VDUs
         cps_map = self.generate_map(T.node_template, T.int_cpd_identifier,
                                     map_function=V2Map.int_cp_mapping,
@@ -427,6 +435,7 @@ class V2Map(V2Mapping):
         mgmt_cps_map = self.generate_map(T.node_template, T.int_cpd_mgmt_identifier,
                                          map_function=V2Map.int_cp_mapping,
                                          map_args={"vdu_map": vdu_map})
+
         # These are not going to be correctly mapped, so get the mapping from cps_map where
         # the names are the same
         # Every int-cpd will have a virtual-link-desc field, just if it's MGMT or ORCH is the
@@ -435,7 +444,21 @@ class V2Map(V2Mapping):
         # Get the opposite set for the orch cps. Note: this can be sped up by putting both of these
         # in a single loop
         orch_cps_map = [x for x in cps_map if not any(x.name == i.name for i in mgmt_cps_map)]
-        # ** End Connection Point mapping
+
+        # *** End Connection Point mapping ***
+
+        # Get the default instantiation level, if it exists
+        def_inst = get_path_value(T.def_inst_level, self.dict_tosca)
+        def_inst = get_roots_from_filter(def_inst, child_key=T.def_inst_key)
+        if def_inst:
+            def_inst_id = T.def_inst_key
+        else:
+            def_inst_id = None
+
+        print(def_inst_id)
+
+        vdu_inst_level_map = self.generate_map(T.policies, T.inst_level_identifier)
+        print(vdu_inst_level_map)
 
         # If there is a mapping function needed, the second parameter is a list with the mapping
         # as the second parameter
@@ -504,6 +527,8 @@ class V2Map(V2Mapping):
              (self.set_value(S.KEY_VIRT_LINK_MGMT, S.ext_cpd_virt_link, 0)),
              (self.set_value(S.KEY_VIRT_LINK_ORCH, S.ext_cpd_virt_link, 1)),
              (self.set_value(S.KEY_EXT_CP_ORCH, S.ext_cpd_id, 1)),
+
+                (self.set_value(def_inst_id, ))
             ]
 
     def set_value(self, val, path, index):
