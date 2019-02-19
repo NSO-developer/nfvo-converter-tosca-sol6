@@ -1,7 +1,7 @@
 import copy
 
 
-def get_path_value(path, cur_dict, must_exist=True):
+def get_path_value(path, cur_dict, must_exist=True, ensure_dict=False):
     """
     topology_template.node_templates.vnf.properties.descriptor_id
     Pass in a path and a dict the path applies to and get the value of the key
@@ -47,6 +47,11 @@ def get_path_value(path, cur_dict, must_exist=True):
             else:
                 print("{} not found in {}".format(val, path))
                 return False
+
+    if ensure_dict and isinstance(cur_context, list):
+        # Merge the list into a dict
+        return merge_list_of_dicts(cur_context)
+
     return cur_context
 
 
