@@ -56,6 +56,7 @@ class Sol6Converter:
         for ((tosca_path, flags), map_sol6) in keys.mapping:
             key_as_value = False
             only_number = False
+            only_number_float = False
             append_list = False
 
             # Ensure flags is iterable
@@ -68,6 +69,8 @@ class Sol6Converter:
                     only_number = True
                 if flag == keys.FLAG_APPEND_LIST:
                     append_list = True
+                if flag == keys.FLAG_ONLY_NUMBERS_FLOAT:
+                    only_number_float = True
 
             # Check if there is a mapping needed
             if isinstance(map_sol6, list):
@@ -80,7 +83,8 @@ class Sol6Converter:
 
                     # Handle the various flags
                     value = self._key_as_value(key_as_value, f_tosca_path)
-                    value = Sol6Converter._only_number(only_number, value)
+                    value = Sol6Converter._only_number(only_number, value,
+                                                       is_float=only_number_float)
                     value = self._append_to_list(append_list, f_sol6_path, value)
 
                     # If the value doesn't exist, don't write it
@@ -91,7 +95,7 @@ class Sol6Converter:
 
                 # Handle the various flags
                 value = self._key_as_value(key_as_value, tosca_path)
-                value = Sol6Converter._only_number(only_number, value)
+                value = Sol6Converter._only_number(only_number, value, is_float=only_number_float)
 
                 set_path_to(sol6_path, self.vnfd, value, create_missing=True)
 
@@ -111,10 +115,13 @@ class Sol6Converter:
         return get_path_value(path, self.tosca_vnf, must_exist=False)
 
     @staticmethod
-    def _only_number(option, value):
+    def _only_number(option, value, is_float=False):
         if not option:
             return value
-        return re.sub('[^0-9]', '', value)
+        cur_type = int
+        if is_float:
+            cur_type = float
+        return cur_type(re.sub('[^0-9]', '', str(value)))
 
     # ----------------------------------------------------------------------------------------------
 
