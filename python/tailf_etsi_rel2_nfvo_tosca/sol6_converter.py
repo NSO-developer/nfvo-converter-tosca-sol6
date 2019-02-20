@@ -78,6 +78,10 @@ class Sol6Converter:
                 sol6_path = map_sol6[0]
 
                 for elem in mapping_list:
+                    # Skip this mapping element if it is None or it's name is none
+                    if not elem or not elem.name:
+                        continue
+
                     f_tosca_path = MapElem.format_path(elem, tosca_path, use_value=False)
                     f_sol6_path = MapElem.format_path(elem, sol6_path, use_value=True)
 
