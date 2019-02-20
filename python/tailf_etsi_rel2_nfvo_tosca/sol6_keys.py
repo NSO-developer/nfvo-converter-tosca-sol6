@@ -272,7 +272,9 @@ class TOSCAv2:
     sw_size                         = sw_image_data + ".size"
     sw_image_file                   = virt_artifacts + ".sw_image.file"
 
+    # ***********************
     # ** Deployment Flavor **
+    # ***********************
 
     df_id                           = vnf_prop + ".flavour_id"
     df_desc                         = vnf_prop + ".flavour_description"
@@ -285,6 +287,15 @@ class TOSCAv2:
     inst_level                      = policies + ".{}"
     inst_level_targets              = inst_level + ".targets"
     inst_level_num_instances        = inst_level + ".properties.levels.default.number_of_instances"
+
+    # Scaling Aspects
+    scaling_aspects                 = policies + ".{}"
+    scaling_aspects_identifier      = ["type", "tosca.policies.nfv.ScalingAspects"]
+    scaling_props                   = scaling_aspects + ".properties"
+    scaling_aspect_item_list        = scaling_props + ".aspects"
+    scaling_aspect_item             = scaling_aspect_item_list + ".{}"
+    scaling_aspect_name             = scaling_aspect_item + ".name"
+    scaling_aspect_level            = scaling_aspect_item + ".max_scale_level"
 
 
 class SOL6v2:
@@ -319,12 +330,17 @@ class SOL6v2:
     df_vdu_prof_id                  = df_vdu_profile + ".id"
     df_vdu_prof_inst_min            = df_vdu_profile + ".min-number-of-instances"
     df_vdu_prof_inst_max            = df_vdu_profile + ".max-number-of-instances"
+    # -- Instantiation Level
     df_inst_level                   = deployment_flavor + ".instantiation-level"
     df_inst_level_id                = df_inst_level + ".id"
     df_inst_level_desc              = df_inst_level + ".description"
     df_inst_level_vdu_level         = df_inst_level + ".vdu-level.{}"
     df_inst_level_vdu_vdu           = df_inst_level_vdu_level + ".id"
     df_inst_level_vdu_num           = df_inst_level_vdu_level + ".number-of-instances"
+    # - Scaling Info
+    df_inst_scaling_info            = df_inst_level + ".scaling-info.{}"
+    df_inst_scaling_aspect          = df_inst_scaling_info + ".id"
+    df_inst_scaling_level           = df_inst_scaling_info + ".scale-level"
 
     # ****************************
     # ** Virtual/External Links **
@@ -487,17 +503,27 @@ class V2Map(V2Mapping):
                     temp_vdu_map.insert(j, vdu_inst_level_map[i].copy())
         vdu_inst_level_map = temp_vdu_map
 
-        # Re-adjust the mapping so that it's contiguous, since duplicating values will make it not so
+        # Re-adjust the mapping so that it's contiguous, since duplicating values will make it not
         MapElem.ensure_map_values(vdu_inst_level_map)
         target_list = flatten(target_list)
         # Finally generate the map for setting the vdu value
         target_map = self.generate_map_from_list(target_list)
 
+        # ** Scaling Aspect info **
+        # Get all of the scaling aspects information
+        # Only handle 1 for now. TODO: Handle more
+        scaling_map = self.generate_map(T.policies, T.scaling_aspects_identifier)[0]
+        aspects = get_path_value(T.scaling_aspect_item_list.format(scaling_map.name),
+                                 self.dict_tosca)
+
+        aspect_f_map = self.generate_map_from_list(list(aspects.keys()))
+        MapElem.add_parent_mapping(aspect_f_map, scaling_map)
+
         # *** End Instantiation Level mapping ***
 
         # If there is a mapping function needed, the second parameter is a list with the mapping
         # as the second parameter
-        # The first parameteer is always a tuple
+        # The first parameter is always a tuple
         # This now supports the same value mapped to different locations
         self.mapping = \
             [
@@ -555,6 +581,8 @@ class V2Map(V2Mapping):
              ((T.inst_level_num_instances, self.FLAG_BLANK),    [S.df_inst_level_vdu_num,
                                                                  vdu_inst_level_map]),
 
+             ((T.scaling_aspect_name, self.FLAG_BLANK), [S.df_inst_scaling_aspect, aspect_f_map]),
+             ((T.scaling_aspect_level, self.FLAG_BLANK), [S.df_inst_scaling_level, aspect_f_map]),
 
              # -- End Deployment Flavor --
 

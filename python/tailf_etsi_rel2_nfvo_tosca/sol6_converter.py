@@ -92,7 +92,7 @@ class Sol6Converter:
                     value = self._append_to_list(append_list, f_sol6_path, value)
 
                     # If the value doesn't exist, don't write it
-                    if value:
+                    if value is not None:
                         set_path_to(f_sol6_path, self.vnfd, value, create_missing=True)
             else:  # No mapping needed
                 sol6_path = map_sol6
