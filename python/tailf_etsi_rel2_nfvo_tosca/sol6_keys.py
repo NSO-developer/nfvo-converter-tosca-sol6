@@ -5,7 +5,7 @@ The program does not attempt to map variables beginning with '_'
 """
 from mapping_v2 import V2Mapping, MapElem
 from dict_utils import *
-
+from list_utils import *
 
 class TOSCA:
     """
@@ -279,7 +279,12 @@ class TOSCAv2:
 
     def_inst_level                  = policies + ".instantiation_levels"
     def_inst_key                    = "default"
+    def_inst_prop                   = def_inst_level + ".properties.levels"
+    def_inst_desc                   = def_inst_prop + "." + def_inst_key + ".description"
     inst_level_identifier           = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
+    inst_level                      = policies + ".{}"
+    inst_level_targets              = inst_level + ".targets"
+    inst_level_num_instances        = inst_level + ".properties.levels.default.number_of_instances"
 
 
 class SOL6v2:
@@ -315,7 +320,11 @@ class SOL6v2:
     df_vdu_prof_inst_min            = df_vdu_profile + ".min-number-of-instances"
     df_vdu_prof_inst_max            = df_vdu_profile + ".max-number-of-instances"
     df_inst_level                   = deployment_flavor + ".instantiation-level"
-    df_inst_id                      = df_inst_level + ".id"
+    df_inst_level_id                = df_inst_level + ".id"
+    df_inst_level_desc              = df_inst_level + ".description"
+    df_inst_level_vdu_level         = df_inst_level + ".vdu-level.{}"
+    df_inst_level_vdu_vdu           = df_inst_level_vdu_level + ".id"
+    df_inst_level_vdu_num           = df_inst_level_vdu_level + ".number-of-instances"
 
     # ****************************
     # ** Virtual/External Links **
@@ -447,18 +456,44 @@ class V2Map(V2Mapping):
 
         # *** End Connection Point mapping ***
 
+        # *** Instantiation Level mapping ***
         # Get the default instantiation level, if it exists
         def_inst = get_path_value(T.def_inst_level, self.dict_tosca)
         def_inst = get_roots_from_filter(def_inst, child_key=T.def_inst_key)
         if def_inst:
             def_inst_id = T.def_inst_key
+            def_inst_desc = get_path_value(T.def_inst_desc, self.dict_tosca)
         else:
             def_inst_id = None
+            def_inst_desc = None
+        # TODO: Handle more than the default instantiation level
 
-        print(def_inst_id)
-
+        # Problem here is we need duplicate entries, since we have, for example, 2 VDUs each
+        # information needs to be assigned to
         vdu_inst_level_map = self.generate_map(T.policies, T.inst_level_identifier)
-        print(vdu_inst_level_map)
+
+        # Get the list of targets from the mappings
+        target_list = []
+        for elem in vdu_inst_level_map:
+            temp_vdu = get_path_value(T.inst_level_targets.format(elem.name), self.dict_tosca)
+            target_list.append(temp_vdu)
+
+        # Duplicate the inst_level_map to fill the number of targets in each one
+        temp_vdu_map = []
+        for i, item in enumerate(target_list):
+            if isinstance(item, list):
+                # We need this many duplicate keys with incremented values in the inst_map
+                for j in range(len(temp_vdu_map), len(item) + len(temp_vdu_map)):
+                    temp_vdu_map.insert(j, vdu_inst_level_map[i].copy())
+        vdu_inst_level_map = temp_vdu_map
+
+        # Re-adjust the mapping so that it's contiguous, since duplicating values will make it not so
+        MapElem.ensure_map_values(vdu_inst_level_map)
+        target_list = flatten(target_list)
+        # Finally generate the map for setting the vdu value
+        target_map = self.generate_map_from_list(target_list)
+
+        # *** End Instantiation Level mapping ***
 
         # If there is a mapping function needed, the second parameter is a list with the mapping
         # as the second parameter
@@ -515,6 +550,11 @@ class V2Map(V2Mapping):
              ((T.vdu, self.FLAG_KEY_SET_VALUE),                 [S.df_vdu_prof_id, vdu_map]),
              ((T.vdu_prof_inst_min, self.FLAG_BLANK),           [S.df_vdu_prof_inst_min, vdu_map]),
              ((T.vdu_prof_inst_max, self.FLAG_BLANK),           [S.df_vdu_prof_inst_max, vdu_map]),
+             (("{}", self.FLAG_KEY_SET_VALUE),                  [S.df_inst_level_vdu_vdu,
+                                                                 target_map]),
+             ((T.inst_level_num_instances, self.FLAG_BLANK),    [S.df_inst_level_vdu_num,
+                                                                 vdu_inst_level_map]),
+
 
              # -- End Deployment Flavor --
 
@@ -528,7 +568,9 @@ class V2Map(V2Mapping):
              (self.set_value(S.KEY_VIRT_LINK_ORCH, S.ext_cpd_virt_link, 1)),
              (self.set_value(S.KEY_EXT_CP_ORCH, S.ext_cpd_id, 1)),
 
-                (self.set_value(def_inst_id, ))
+             # Assign the default instantiation level to the first element in the array
+             (self.set_value(def_inst_id, S.df_inst_level_id, 0)),
+             (self.set_value(def_inst_desc, S.df_inst_level_desc, 0))
             ]
 
     def set_value(self, val, path, index):

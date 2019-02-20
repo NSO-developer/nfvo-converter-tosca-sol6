@@ -19,11 +19,16 @@ class V2Mapping:
     @staticmethod
     def parent_match(map1_list, start_num=0, **kwargs):
         """
+        Given a list, like ['a', 'b', 'c'], then a value dict of
+        {'a': 'apple', 'b': 'banana', 'c': 'carrot'}
 
-        :param map1_list:
-        :param start_num:
-        :param kwargs:
-        :return:
+        A parent map of
+        [apple -> 0, banana -> 1, carrot -> 2]
+
+        Return a mapping:
+        [a -> apple, parent=(apple -> 0),
+        b -> banana, parent=(banana-> 1),
+        c -> carrot, parent=(carrot -> 2)]
         """
         if "parent_map" not in kwargs:
             raise KeyError("parent_map not included in kwargs")
@@ -219,6 +224,41 @@ class MapElem:
         self.name = name
         self.cur_map = cur_map
         self.parent_map = parent_map
+
+    def copy(self):
+        par = self.parent_map.copy() if self.parent_map else None
+        return MapElem(self.name, self.cur_map, par)
+
+    @staticmethod
+    def ensure_map_values(mapping):
+        """
+        Given a mapping, ensure that the values are properly incrementing, if not fix them.
+        Only applies to top-level mapping, does not check parent maps
+        """
+        # If it's valid, don't do anything
+        if MapElem.validate_map_values(mapping):
+            return
+        # Take the first value and increment from there
+        cur_val = mapping[0].cur_map
+        for c_map in mapping:
+            c_map.cur_map = cur_val
+            cur_val += 1
+
+    @staticmethod
+    def validate_map_values(mapping):
+        """
+        Ensure the values are incrementing by 1 each time, if not return False
+        """
+        if not isinstance(mapping, list):
+            return True
+        last_value = None
+        for c_map in mapping:
+            if last_value is None:
+                last_value = c_map.cur_map
+            else:
+                if last_value != c_map.cur_map + 1:
+                    return False
+        return True
 
     @staticmethod
     def basic_map(num):
