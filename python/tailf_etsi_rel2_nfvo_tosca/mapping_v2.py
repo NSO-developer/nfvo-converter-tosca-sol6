@@ -71,6 +71,7 @@ class V2Mapping:
         value_map = None
         if "value_map" in kwargs:
             value_map = kwargs["value_map"]
+        none_value = kwargs["none_value"] if "none_value" in kwargs else False
 
         result = []
         cur_num = start_num
@@ -93,8 +94,8 @@ class V2Mapping:
                         if v_map.name == cur_num:
                             final_parent_map = v_map
                             break
-
-                map_elem = MapElem(item_1, cur_num, final_parent_map)
+                cur_num_val = None if none_value else cur_num
+                map_elem = MapElem(item_1, cur_num_val, final_parent_map)
 
                 result.append(map_elem)
                 cur_num += 1
@@ -261,6 +262,18 @@ class MapElem:
         return True
 
     @staticmethod
+    def add_parent_mapping(mapping_list, parent_mapping):
+        for c_map in mapping_list:
+            if c_map.parent_map:
+                raise KeyError("Expected an empty parent map, instead found {}".
+                               format(c_map.parent_map))
+            if not isinstance(parent_mapping, MapElem):
+                raise ValueError("Expected a MapElem, instead {} was given".
+                                 format(type(parent_mapping)))
+            c_map.parent_map = parent_mapping
+
+
+    @staticmethod
     def basic_map(num):
         return MapElem(num, num)
 
@@ -273,6 +286,8 @@ class MapElem:
         """
         Formats the provided path with the mapping that is stored internally
         Defaults to using the values of the mapping, but can be switched to use keys
+        If the value of a mapping is None, it will not be formatted into the string.
+        This allows different numbers of formattable elements.
         """
 
         path_list = path.split(".")
@@ -284,7 +299,9 @@ class MapElem:
                 val = elem.cur_map if use_value else elem.name
             else:
                 val = ""
-            path_list[index] = path_list[index].format(val)
+                # Skip the given value if it's None
+            if val is not None:
+                path_list[index] = path_list[index].format(val)
 
             if not elem:
                 break
