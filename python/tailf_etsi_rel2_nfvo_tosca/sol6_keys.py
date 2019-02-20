@@ -295,7 +295,9 @@ class TOSCAv2:
     scaling_aspect_item_list        = scaling_props + ".aspects"
     scaling_aspect_item             = scaling_aspect_item_list + ".{}"
     scaling_aspect_name             = scaling_aspect_item + ".name"
+    scaling_aspect_desc             = scaling_aspect_item + ".description"
     scaling_aspect_level            = scaling_aspect_item + ".max_scale_level"
+    scaling_aspect_deltas           = scaling_aspect_item + ".step_deltas"
 
 
 class SOL6v2:
@@ -341,6 +343,13 @@ class SOL6v2:
     df_inst_scaling_info            = df_inst_level + ".scaling-info.{}"
     df_inst_scaling_aspect          = df_inst_scaling_info + ".id"
     df_inst_scaling_level           = df_inst_scaling_info + ".scale-level"
+
+    df_scale_aspect                 = deployment_flavor + ".scaling-aspect.{}"
+    df_scale_aspect_id              = df_scale_aspect + ".id"
+    df_scale_aspect_name            = df_scale_aspect + ".name"
+    df_scale_aspect_desc            = df_scale_aspect + ".description"
+    df_scale_aspect_max_level       = df_scale_aspect + ".max-scale-level"
+    df_scale_aspect_deltas          = df_scale_aspect + ".step-deltas"
 
     # ****************************
     # ** Virtual/External Links **
@@ -583,6 +592,13 @@ class V2Map(V2Mapping):
 
              ((T.scaling_aspect_name, self.FLAG_BLANK), [S.df_inst_scaling_aspect, aspect_f_map]),
              ((T.scaling_aspect_level, self.FLAG_BLANK), [S.df_inst_scaling_level, aspect_f_map]),
+
+             ((T.scaling_aspect_name, self.FLAG_BLANK), [S.df_scale_aspect_id, aspect_f_map]),
+             ((T.scaling_aspect_name, self.FLAG_BLANK), [S.df_scale_aspect_name, aspect_f_map]),
+             ((T.scaling_aspect_level, self.FLAG_BLANK), [S.df_scale_aspect_max_level, aspect_f_map]),
+             ((T.scaling_aspect_desc, self.FLAG_BLANK), [S.df_scale_aspect_desc, aspect_f_map]),
+             ((T.scaling_aspect_deltas, self.FLAG_BLANK), [S.df_scale_aspect_deltas, aspect_f_map]),
+             # TODO: Dereference step_deltas into deltas as dict
 
              # -- End Deployment Flavor --
 
