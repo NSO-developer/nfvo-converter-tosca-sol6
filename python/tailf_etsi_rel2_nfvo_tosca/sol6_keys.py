@@ -298,8 +298,7 @@ class TOSCAv2:
     scaling_aspect_desc             = scaling_aspect_item + ".description"
     scaling_aspect_level            = scaling_aspect_item + ".max_scale_level"
     scaling_aspect_deltas           = scaling_aspect_item + ".step_deltas"
-
-    scaling_aspect_deltas_num       = inst_level + ".properties.deltas.{}.number_of_instances"
+    scaling_aspect_deltas_num       = scaling_aspect_item + ".deltas.{}.number_of_instances"
 
 
 class SOL6v2:
@@ -534,55 +533,9 @@ class V2Map(V2Mapping):
         aspect_f_map = self.generate_map_from_list(list(aspects.keys()))
         MapElem.add_parent_mapping(aspect_f_map, scaling_map)
 
-        # ** Deltas Mapping **
-        # We need
-        # topology_template.policies.{}.properties.aspects.{}.step_deltas
-        # To assign at that index at this location:
-        # vnfd.df.scaling-aspect.{}.vdu-delta.{}.number-of-instances
-        #       = delta_values[cur_delta]
+        # This is in a separate method because it's a dumpster fire
+        deltas_mapping = self._handle_deltas(aspect_f_map)
 
-        # As a note, I hate this, but I'm not sure how to make it better.
-        # This whole block of code gtes the delta values from tosca (if they exist, they might not)
-        # then, it figured out what the deltas parent functions are, and it maps the delta values to
-        # ints for assignability in an array
-        # After that, it goes and figures out what the delta's parent map is and assigns the proper
-        # parent map to that (from aspect_f_map).
-        # THEN, FINALLY, we have the finished mapping:
-        # [delta_1 -> 0, parent=(session-function -> 0,
-        #                                   parent=(scaling_aspects -> 0, parent=(None)))]
-        # Which we can then use in 'vnfd.df.scaling-aspect.{}.vdu-delta.{}.number-of-instances'
-        # Except I think I forgot something and it's not going to work. I'm going to come back
-        # to this.
-
-        deltas_name = KeyUtils.get_path_last(T.scaling_aspect_deltas)
-        deltas_num = KeyUtils.get_path_last(T.scaling_aspect_deltas_num)
-        # Get all the elements that have step_deltas
-        deltas = get_roots_from_filter(self.dict_tosca, child_key=deltas_name)
-        deltas_mapping = None
-        if deltas:
-            # Get the values of all the step_deltas, and turn them into a flat list
-            all_deltas = []
-            delta_links = {}
-            for delta in deltas:
-                func_name = get_dict_key(delta)
-                all_deltas.append(delta[func_name][deltas_name])
-                for item in all_deltas[-1]:
-                    delta_links[item] = func_name
-            all_deltas = flatten(all_deltas)
-
-            # Get all the delta values that are children of elements in all_deltas
-            delta_values = get_roots_from_filter(self.dict_tosca, child_key=deltas_num,
-                                                 parent_filter=all_deltas)
-
-            # Map the keys to ints
-            deltas_mapping = self.generate_map_from_list([get_dict_key(d) for d in delta_values])
-            for d_m in deltas_mapping:
-                # Find parent mapping and assign it to the current delta mapping
-                for a_m in aspect_f_map:
-                    if a_m.name == delta_links[d_m.name]:
-                        MapElem.add_parent_mapping(d_m, a_m)
-
-        print(deltas_mapping, aspect_f_map)
         # *** End Instantiation Level mapping ***
 
         # If there is a mapping function needed, the second parameter is a list with the mapping
@@ -655,8 +608,11 @@ class V2Map(V2Mapping):
              ((T.scaling_aspect_desc, self.FLAG_BLANK),  [S.df_scale_aspect_desc, aspect_f_map]),
              ((T.scaling_aspect_deltas, self.FLAG_REQ_DELTA),
               [S.df_scale_aspect_deltas, aspect_f_map]),
-             #((T.scaling_aspect_deltas, self.FLAG_REQ_DELTA),
-             # [S.df_scale_aspect_vdu_delta, aspect_f_map]),
+
+             (("{}", (self.FLAG_REQ_DELTA, self.FLAG_KEY_SET_VALUE)),
+              [S.df_scale_aspect_vdu_id, deltas_mapping]),
+             ((T.scaling_aspect_deltas_num, self.FLAG_REQ_DELTA),
+              [S.df_scale_aspect_vdu_num, deltas_mapping]),
 
              # -- End Deployment Flavor --
 
@@ -677,6 +633,65 @@ class V2Map(V2Mapping):
 
     def set_value(self, val, path, index):
         return (val, self.FLAG_KEY_SET_VALUE), [path, [MapElem(val, index)]]
+
+    def _handle_deltas(self, aspect_f_map):
+        """
+        ** WARNING: Here be bullshit (it sucks, and I know it sucks) **
+
+        This whole block of code gets the delta values from tosca (if they exist, they might not)
+        then, it figures out what the deltas parent functions are, and it maps the delta values to
+        ints for assignability in an array
+        After that, it goes and figures out what the delta's parent map is and assigns the proper
+        parent map to that (from aspect_f_map).
+        THEN, FINALLY, we have the finished mapping:
+        
+        topology_template.policies.{scaling_aspects}.properties.aspects.{session-function}
+                                                                   .step_deltas ==> ['delta_1']
+        step_deltas_map = [data_1 -> 0, parent=(session-function -> 0)]
+        vnfd.df.scaling-aspect.{session-function->0}.vdu-delta.{delta_1->0}.id = {}
+                   topology_template.policies.{scaling_aspects}.properties.deltas.{delta_1}
+        
+        Then, we have the num_instances value, but not it's full location. So, just stick the
+        value into a location that we know and can access.
+        """
+
+        deltas_name = KeyUtils.get_path_last(TOSCAv2.scaling_aspect_deltas)
+        deltas_num = KeyUtils.get_path_last(TOSCAv2.scaling_aspect_deltas_num)
+        # Get all the elements that have step_deltas
+        deltas = get_roots_from_filter(self.dict_tosca, child_key=deltas_name)
+
+        deltas_mapping = None
+        if deltas:
+            # Get the values of all the step_deltas, and turn them into a flat list
+            all_deltas = []
+            delta_links = {}
+            for delta in deltas:
+                func_name = get_dict_key(delta)
+                all_deltas.append(delta[func_name][deltas_name])
+                for item in all_deltas[-1]:
+                    delta_links[item] = func_name
+            all_deltas = flatten(all_deltas)
+
+            # Get all the delta values that are children of elements in all_deltas
+            delta_values = get_roots_from_filter(self.dict_tosca, child_key=deltas_num,
+                                                 parent_filter=all_deltas)
+
+            # Map the keys to ints
+            deltas_mapping = self.generate_map_from_list([get_dict_key(d) for d in delta_values])
+            delta_values = merge_list_of_dicts(delta_values)
+            for d_m in deltas_mapping:
+                # Find parent mapping and assign it to the current delta mapping
+                for a_m in aspect_f_map:
+                    if a_m.name == delta_links[d_m.name]:
+                        MapElem.add_parent_mapping(d_m, a_m)
+                        # Now place the value in delta_values into the path we have mapped
+                        cur_path = MapElem.format_path(d_m, TOSCAv2.scaling_aspect_deltas_num,
+                                                       use_value=False)
+                        # Remove the last element in the path (num-instances)
+                        cur_path = KeyUtils.remove_path_elem(cur_path, -1)
+                        set_path_to(cur_path, self.dict_tosca, delta_values[d_m.name],
+                                    create_missing=True)
+        return deltas_mapping
 
     @staticmethod
     def int_cp_mapping(names, map_start, **kwargs):
