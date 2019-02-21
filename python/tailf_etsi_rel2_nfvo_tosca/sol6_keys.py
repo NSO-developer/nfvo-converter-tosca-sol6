@@ -299,6 +299,8 @@ class TOSCAv2:
     scaling_aspect_level            = scaling_aspect_item + ".max_scale_level"
     scaling_aspect_deltas           = scaling_aspect_item + ".step_deltas"
 
+    scaling_aspect_deltas_num       = inst_level + ".properties.deltas.{}.number_of_instances"
+
 
 class SOL6v2:
     """
@@ -349,7 +351,10 @@ class SOL6v2:
     df_scale_aspect_name            = df_scale_aspect + ".name"
     df_scale_aspect_desc            = df_scale_aspect + ".description"
     df_scale_aspect_max_level       = df_scale_aspect + ".max-scale-level"
-    df_scale_aspect_deltas          = df_scale_aspect + ".step-deltas"
+    df_scale_aspect_deltas          = df_scale_aspect + ".deltas"
+    df_scale_aspect_vdu_delta       = df_scale_aspect + ".vdu-delta.{}"
+    df_scale_aspect_vdu_id          = df_scale_aspect_vdu_delta + ".id"
+    df_scale_aspect_vdu_num         = df_scale_aspect_vdu_delta + ".number-of-instances"
 
     # ****************************
     # ** Virtual/External Links **
@@ -413,6 +418,7 @@ class V2Map(V2Mapping):
     FLAG_ONLY_NUMBERS               = "NUMBERS"
     FLAG_ONLY_NUMBERS_FLOAT         = "NUMBERS_FLOAT"
     FLAG_APPEND_LIST                = "APPENDLIST"
+    FLAG_REQ_DELTA                  = "YAMLSUCKS"
 
     mapping = {}
 
@@ -528,6 +534,55 @@ class V2Map(V2Mapping):
         aspect_f_map = self.generate_map_from_list(list(aspects.keys()))
         MapElem.add_parent_mapping(aspect_f_map, scaling_map)
 
+        # ** Deltas Mapping **
+        # We need
+        # topology_template.policies.{}.properties.aspects.{}.step_deltas
+        # To assign at that index at this location:
+        # vnfd.df.scaling-aspect.{}.vdu-delta.{}.number-of-instances
+        #       = delta_values[cur_delta]
+
+        # As a note, I hate this, but I'm not sure how to make it better.
+        # This whole block of code gtes the delta values from tosca (if they exist, they might not)
+        # then, it figured out what the deltas parent functions are, and it maps the delta values to
+        # ints for assignability in an array
+        # After that, it goes and figures out what the delta's parent map is and assigns the proper
+        # parent map to that (from aspect_f_map).
+        # THEN, FINALLY, we have the finished mapping:
+        # [delta_1 -> 0, parent=(session-function -> 0,
+        #                                   parent=(scaling_aspects -> 0, parent=(None)))]
+        # Which we can then use in 'vnfd.df.scaling-aspect.{}.vdu-delta.{}.number-of-instances'
+        # Except I think I forgot something and it's not going to work. I'm going to come back
+        # to this.
+
+        deltas_name = KeyUtils.get_path_last(T.scaling_aspect_deltas)
+        deltas_num = KeyUtils.get_path_last(T.scaling_aspect_deltas_num)
+        # Get all the elements that have step_deltas
+        deltas = get_roots_from_filter(self.dict_tosca, child_key=deltas_name)
+        deltas_mapping = None
+        if deltas:
+            # Get the values of all the step_deltas, and turn them into a flat list
+            all_deltas = []
+            delta_links = {}
+            for delta in deltas:
+                func_name = get_dict_key(delta)
+                all_deltas.append(delta[func_name][deltas_name])
+                for item in all_deltas[-1]:
+                    delta_links[item] = func_name
+            all_deltas = flatten(all_deltas)
+
+            # Get all the delta values that are children of elements in all_deltas
+            delta_values = get_roots_from_filter(self.dict_tosca, child_key=deltas_num,
+                                                 parent_filter=all_deltas)
+
+            # Map the keys to ints
+            deltas_mapping = self.generate_map_from_list([get_dict_key(d) for d in delta_values])
+            for d_m in deltas_mapping:
+                # Find parent mapping and assign it to the current delta mapping
+                for a_m in aspect_f_map:
+                    if a_m.name == delta_links[d_m.name]:
+                        MapElem.add_parent_mapping(d_m, a_m)
+
+        print(deltas_mapping, aspect_f_map)
         # *** End Instantiation Level mapping ***
 
         # If there is a mapping function needed, the second parameter is a list with the mapping
@@ -590,15 +645,18 @@ class V2Map(V2Mapping):
              ((T.inst_level_num_instances, self.FLAG_BLANK),    [S.df_inst_level_vdu_num,
                                                                  vdu_inst_level_map]),
 
-             ((T.scaling_aspect_name, self.FLAG_BLANK), [S.df_inst_scaling_aspect, aspect_f_map]),
+             ((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_inst_scaling_aspect, aspect_f_map]),
              ((T.scaling_aspect_level, self.FLAG_BLANK), [S.df_inst_scaling_level, aspect_f_map]),
 
-             ((T.scaling_aspect_name, self.FLAG_BLANK), [S.df_scale_aspect_id, aspect_f_map]),
-             ((T.scaling_aspect_name, self.FLAG_BLANK), [S.df_scale_aspect_name, aspect_f_map]),
-             ((T.scaling_aspect_level, self.FLAG_BLANK), [S.df_scale_aspect_max_level, aspect_f_map]),
-             ((T.scaling_aspect_desc, self.FLAG_BLANK), [S.df_scale_aspect_desc, aspect_f_map]),
-             ((T.scaling_aspect_deltas, self.FLAG_BLANK), [S.df_scale_aspect_deltas, aspect_f_map]),
-             # TODO: Dereference step_deltas into deltas as dict
+             ((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_scale_aspect_id, aspect_f_map]),
+             ((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_scale_aspect_name, aspect_f_map]),
+             ((T.scaling_aspect_level, self.FLAG_BLANK), [S.df_scale_aspect_max_level,
+                                                          aspect_f_map]),
+             ((T.scaling_aspect_desc, self.FLAG_BLANK),  [S.df_scale_aspect_desc, aspect_f_map]),
+             ((T.scaling_aspect_deltas, self.FLAG_REQ_DELTA),
+              [S.df_scale_aspect_deltas, aspect_f_map]),
+             #((T.scaling_aspect_deltas, self.FLAG_REQ_DELTA),
+             # [S.df_scale_aspect_vdu_delta, aspect_f_map]),
 
              # -- End Deployment Flavor --
 

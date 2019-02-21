@@ -26,6 +26,7 @@ class Sol6Converter:
         self.connection_points = {}
         self.tosca_vdus = {}
         self.flavor_vars = {}
+        self.run_deltas = True
 
     def parse(self):
         """
@@ -38,6 +39,7 @@ class Sol6Converter:
         self.vnfd = copy.deepcopy(self.parsed_dict[SOL6.vnfd])
 
         keys = V2Map(self.tosca_vnf, self.vnfd)
+        self.check_deltas_valid()
 
         self.run_v2_mapping(keys)
 
@@ -58,6 +60,8 @@ class Sol6Converter:
             only_number = False
             only_number_float = False
             append_list = False
+            req_delta_valid = False
+            init_dict = False
 
             # Ensure flags is iterable
             if not isinstance(flags, tuple):
@@ -71,6 +75,8 @@ class Sol6Converter:
                     append_list = True
                 if flag == keys.FLAG_ONLY_NUMBERS_FLOAT:
                     only_number_float = True
+                if flag == keys.FLAG_REQ_DELTA:
+                    req_delta_valid = True
 
             # Check if there is a mapping needed
             if isinstance(map_sol6, list):
@@ -86,6 +92,11 @@ class Sol6Converter:
                     f_sol6_path = MapElem.format_path(elem, sol6_path, use_value=True)
 
                     # Handle the various flags
+                    # Skip this element if it requires deltas to be valid
+                    if req_delta_valid:
+                        if not self.run_deltas:
+                            continue
+
                     value = self._key_as_value(key_as_value, f_tosca_path)
                     value = Sol6Converter._only_number(only_number, value,
                                                        is_float=only_number_float)
@@ -134,11 +145,33 @@ class Sol6Converter:
 
     # ----------------------------------------------------------------------------------------------
 
+    def check_deltas_valid(self):
+        """
+        We are only supporting step_deltas that have unique names across the entire yaml file
+        I don't care that YAML supports more.
+        """
+        step_deltas_name = KeyUtils.get_path_last(TOSCAv2.scaling_aspect_deltas)
+        # Get all the elements that have step_deltas
+        deltas = get_roots_from_filter(self.tosca_vnf, child_key=step_deltas_name)
+        # Get all the values of 'step_deltas' and stick them in a list
+        try:
+            all_deltas = [delta[get_dict_key(delta)][step_deltas_name] for delta in deltas]
+            all_deltas = flatten(all_deltas)
+        except KeyError:
+            # We're going to assume that if we can't do the check to just try to run deltas
+            return
+
+        # Determine if there are any duplicates
+        if len(all_deltas) != len(set(all_deltas)):
+            print("WARNING: step_deltas were detected that have the same name, "
+                  "this is not suppported and thus deltas will not be processed.")
+            self.run_deltas = False
+
     def _handle_virtual_compute(self):
         """
         Get the list of vim flavor names that are in use, and find their properties
         """
-        #self._virtual_get_flavor_names()
+        # self._virtual_get_flavor_names()
         self._process_vdus()
         self._populate_init_level()
         self._populate_scaling_aspects()
