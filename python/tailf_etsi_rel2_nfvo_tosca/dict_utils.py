@@ -1,7 +1,7 @@
 import copy
 
 
-def get_path_value(path, cur_dict, must_exist=True, ensure_dict=False):
+def get_path_value(path, cur_dict, must_exist=True, ensure_dict=False, no_msg=False):
     """
     topology_template.node_templates.vnf.properties.descriptor_id
     Pass in a path and a dict the path applies to and get the value of the key
@@ -45,7 +45,8 @@ def get_path_value(path, cur_dict, must_exist=True, ensure_dict=False):
             if must_exist:
                 raise KeyError("Path '{}' not found in {}".format(val, path))
             else:
-                print("{} not found in {}".format(val, path))
+                if not no_msg:
+                    print("{} not found in {}".format(val, path))
                 return False
 
     if ensure_dict and isinstance(cur_context, list):
@@ -128,7 +129,7 @@ def list_insert_padding(lst, index, value):
 
 
 def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key=None,
-                          internal_call=False, agg=None, user_filter=None):
+                          internal_call=False, agg=None, user_filter=None, parent_filter=None):
     """
     We need to be able to get root elements based on some interior condition, for example:
 
@@ -163,6 +164,18 @@ def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key
                 if parent_key:
                     return {parent_key: cur_dict}
                 return cur_dict
+        # Handling only child_value specified
+        if child_value:
+            try:
+                # We'll hit a type error when trying to iterate over non-iterables
+                # Just ignore it if that's the case
+                if child_value == value or child_value in value:
+                    if not child_key:
+                        if parent_key:
+                            return {parent_key: cur_dict}
+                        return cur_dict
+            except TypeError:
+                pass
 
         # This is the actual recursion and aggregation bit, a list is kept and passed
         # around that only has dicts in it, and eventually it gets to the top and is returned
@@ -199,7 +212,9 @@ def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key
                 if user_filter(a):
                     kept.append(a)
             agg = kept
-
+        # parent_filter is a list of acceptable values for the parent key
+        if parent_filter:
+            agg = [d for d in agg if get_dict_key(d) in parent_filter]
         return agg
 
 
