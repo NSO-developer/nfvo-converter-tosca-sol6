@@ -125,6 +125,7 @@ class SOL6v2:
     """
     Second version of the definitions
     """
+    extensions_prefix               = "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions"
     # **********
     # ** VNFD **
     # **********
@@ -145,7 +146,8 @@ class SOL6v2:
     # ********************************
     vnfd_virt_compute_desc          = vnfd + ".virtual-compute-descriptor.{}"
     vnfd_vcd_id                     = vnfd_virt_compute_desc + ".id"
-    vnfd_vcd_flavor_name            = vnfd_virt_compute_desc + ".flavor-name-variable"
+    vnfd_vcd_flavor_name            = vnfd_virt_compute_desc + "." + extensions_prefix \
+                                      + ":flavor-name-variable"
     vnfd_vcd_cpu_num                = vnfd_virt_compute_desc + ".virtual-cpu.num-virtual-cpu"
     vnfd_vcd_mem_size               = vnfd_virt_compute_desc + ".virtual-memory.size"
 
@@ -230,7 +232,8 @@ class SOL6v2:
     sw_img_desc                     = vnfd + ".sw-image-desc.{}"
     sw_id                           = sw_img_desc + ".id"
     sw_name                         = sw_img_desc + ".name"
-    sw_image_name_var               = sw_img_desc + ".image_name_variable"
+    sw_image_name_var               = sw_img_desc + "." +\
+                                      extensions_prefix + ":image-name-variable"
     sw_version                      = sw_img_desc + ".version"
     sw_checksum                     = sw_img_desc + ".checksum"
     sw_container_format             = sw_img_desc + ".container-format"
@@ -260,6 +263,10 @@ class V2Map(V2Mapping):
     FLAG_REQ_DELTA                  = "YAMLSUCKS"
     # Try to format the value as a valid input for layer-protocol
     FLAG_FORMAT_IP                  = "FORMATIPVER"
+    # Label if this is a variable output
+    # This means if the value to set is an input, to set it, if it is not an input, don't set
+    # anything
+    FLAG_VAR                        = "THISVARIABLE"
 
     mapping = {}
 
@@ -324,6 +331,8 @@ class V2Map(V2Mapping):
                 if m.name == v:
                     vim_flavors_map.append(MapElem(k, m.cur_map))
 
+        print(vdu_vim_flavors)
+        print(vim_flavors_map)
         # *** End VDU Flavors ***
 
         # *** Connection Point mappings ***
@@ -452,11 +461,12 @@ class V2Map(V2Mapping):
 
              # The first value in the map is what we want to set, so insert that into the 'key'
              (("{}", self.FLAG_KEY_SET_VALUE),                  [S.vnfd_vcd_id, vim_flavors_map]),
+             ((T.vdu_vim_flavor, self.FLAG_VAR),                [S.vnfd_vcd_flavor_name, vdu_map]),
              ((T.vdu_virt_cpu_num, self.FLAG_ONLY_NUMBERS),     [S.vnfd_vcd_cpu_num, flavor_map]),
              ((T.vdu_virt_mem_size, self.FLAG_ONLY_NUMBERS),    [S.vnfd_vcd_mem_size, flavor_map]),
 
              ((T.int_cpd, self.FLAG_KEY_SET_VALUE),             [S.int_cpd_id, cps_map]),
-             ((T.int_cpd_layer_prot, self.FLAG_FORMAT_IP),          [S.int_cpd_layer_prot, cps_map]),
+             ((T.int_cpd_layer_prot, self.FLAG_FORMAT_IP),      [S.int_cpd_layer_prot, cps_map]),
              ((S.KEY_VIRT_LINK_MGMT, self.FLAG_KEY_SET_VALUE),  [S.int_cpd_virt_link_desc,
                                                                  mgmt_cps_map]),
              ((S.KEY_VIRT_LINK_ORCH, self.FLAG_KEY_SET_VALUE),  [S.int_cpd_virt_link_desc,
@@ -464,8 +474,8 @@ class V2Map(V2Mapping):
 
              # -- Software Image --
              ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.sw_id, sw_map]),
-             ((T.sw_name, self.FLAG_BLANK),                     [S.sw_name, sw_map]),
-             ((T.sw_name, self.FLAG_BLANK),                     [S.sw_image_name_var, sw_map]),
+             ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.sw_name, sw_map]),
+             ((T.sw_name, self.FLAG_VAR),                       [S.sw_image_name_var, sw_map]),
              ((T.sw_version, self.FLAG_BLANK),                  [S.sw_version, sw_map]),
              ((T.sw_checksum, self.FLAG_BLANK),                 [S.sw_checksum, sw_map]),
              ((T.sw_container_fmt, self.FLAG_BLANK),            [S.sw_container_format, sw_map]),
