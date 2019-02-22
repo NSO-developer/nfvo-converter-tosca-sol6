@@ -166,3 +166,10 @@ For our previous example, the map would now look like this
 ```
 
 Which allows iterative behavior no matter how deep the mapping goes.
+
+
+---
+
+# Fixes
+1. `id` field must always be the first entry
+2. 

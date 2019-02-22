@@ -248,10 +248,20 @@ def merge_list_of_dicts(lst):
 
 
 def remove_empty_from_dict(d):
+    def _handle_zero(val):
+        """
+        Python treats 0s as False. So return True if we want to keep it
+        """
+        if val is 0:
+            return True
+        return val
+
     if type(d) is dict:
-        return dict((k, remove_empty_from_dict(v)) for k, v in d.items() if v and remove_empty_from_dict(v))
+        return dict((k, remove_empty_from_dict(v)) for k, v in d.items() if _handle_zero(v)
+                    and _handle_zero(remove_empty_from_dict(v)))
     elif type(d) is list:
-        return [remove_empty_from_dict(v) for v in d if v and remove_empty_from_dict(v)]
+        return [remove_empty_from_dict(v) for v in d if _handle_zero(v) and
+                _handle_zero(remove_empty_from_dict(v))]
     else:
         return d
 
