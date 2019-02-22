@@ -117,6 +117,7 @@ class TOSCAv2:
     scaling_aspect_desc             = scaling_aspect_item + ".description"
     scaling_aspect_level            = scaling_aspect_item + ".max_scale_level"
     scaling_aspect_deltas           = scaling_aspect_item + ".step_deltas"
+    # Note: this is not a valid TOSCA path, it's for internal use
     scaling_aspect_deltas_num       = scaling_aspect_item + ".deltas.{}.number_of_instances"
 
 
@@ -420,6 +421,20 @@ class V2Map(V2Mapping):
              ((T.vnf_vnfm_info, self.FLAG_BLANK),               S.vnfd_vnfm_info),
              # -- End Metadata --
 
+             # This happens first because IDs need to be the first element, for now
+             # Setting specific values at specific indexes
+             # These are currently only the two virtual links and external links
+             (self.set_value(S.KEY_VIRT_LINK_MGMT, S.virt_link_desc_id, 0)),
+             (self.set_value(S.KEY_VIRT_LINK_ORCH, S.virt_link_desc_id, 1)),
+
+             (self.set_value(S.KEY_EXT_CP_MGMT, S.ext_cpd_id, 0)),
+             (self.set_value(S.KEY_VIRT_LINK_MGMT, S.ext_cpd_virt_link, 0)),
+             (self.set_value(S.KEY_EXT_CP_ORCH, S.ext_cpd_id, 1)),
+             (self.set_value(S.KEY_VIRT_LINK_ORCH, S.ext_cpd_virt_link, 1)),
+
+
+             # End set values
+
              ((T.vdu, self.FLAG_KEY_SET_VALUE),                 [S.vdu_id, vdu_map]),
              ((T.vdu_name, self.FLAG_BLANK),                    [S.vdu_name, vdu_map]),
              ((T.vdu_desc, self.FLAG_BLANK),                    [S.vdu_desc, vdu_map]),
@@ -462,6 +477,9 @@ class V2Map(V2Mapping):
 
              # -- Deployment Flavor --
              ((T.df_id, self.FLAG_BLANK),                       S.df_id),
+             # Assign the default instantiation level to the first element in the array
+             (self.set_value(def_inst_id, S.df_inst_level_id, 0)),
+             (self.set_value(def_inst_desc, S.df_inst_level_desc, 0)),
              ((T.df_desc, self.FLAG_BLANK),                     S.df_desc),
              ((T.vdu, self.FLAG_KEY_SET_VALUE),                 [S.df_vdu_prof_id, vdu_map]),
              ((T.vdu_prof_inst_min, self.FLAG_BLANK),           [S.df_vdu_prof_inst_min, vdu_map]),
@@ -485,23 +503,9 @@ class V2Map(V2Mapping):
              (("{}", (self.FLAG_REQ_DELTA, self.FLAG_KEY_SET_VALUE)),
               [S.df_scale_aspect_vdu_id, deltas_mapping]),
              ((T.scaling_aspect_deltas_num, self.FLAG_REQ_DELTA),
-              [S.df_scale_aspect_vdu_num, deltas_mapping]),
+              [S.df_scale_aspect_vdu_num, deltas_mapping])
 
              # -- End Deployment Flavor --
-
-             # Setting specific values at specific indexes
-             # These are currently only the two virtual links and external links
-             (self.set_value(S.KEY_VIRT_LINK_MGMT, S.virt_link_desc_id, 0)),
-             (self.set_value(S.KEY_VIRT_LINK_ORCH, S.virt_link_desc_id, 1)),
-
-             (self.set_value(S.KEY_EXT_CP_MGMT, S.ext_cpd_id, 0)),
-             (self.set_value(S.KEY_VIRT_LINK_MGMT, S.ext_cpd_virt_link, 0)),
-             (self.set_value(S.KEY_VIRT_LINK_ORCH, S.ext_cpd_virt_link, 1)),
-             (self.set_value(S.KEY_EXT_CP_ORCH, S.ext_cpd_id, 1)),
-
-             # Assign the default instantiation level to the first element in the array
-             (self.set_value(def_inst_id, S.df_inst_level_id, 0)),
-             (self.set_value(def_inst_desc, S.df_inst_level_desc, 0))
             ]
 
     def set_value(self, val, path, index):
@@ -509,7 +513,7 @@ class V2Map(V2Mapping):
 
     def _handle_deltas(self, aspect_f_map):
         """
-        ** WARNING: Here be bullshit (it sucks, and I know it sucks) **
+        ** WARNING: Here be bullshit **
 
         This whole block of code gets the delta values from tosca (if they exist, they might not)
         then, it figures out what the deltas parent functions are, and it maps the delta values to
@@ -524,8 +528,8 @@ class V2Map(V2Mapping):
         vnfd.df.scaling-aspect.{session-function->0}.vdu-delta.{delta_1->0}.id = {}
                    topology_template.policies.{scaling_aspects}.properties.deltas.{delta_1}
         
-        Then, we have the num_instances value, but not it's full location. So, just stick the
-        value into a location that we know and can access.
+        Then (we're not done yet), we have the num_instances value, but not it's full location.
+        So, just stick the value into a location that we know and can access easily.
         """
 
         deltas_name = KeyUtils.get_path_last(TOSCAv2.scaling_aspect_deltas)

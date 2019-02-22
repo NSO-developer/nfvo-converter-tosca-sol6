@@ -26,6 +26,8 @@ class Sol6Converter:
         self.tosca_vdus = {}
         self.flavor_vars = {}
         self.run_deltas = True
+        # If we want to hard skip the loop that runs the deltas
+        self.override_run_deltas = False
 
         # Set up the flag variables
         self.key_as_value = False
@@ -52,7 +54,7 @@ class Sol6Converter:
 
         keys = V2Map(self.tosca_vnf, self.vnfd)
         if keys.override_deltas:
-            self.run_deltas = keys.run_deltas
+            self.override_run_deltas = not keys.run_deltas
         else:
             self.check_deltas_valid()
 
@@ -81,6 +83,10 @@ class Sol6Converter:
             if isinstance(map_sol6, list):
                 mapping_list = map_sol6[1]  # List of MapElems
                 sol6_path = map_sol6[0]
+
+                if self.override_run_deltas:
+                    if self.req_delta_valid and not mapping_list:
+                        continue
 
                 for elem in mapping_list:
                     # Skip this mapping element if it is None, but allow a none name to pass
