@@ -195,10 +195,13 @@ class SOL6v2:
     # ****************************
     # ** Virtual/External Links **
     # ****************************
-    virt_link_desc_id               = vnfd + ".int-virtual-link-desc.{}.id"
+    virt_link_desc                  = vnfd + ".int-virtual-link-desc.{}"
+    virt_link_desc_id               = virt_link_desc + ".id"
+    virt_link_desc_protocol         = virt_link_desc + ".connectivity-type.layer-protocol"
 
     ext_cpd                         = vnfd + ".ext-cpd.{}"
     ext_cpd_id                      = ext_cpd + ".id"
+    ext_cpd_protocol                = ext_cpd + ".layer-protocol"
     ext_cpd_virt_link               = ext_cpd + ".int-virtual-link-desc"
 
     # *********
@@ -223,9 +226,13 @@ class SOL6v2:
     int_cpd_virt_link_desc          = int_cpd + ".int-virtual-link-desc"
 
     KEY_VIRT_LINK_MGMT              = "CP_MGMT"
+    KEY_VIRT_LINK_MGMT_PROT         = "IPv4"
     KEY_VIRT_LINK_ORCH              = "CP_ORCH"
+    KEY_VIRT_LINK_ORCH_PROT         = "IPv4"
     KEY_EXT_CP_MGMT                 = "CP_EXT_MGMT"
+    KEY_EXT_CP_MGMT_PROT            = "IPv4"
     KEY_EXT_CP_ORCH                 = "CP_EXT_ORCH"
+    KEY_EXT_CP_ORCH_PROT            = "IPv4"
 
     # *******************************
     # ** Software Image Descriptor **
@@ -433,11 +440,15 @@ class V2Map(V2Mapping):
              # Setting specific values at specific indexes
              # These are currently only the two virtual links and external links
              (self.set_value(S.KEY_VIRT_LINK_MGMT, S.virt_link_desc_id, 0)),
+             (self.set_value(S.KEY_VIRT_LINK_MGMT_PROT, S.virt_link_desc_protocol, 0)),
              (self.set_value(S.KEY_VIRT_LINK_ORCH, S.virt_link_desc_id, 1)),
+             (self.set_value(S.KEY_VIRT_LINK_ORCH_PROT, S.virt_link_desc_protocol, 1)),
 
              (self.set_value(S.KEY_EXT_CP_MGMT, S.ext_cpd_id, 0)),
+             (self.set_value(S.KEY_EXT_CP_MGMT_PROT, S.ext_cpd_protocol, 0)),
              (self.set_value(S.KEY_VIRT_LINK_MGMT, S.ext_cpd_virt_link, 0)),
              (self.set_value(S.KEY_EXT_CP_ORCH, S.ext_cpd_id, 1)),
+             (self.set_value(S.KEY_EXT_CP_ORCH_PROT, S.ext_cpd_protocol, 1)),
              (self.set_value(S.KEY_VIRT_LINK_ORCH, S.ext_cpd_virt_link, 1)),
 
 
