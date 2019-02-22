@@ -38,6 +38,7 @@ class Sol6Converter:
         self.format_as_ip = False
         self.first_list_elem = False
         self.tosca_use_value = False
+        self.is_variable = False
 
     def parse(self):
         """
@@ -76,6 +77,7 @@ class Sol6Converter:
             self.format_as_ip = False
             self.first_list_elem = False
             self.tosca_use_value = False
+            self.is_variable = False
 
             self.set_flags_loop(flags, keys)
 
@@ -143,6 +145,8 @@ class Sol6Converter:
                 self.first_list_elem = True
             if flag == keys.FLAG_USE_VALUE:
                 self.tosca_use_value = True
+            if flag == keys.FLAG_VAR:
+                self.is_variable = True
 
     def handle_flags(self, f_sol6_path, f_tosca_path):
         """
@@ -153,9 +157,21 @@ class Sol6Converter:
         value = self._append_to_list(self.append_list, f_sol6_path, value)
         value = self._format_as_ip(self.format_as_ip, f_sol6_path, value)
         value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
+        value = self._handle_input(self.is_variable, f_sol6_path, value)
         return value
 
     # Flag option formatting methods
+    def _handle_input(self, option, path, value):
+        if not option:
+            return value
+        # See if this is actually an input, if can not be
+        is_input = V2Mapping.is_tosca_input(value)
+        # If this isn't actually an input, then don't assign it
+        if not is_input:
+            return None
+        return V2Mapping.tosca_get_input_key(value)
+
+
     def _append_to_list(self, option, path, value):
         if not option:
             return value

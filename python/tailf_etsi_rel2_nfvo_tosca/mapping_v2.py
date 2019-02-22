@@ -194,6 +194,11 @@ class V2Mapping:
             return tosca_inputs[item["get_input"]]
 
     @staticmethod
+    def tosca_get_input_key(input_name):
+        if V2Mapping.is_tosca_input(input_name):
+            return input_name["get_input"]
+
+    @staticmethod
     def is_tosca_input(val):
         try:
             return "get_input" in val
