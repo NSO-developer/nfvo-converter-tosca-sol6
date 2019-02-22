@@ -171,7 +171,6 @@ class Sol6Converter:
             return None
         return V2Mapping.tosca_get_input_key(value)
 
-
     def _append_to_list(self, option, path, value):
         if not option:
             return value
