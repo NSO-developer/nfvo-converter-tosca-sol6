@@ -51,7 +51,10 @@ class Sol6Converter:
             self.vnfd = {}
 
         keys = V2Map(self.tosca_vnf, self.vnfd)
-        self.check_deltas_valid()
+        if keys.override_deltas:
+            self.run_deltas = keys.run_deltas
+        else:
+            self.check_deltas_valid()
 
         self.run_v2_mapping(keys)
 

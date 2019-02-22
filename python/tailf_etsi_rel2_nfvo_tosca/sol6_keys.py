@@ -146,7 +146,7 @@ class SOL6v2:
     vnfd_vcd_id                     = vnfd_virt_compute_desc + ".id"
     vnfd_vcd_flavor_name            = vnfd_virt_compute_desc + ".flavor-name-variable"
     vnfd_vcd_cpu_num                = vnfd_virt_compute_desc + ".virtual-cpu.num-virtual-cpu"
-    vnfd_vcd_mem_size               = vnfd_virt_compute_desc + ".virtual-memory.virtual-memory-size"
+    vnfd_vcd_mem_size               = vnfd_virt_compute_desc + ".virtual-memory.size"
 
     # ********************************
     # ** Virtual Storage Descriptor **
@@ -264,6 +264,9 @@ class V2Map(V2Mapping):
 
     def __init__(self, dict_tosca, dict_sol6):
         super().__init__(dict_tosca, dict_sol6)
+
+        self.override_deltas = False
+        self.run_deltas = False
 
         T = TOSCAv2
         S = SOL6v2
@@ -392,6 +395,11 @@ class V2Map(V2Mapping):
 
         # This is in a separate method because it's a dumpster fire
         deltas_mapping = self._handle_deltas(aspect_f_map)
+        # It is possible for there to be no step deltas, in that case don't run them even
+        # if the input is valid
+        if not deltas_mapping:
+            self.override_deltas = True
+            self.run_deltas = False
 
         # *** End Instantiation Level mapping ***
 
