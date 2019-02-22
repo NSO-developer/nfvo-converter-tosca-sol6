@@ -59,6 +59,7 @@ class V2Mapping:
         """
         Example input: ["c1", "c2", "s3", "s4"], 0
         Example output: {"c1": 0, "c2": 1, "s3": 2, "s4": 3}
+        Options: parent_map, value_map, none_value, none_key
         :param map1_list: A list of strirngs
         :param start_num: The number to start mapping values to
         :optional parent_map:
@@ -72,6 +73,7 @@ class V2Mapping:
         if "value_map" in kwargs:
             value_map = kwargs["value_map"]
         none_value = kwargs["none_value"] if "none_value" in kwargs else False
+        none_key = kwargs["none_key"] if "none_key" in kwargs else False
 
         result = []
         cur_num = start_num
@@ -95,7 +97,8 @@ class V2Mapping:
                             final_parent_map = v_map
                             break
                 cur_num_val = None if none_value else cur_num
-                map_elem = MapElem(item_1, cur_num_val, final_parent_map)
+                cur_item_1 = None if none_key else item_1
+                map_elem = MapElem(cur_item_1, cur_num_val, final_parent_map)
 
                 result.append(map_elem)
                 cur_num += 1

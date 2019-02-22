@@ -23,7 +23,7 @@ tosca.py is the entry point for the standalone version of the converter.
 - -l --log-level: Set the log level for NSO and standalone logging
 - -H --hide-output: By default the tool will output the processed JSON at the end, specify this flag to stop that
 - -n --dry-run: Don't send the converted information to NSO
-- -y --yang-template (REQ): The given YANG specifications file for the tool to fill out
+- -y --yang-template: The given YANG specifications file for the tool to fill out (optional)
 - -g --no-grouping: If there are no grouping tags in the YANG specifications file give this tag,
                   otherwise it will fail to parse the file
 - -p --prune: Prune empty values from the dict at the end

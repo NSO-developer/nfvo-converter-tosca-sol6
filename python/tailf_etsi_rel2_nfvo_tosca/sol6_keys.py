@@ -136,11 +136,25 @@ class SOL6v2:
     vnfd_info_name                  = vnfd + ".product-info-name"
     vnfd_info_desc                  = vnfd + ".product-info-description"
     vnfd_vnfm_info                  = vnfd + ".vnfm-info"
+
+    VALID_PROTOCOLS = ["Ethernet", "IPv4", "IPv6", "MPLS", "ODU2", "Pseudo-Wire"]
+
+    # ********************************
+    # ** Virtual Compute Descriptor **
+    # ********************************
     vnfd_virt_compute_desc          = vnfd + ".virtual-compute-descriptor.{}"
     vnfd_vcd_id                     = vnfd_virt_compute_desc + ".id"
     vnfd_vcd_flavor_name            = vnfd_virt_compute_desc + ".flavor-name-variable"
     vnfd_vcd_cpu_num                = vnfd_virt_compute_desc + ".virtual-cpu.num-virtual-cpu"
     vnfd_vcd_mem_size               = vnfd_virt_compute_desc + ".virtual-memory.virtual-memory-size"
+
+    # ********************************
+    # ** Virtual Storage Descriptor **
+    # ********************************
+    vnfd_virt_storage_desc          = vnfd + ".virtual-storage-descriptor.{}"
+    vnfd_virt_storage_id            = vnfd_virt_storage_desc + ".id"
+    vnfd_virt_storage_type          = vnfd_virt_storage_desc + ".type-of-storage"
+    vnfd_virt_storage_size          = vnfd_virt_storage_desc + ".size-of-storage"
 
     # ***********************
     # ** Deployment Flavor **
@@ -191,7 +205,7 @@ class SOL6v2:
     vdu_name                        = vdu + ".name"
     vdu_desc                        = vdu + ".description"
     vdu_id                          = vdu + ".id"
-    vdu_boot_order                  = vdu + ".boot-order"
+    vdu_boot_order                  = vdu + ".boot-order.{}"
     vdu_boot_key                    = vdu_boot_order + ".key"
     vdu_boot_value                  = vdu_boot_order + ".value"
     vdu_vc_desc                     = vdu + ".virtual-compute-desc.{}"
@@ -234,9 +248,17 @@ class V2Map(V2Mapping):
     FLAG_KEY_SET_VALUE              = "KSV"
     # Will remove all non-numeric characters
     FLAG_ONLY_NUMBERS               = "NUMBERS"
-    FLAG_ONLY_NUMBERS_FLOAT         = "NUMBERS_FLOAT"
+    FLAG_ONLY_NUMBERS_FLOAT         = "NUMBERSFLOAT"
+    # Make the tosca MapElem format use the value of the mapping instead of the key
+    FLAG_USE_VALUE                  = "USESOLMAPFORTOSCA"
+    # Append the items to a list, create the list if it doesn't exist
     FLAG_APPEND_LIST                = "APPENDLIST"
+    # Get the first element in the input list
+    FLAG_LIST_FIRST                 = "GETFIRSTLISTELEM"
+    # Require delta validation
     FLAG_REQ_DELTA                  = "YAMLSUCKS"
+    # Try to format the value as a valid input for layer-protocol
+    FLAG_FORMAT_IP                  = "FORMATIPVER"
 
     mapping = {}
 
@@ -254,6 +276,22 @@ class V2Map(V2Mapping):
         # This list has the VDUs the flavors are attached to
         vdu_vim_flavors = self.get_items_from_map(T.vdu_vim_flavor, vdu_map, dict_tosca,
                                                   link_list=True)
+
+        # Set up the boot order mapping
+        # [vnfd1-deployment-control-function-1-cf-boot -> 0, parent=(None),
+        # vnfd1-deployment-control-function-0-cf-boot -> 0, parent=(None)]
+        # topology_template.node_templates.{c1}.properties.boot_order
+        # vnfd.vdu.{c1->0}.boot-order.{1-cf-boot->0}.key
+        boot_map = []
+        for vdu in vdu_map:
+            tosca_path = MapElem.format_path(vdu, T.vdu_boot, use_value=False, )
+            boot_data = get_path_value(tosca_path, self.dict_tosca, must_exist=False, no_msg=True)
+            if boot_data:
+                b_map = self.generate_map_from_list(boot_data, map_args={"none_key": True})
+                MapElem.add_parent_mapping(b_map, vdu)
+                boot_map.append(b_map)
+        boot_map = flatten(boot_map)
+
         # *** VDU Flavors ***
         # vim_flavors = [VDU, {"get_input": FLAVOR_NAME}], so get the dicts
         vim_flavors = [x[1] for x in vdu_vim_flavors]
@@ -374,12 +412,20 @@ class V2Map(V2Mapping):
              ((T.vnf_vnfm_info, self.FLAG_BLANK),               S.vnfd_vnfm_info),
              # -- End Metadata --
 
-             ((T.vdu_name, self.FLAG_BLANK),                    [S.vdu_name, vdu_map]),
              ((T.vdu, self.FLAG_KEY_SET_VALUE),                 [S.vdu_id, vdu_map]),
+             ((T.vdu_name, self.FLAG_BLANK),                    [S.vdu_name, vdu_map]),
              ((T.vdu_desc, self.FLAG_BLANK),                    [S.vdu_desc, vdu_map]),
 
-             # ((T.vdu_boot, self.FLAG_BLANK),                    [S.vdu_boot_key, vdu_map]),
-             ((T.vdu_boot, self.FLAG_BLANK),                    [S.vdu_boot_value, vdu_map]),
+             # Each value is a list, but we've created a mapping that handles that, so only
+             # set the first value of the list
+             # We want a unique int for the key here, and we have that in the mapping, but it's
+             # the sol6 mapping, so swap the tosca map to the sol6 with FLAG_USE_VALUE, then
+             # set the value to the key, and pass in '{}' so the mapping is the only thing we're
+             # setting. This gives a list of numbers from 0->len
+             (("{}", (self.FLAG_ONLY_NUMBERS, self.FLAG_LIST_FIRST, self.FLAG_USE_VALUE,
+                      self.FLAG_KEY_SET_VALUE)),
+              [S.vdu_boot_key, boot_map]),
+             ((T.vdu_boot, self.FLAG_LIST_FIRST),               [S.vdu_boot_value, boot_map]),
 
              # The first value in the map is what we want to set, so insert that into the 'key'
              (("{}", self.FLAG_KEY_SET_VALUE),                  [S.vnfd_vcd_id, vim_flavors_map]),
@@ -387,7 +433,7 @@ class V2Map(V2Mapping):
              ((T.vdu_virt_mem_size, self.FLAG_ONLY_NUMBERS),    [S.vnfd_vcd_mem_size, flavor_map]),
 
              ((T.int_cpd, self.FLAG_KEY_SET_VALUE),             [S.int_cpd_id, cps_map]),
-             ((T.int_cpd_layer_prot, self.FLAG_BLANK),          [S.int_cpd_layer_prot, cps_map]),
+             ((T.int_cpd_layer_prot, self.FLAG_FORMAT_IP),          [S.int_cpd_layer_prot, cps_map]),
              ((S.KEY_VIRT_LINK_MGMT, self.FLAG_KEY_SET_VALUE),  [S.int_cpd_virt_link_desc,
                                                                  mgmt_cps_map]),
              ((S.KEY_VIRT_LINK_ORCH, self.FLAG_KEY_SET_VALUE),  [S.int_cpd_virt_link_desc,

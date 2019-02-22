@@ -23,7 +23,7 @@ parser.add_argument('-l', '--log-level',
 parser.add_argument('-H', '--hide-output', action='store_true',
                     help="Hide the output to the console at the end")
 parser.add_argument('-n', '--dry-run', action='store_true', help="Don't send VNFD to NSO")
-parser.add_argument('-y', '--yang-template', required=True, help="The yang specifications file")
+parser.add_argument('-y', '--yang-template', help="The yang specifications file")
 parser.add_argument('-g', '--no-grouping', action='store_false',
                     help="Specify if there are no grouping tags in the specifications file")
 parser.add_argument('-p', '--prune', action='store_true', help='Prune empty values from the dict'
@@ -35,10 +35,13 @@ logging.basicConfig(level=args.log_level)
 log = logging.getLogger(__name__)
 
 # Parse the yang specifications file into an empty dictionary
-print("Parsing YANG file {}".format(args.yang_template))
-ytd = YangToDict(file=args.yang_template, log=log, g_req=args.no_grouping)
-parsed_dict = ytd.parse_yang()
-start_empty = count_empty_fields(parsed_dict)
+parsed_dict = {}
+start_empty = None
+if args.yang_template:
+    print("Parsing YANG file {}".format(args.yang_template))
+    ytd = YangToDict(file=args.yang_template, log=log, g_req=args.no_grouping)
+    parsed_dict = ytd.parse_yang()
+    start_empty = count_empty_fields(parsed_dict)
 
 # Read the tosca vnf into a dict from yaml format
 print("Reading TOSCA YAML file {}".format(args.file))
@@ -51,7 +54,8 @@ cnfv = converter.parse()
 
 end_empty = count_empty_fields(cnfv)
 
-print("{}% of fields filled".format(round((end_empty / start_empty)*100, 2)))
+if start_empty:
+    print("{}% of fields filled".format(round((end_empty / start_empty)*100, 2)))
 
 # Prune the empty fields
 if args.prune:

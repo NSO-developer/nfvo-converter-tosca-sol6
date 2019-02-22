@@ -27,6 +27,16 @@ class Sol6Converter:
         self.flavor_vars = {}
         self.run_deltas = True
 
+        # Set up the flag variables
+        self.key_as_value = False
+        self.only_number = False
+        self.only_number_float = False
+        self.append_list = False
+        self.req_delta_valid = False
+        self.format_as_ip = False
+        self.first_list_elem = False
+        self.tosca_use_value = False
+
     def parse(self):
         """
         Convert the tosca_vnf to sol6 VNFD
@@ -35,18 +45,15 @@ class Sol6Converter:
         # TODO: Handle multiple vnfds
         print("Starting TOSCA -> SOL6 (v{}) converter.".format(self.SUPPORTED_SOL6_VERSION))
         # First, get the vnfd specifications model
-        self.vnfd = copy.deepcopy(self.parsed_dict[SOL6v2.vnfd])
+        try:
+            self.vnfd = copy.deepcopy(self.parsed_dict[SOL6v2.vnfd])
+        except KeyError:
+            self.vnfd = {}
 
         keys = V2Map(self.tosca_vnf, self.vnfd)
         self.check_deltas_valid()
 
         self.run_v2_mapping(keys)
-
-        # Get all of the inputs from tosca
-        #self.template_inputs = get_path_value(TOSCA.inputs, self.tosca_vnf)
-
-        #self._handle_virtual_compute()
-        #self._handle_virtual_link()
 
         return self.vnfd
 
@@ -55,27 +62,17 @@ class Sol6Converter:
         # If there are multiple flags, they will be grouped in a tuple as well
 
         for ((tosca_path, flags), map_sol6) in keys.mapping:
-            key_as_value = False
-            only_number = False
-            only_number_float = False
-            append_list = False
-            req_delta_valid = False
-            init_dict = False
+            # Reset these for every mapping
+            self.key_as_value = False
+            self.only_number = False
+            self.only_number_float = False
+            self.append_list = False
+            self.req_delta_valid = False
+            self.format_as_ip = False
+            self.first_list_elem = False
+            self.tosca_use_value = False
 
-            # Ensure flags is iterable
-            if not isinstance(flags, tuple):
-                flags = [flags]
-            for flag in flags:
-                if flag == keys.FLAG_KEY_SET_VALUE:
-                    key_as_value = True
-                if flag == keys.FLAG_ONLY_NUMBERS:
-                    only_number = True
-                if flag == keys.FLAG_APPEND_LIST:
-                    append_list = True
-                if flag == keys.FLAG_ONLY_NUMBERS_FLOAT:
-                    only_number_float = True
-                if flag == keys.FLAG_REQ_DELTA:
-                    req_delta_valid = True
+            self.set_flags_loop(flags, keys)
 
             # Check if there is a mapping needed
             if isinstance(map_sol6, list):
@@ -83,23 +80,22 @@ class Sol6Converter:
                 sol6_path = map_sol6[0]
 
                 for elem in mapping_list:
-                    # Skip this mapping element if it is None or it's name is none
-                    if not elem or not elem.name:
+                    # Skip this mapping element if it is None, but allow a none name to pass
+                    if not elem:
                         continue
 
-                    f_tosca_path = MapElem.format_path(elem, tosca_path, use_value=False)
+                    tosca_use_value = self.tosca_use_value
+                    f_tosca_path = MapElem.format_path(elem, tosca_path, use_value=tosca_use_value)
                     f_sol6_path = MapElem.format_path(elem, sol6_path, use_value=True)
 
-                    # Handle the various flags
                     # Skip this element if it requires deltas to be valid
-                    if req_delta_valid:
+                    # This has to be outside the flag method
+                    if self.req_delta_valid:
                         if not self.run_deltas:
                             continue
 
-                    value = self._key_as_value(key_as_value, f_tosca_path)
-                    value = Sol6Converter._only_number(only_number, value,
-                                                       is_float=only_number_float)
-                    value = self._append_to_list(append_list, f_sol6_path, value)
+                    # Handle flags for mapped values
+                    value = self.handle_flags(f_sol6_path, f_tosca_path)
 
                     # If the value doesn't exist, don't write it
                     # Do write it if the value is 0, though
@@ -112,11 +108,43 @@ class Sol6Converter:
             else:  # No mapping needed
                 sol6_path = map_sol6
 
-                # Handle the various flags
-                value = self._key_as_value(key_as_value, tosca_path)
-                value = Sol6Converter._only_number(only_number, value, is_float=only_number_float)
+                # Handle the various flags for no mappings
+                value = self.handle_flags(sol6_path, tosca_path)
 
                 set_path_to(sol6_path, self.vnfd, value, create_missing=True)
+
+    def set_flags_loop(self, flags, keys):
+        # Ensure flags is iterable
+        if not isinstance(flags, tuple):
+            flags = [flags]
+        for flag in flags:
+            if flag == keys.FLAG_KEY_SET_VALUE:
+                self.key_as_value = True
+            if flag == keys.FLAG_ONLY_NUMBERS:
+                self.only_number = True
+            if flag == keys.FLAG_APPEND_LIST:
+                self.append_list = True
+            if flag == keys.FLAG_ONLY_NUMBERS_FLOAT:
+                self.only_number_float = True
+            if flag == keys.FLAG_REQ_DELTA:
+                self.req_delta_valid = True
+            if flag == keys.FLAG_FORMAT_IP:
+                self.format_as_ip = True
+            if flag == keys.FLAG_LIST_FIRST:
+                self.first_list_elem = True
+            if flag == keys.FLAG_USE_VALUE:
+                self.tosca_use_value = True
+
+    def handle_flags(self, f_sol6_path, f_tosca_path):
+        """
+        Returns the value after being formatted by the flags
+        """
+        value = self._key_as_value(self.key_as_value, f_tosca_path)
+        value = Sol6Converter._only_number(self.only_number, value, is_float=self.only_number_float)
+        value = self._append_to_list(self.append_list, f_sol6_path, value)
+        value = self._format_as_ip(self.format_as_ip, f_sol6_path, value)
+        value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
+        return value
 
     # Flag option formatting methods
     def _append_to_list(self, option, path, value):
@@ -132,6 +160,31 @@ class Sol6Converter:
         if option:
             return KeyUtils.get_path_last(path)
         return get_path_value(path, self.tosca_vnf, must_exist=False)
+
+    def _format_as_ip(self, option, path, value):
+        if not option:
+            return value
+        valid_opts = SOL6v2.VALID_PROTOCOLS
+
+        def _fmt_val(val):
+            for opt in valid_opts:
+                # We found a valid mapping, so set the value to the actual formatted value
+                if val.lower() == opt.lower():
+                    return opt
+        # Turn it into a list if it isn't already
+        if not isinstance(value, list):
+            value = [value]
+
+        for i, item in enumerate(value):
+            value[i] = _fmt_val(item)
+        # If we don't find a matching value, pass the original value through so it's not lost
+        return value
+
+    def _first_list_elem(self, option, path, value):
+        if not option or not isinstance(value, list):
+            return value
+        return value[0]
+
 
     @staticmethod
     def _only_number(option, value, is_float=False):
