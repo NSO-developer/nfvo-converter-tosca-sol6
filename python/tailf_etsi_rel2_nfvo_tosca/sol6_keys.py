@@ -186,7 +186,8 @@ class SOL6v2:
     df_scale_aspect_name            = df_scale_aspect + ".name"
     df_scale_aspect_desc            = df_scale_aspect + ".description"
     df_scale_aspect_max_level       = df_scale_aspect + ".max-scale-level"
-    df_scale_aspect_deltas          = df_scale_aspect + ".deltas"
+    df_scale_aspect_delta_det       = df_scale_aspect + ".aspect-delta-details"
+    df_scale_aspect_deltas          = df_scale_aspect_delta_det + ".deltas"
     df_scale_aspect_vdu_delta       = df_scale_aspect + ".vdu-delta.{}"
     df_scale_aspect_vdu_id          = df_scale_aspect_vdu_delta + ".id"
     df_scale_aspect_vdu_num         = df_scale_aspect_vdu_delta + ".number-of-instances"
@@ -331,8 +332,6 @@ class V2Map(V2Mapping):
                 if m.name == v:
                     vim_flavors_map.append(MapElem(k, m.cur_map))
 
-        print(vdu_vim_flavors)
-        print(vim_flavors_map)
         # *** End VDU Flavors ***
 
         # *** Connection Point mappings ***
@@ -497,24 +496,26 @@ class V2Map(V2Mapping):
              (("{}", self.FLAG_KEY_SET_VALUE),                  [S.df_inst_level_vdu_vdu,
                                                                  target_map]),
              ((T.inst_level_num_instances, self.FLAG_BLANK),    [S.df_inst_level_vdu_num,
-                                                                 vdu_inst_level_map]),
+                                                                 vdu_inst_level_map])
 
-             ((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_inst_scaling_aspect, aspect_f_map]),
-             ((T.scaling_aspect_level, self.FLAG_BLANK), [S.df_inst_scaling_level, aspect_f_map]),
 
-             ((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_scale_aspect_id, aspect_f_map]),
-             ((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_scale_aspect_name, aspect_f_map]),
-             ((T.scaling_aspect_level, self.FLAG_BLANK), [S.df_scale_aspect_max_level,
-                                                          aspect_f_map]),
-             ((T.scaling_aspect_desc, self.FLAG_BLANK),  [S.df_scale_aspect_desc, aspect_f_map]),
-             ((T.scaling_aspect_deltas, self.FLAG_REQ_DELTA),
-              [S.df_scale_aspect_deltas, aspect_f_map]),
+             #((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_inst_scaling_aspect, aspect_f_map]),
+             #((T.scaling_aspect_level, self.FLAG_BLANK), [S.df_inst_scaling_level, aspect_f_map]),
 
-             (("{}", (self.FLAG_REQ_DELTA, self.FLAG_KEY_SET_VALUE)),
-              [S.df_scale_aspect_vdu_id, deltas_mapping]),
-             ((T.scaling_aspect_deltas_num, self.FLAG_REQ_DELTA),
-              [S.df_scale_aspect_vdu_num, deltas_mapping])
+             #((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_scale_aspect_id, aspect_f_map]),
+             #((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_scale_aspect_name, aspect_f_map]),
+             #((T.scaling_aspect_level, self.FLAG_BLANK), [S.df_scale_aspect_max_level,
+             #                                             aspect_f_map]),
+             #((T.scaling_aspect_desc, self.FLAG_BLANK),  [S.df_scale_aspect_desc, aspect_f_map]),
 
+
+             #((T.scaling_aspect_deltas, self.FLAG_REQ_DELTA),
+             #[S.df_scale_aspect_deltas, aspect_f_map]),
+
+             #(("{}", (self.FLAG_REQ_DELTA, self.FLAG_KEY_SET_VALUE)),
+             # [S.df_scale_aspect_vdu_id, deltas_mapping]),
+             #((T.scaling_aspect_deltas_num, self.FLAG_REQ_DELTA),
+             # [S.df_scale_aspect_vdu_num, deltas_mapping])
              # -- End Deployment Flavor --
             ]
 
@@ -560,8 +561,7 @@ class V2Map(V2Mapping):
             all_deltas = flatten(all_deltas)
 
             # Get all the delta values that are children of elements in all_deltas
-            delta_values = get_roots_from_filter(self.dict_tosca, child_key=deltas_num,
-                                                 parent_filter=all_deltas)
+            delta_values = get_roots_from_filter(self.dict_tosca, child_key="deltas")
 
             # Map the keys to ints
             deltas_mapping = self.generate_map_from_list([get_dict_key(d) for d in delta_values])
@@ -569,6 +569,8 @@ class V2Map(V2Mapping):
             for d_m in deltas_mapping:
                 # Find parent mapping and assign it to the current delta mapping
                 for a_m in aspect_f_map:
+                    if not d_m.name in delta_links:
+                        continue
                     if a_m.name == delta_links[d_m.name]:
                         MapElem.add_parent_mapping(d_m, a_m)
                         # Now place the value in delta_values into the path we have mapped
