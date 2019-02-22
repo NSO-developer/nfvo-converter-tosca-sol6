@@ -305,9 +305,11 @@ class V2Map(V2Mapping):
         for vdu in vdu_map:
             tosca_path = MapElem.format_path(vdu, T.vdu_boot, use_value=False, )
             boot_data = get_path_value(tosca_path, self.dict_tosca, must_exist=False, no_msg=True)
+
             if boot_data:
                 b_map = self.generate_map_from_list(boot_data, map_args={"none_key": True})
                 MapElem.add_parent_mapping(b_map, vdu)
+
                 boot_map.append(b_map)
         boot_map = flatten(boot_map)
 
@@ -471,7 +473,7 @@ class V2Map(V2Mapping):
 
              # The first value in the map is what we want to set, so insert that into the 'key'
              (("{}", self.FLAG_KEY_SET_VALUE),                  [S.vnfd_vcd_id, vim_flavors_map]),
-             ((T.vdu_vim_flavor, self.FLAG_VAR),                [S.vnfd_vcd_flavor_name, vdu_map]),
+             ((T.vdu_vim_flavor, self.FLAG_VAR),                [S.vnfd_vcd_flavor_name, flavor_map]),
              ((T.vdu_virt_cpu_num, self.FLAG_ONLY_NUMBERS),     [S.vnfd_vcd_cpu_num, flavor_map]),
              ((T.vdu_virt_mem_size, self.FLAG_ONLY_NUMBERS),    [S.vnfd_vcd_mem_size, flavor_map]),
 
@@ -580,7 +582,7 @@ class V2Map(V2Mapping):
             for d_m in deltas_mapping:
                 # Find parent mapping and assign it to the current delta mapping
                 for a_m in aspect_f_map:
-                    if not d_m.name in delta_links:
+                    if d_m.name not in delta_links:
                         continue
                     if a_m.name == delta_links[d_m.name]:
                         MapElem.add_parent_mapping(d_m, a_m)
