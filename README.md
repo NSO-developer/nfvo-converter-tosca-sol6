@@ -27,3 +27,8 @@ tosca.py is the entry point for the standalone version of the converter.
 - -g --no-grouping: If there are no grouping tags in the YANG specifications file give this tag,
                   otherwise it will fail to parse the file
 - -p --prune: Prune empty values from the dict at the end
+
+### Current Limitations
+* Scaling aspects are not converted at this time
+* Only one VNFD in a single file is supported
+* Only the default instantiation level is supported

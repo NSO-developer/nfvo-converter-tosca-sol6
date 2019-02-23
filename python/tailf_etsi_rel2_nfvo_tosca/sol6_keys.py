@@ -445,6 +445,7 @@ class V2Map(V2Mapping):
              ((T.vnf_vnfm_info, self.FLAG_BLANK),               S.vnfd_vnfm_info),
              # -- End Metadata --
 
+             # -- Set Values --
              # This happens first because IDs need to be the first element, for now
              # Setting specific values at specific indexes
              # These are currently only the two virtual links and external links
@@ -459,10 +460,9 @@ class V2Map(V2Mapping):
              (self.set_value(S.KEY_EXT_CP_ORCH, S.ext_cpd_id, 1)),
              (self.set_value(S.KEY_EXT_CP_ORCH_PROT, S.ext_cpd_protocol, 1)),
              (self.set_value(S.KEY_VIRT_LINK_ORCH, S.ext_cpd_virt_link, 1)),
+             # -- End Set Values --
 
-
-             # End set values
-
+             # -- VDU --
              ((T.vdu, self.FLAG_KEY_SET_VALUE),                 [S.vdu_id, vdu_map]),
              ((T.vdu_name, self.FLAG_BLANK),                    [S.vdu_name, vdu_map]),
              ((T.vdu_desc, self.FLAG_BLANK),                    [S.vdu_desc, vdu_map]),
@@ -478,24 +478,29 @@ class V2Map(V2Mapping):
              ((T.vdu_boot, self.FLAG_LIST_FIRST),               [S.vdu_boot_value, boot_map]),
 
              ((T.vdu_boot, self.FLAG_LIST_FIRST),              [S.vdu_vs_desc, boot_map]),
+             # -- End VDU --
 
-
+             # -- Virtual Compute Descriptor --
              # The first value in the map is what we want to set, so insert that into the 'key'
              (("{}", self.FLAG_KEY_SET_VALUE),                  [S.vnfd_vcd_id, vim_flavors_map]),
              ((T.vdu_vim_flavor, self.FLAG_VAR),                [S.vnfd_vcd_flavor_name, flavor_map]),
              ((T.vdu_virt_cpu_num, self.FLAG_ONLY_NUMBERS),     [S.vnfd_vcd_cpu_num, flavor_map]),
              ((T.vdu_virt_mem_size, self.FLAG_ONLY_NUMBERS),    [S.vnfd_vcd_mem_size, flavor_map]),
+             # -- End Virtual Compute Descriptor --
 
+             # -- Internal Connction Points --
              ((T.int_cpd, self.FLAG_KEY_SET_VALUE),             [S.int_cpd_id, cps_map]),
              ((T.int_cpd_layer_prot, self.FLAG_FORMAT_IP),      [S.int_cpd_layer_prot, cps_map]),
              ((S.KEY_VIRT_LINK_MGMT, self.FLAG_KEY_SET_VALUE),  [S.int_cpd_virt_link_desc,
                                                                  mgmt_cps_map]),
              ((S.KEY_VIRT_LINK_ORCH, self.FLAG_KEY_SET_VALUE),  [S.int_cpd_virt_link_desc,
                                                                  orch_cps_map]),
+             # -- End Internal Connection Points
+
              # -- Virtual Storage Descriptor --
              ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.vnfd_virt_storage_id, sw_map]),
              ((T.virt_size, self.FLAG_ONLY_NUMBERS),            [S.vnfd_virt_storage_size, sw_map]),
-             ((T.virt_type, self.FLAG_TYPE_ROOT_DEF),                   [S.vnfd_virt_storage_type, sw_map]),
+             ((T.virt_type, self.FLAG_TYPE_ROOT_DEF),           [S.vnfd_virt_storage_type, sw_map]),
              ((T.virt_storage, self.FLAG_KEY_SET_VALUE),    [S.vnfd_virt_storage_sw_image, sw_map]),
              # -- End Virtual Storage Descriptor --
 
@@ -526,7 +531,7 @@ class V2Map(V2Mapping):
              ((T.inst_level_num_instances, self.FLAG_BLANK),    [S.df_inst_level_vdu_num,
                                                                  vdu_inst_level_map])
 
-
+             # -- Scaling Aspect --
              #((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_inst_scaling_aspect, aspect_f_map]),
              #((T.scaling_aspect_level, self.FLAG_BLANK), [S.df_inst_scaling_level, aspect_f_map]),
 
@@ -544,6 +549,8 @@ class V2Map(V2Mapping):
              # [S.df_scale_aspect_vdu_id, deltas_mapping]),
              #((T.scaling_aspect_deltas_num, self.FLAG_REQ_DELTA),
              # [S.df_scale_aspect_vdu_num, deltas_mapping])
+             # -- End Scaling Aspect
+
              # -- End Deployment Flavor --
             ]
 
