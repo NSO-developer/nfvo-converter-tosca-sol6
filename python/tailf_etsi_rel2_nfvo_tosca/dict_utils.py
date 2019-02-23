@@ -82,6 +82,11 @@ def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
         if isinstance(cur_context, list):
             # If our value is a list index
             if values[i].isdigit():
+                if i == len(values) - 1:
+                    try:
+                        cur_context[int(values[i])] = value
+                    except IndexError:
+                        list_insert_padding(cur_context, int(values[i]), value)
                 try:
                     cur_context = cur_context[int(values[i])]
                     i += 1
@@ -98,7 +103,12 @@ def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
                     break
 
                 if not cur_context[values[i]] and create_missing:
-                    cur_context[values[i]] = {}
+                    # Look ahead and see if we're going to be using this as a list next iteration
+                    # If so, make it a list, otherwise make it a dict
+                    if values[i+1].isdigit():
+                        cur_context[values[i]] = []
+                    else:
+                        cur_context[values[i]] = {}
                 cur_context = cur_context[values[i]]
 
             else:  # Enforce strict structure

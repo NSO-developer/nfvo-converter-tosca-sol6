@@ -39,6 +39,7 @@ class Sol6Converter:
         self.first_list_elem = False
         self.tosca_use_value = False
         self.is_variable = False
+        self.default_root = False
 
     def parse(self):
         """
@@ -78,6 +79,7 @@ class Sol6Converter:
             self.first_list_elem = False
             self.tosca_use_value = False
             self.is_variable = False
+            self.default_root = False
 
             self.set_flags_loop(flags, keys)
 
@@ -147,6 +149,8 @@ class Sol6Converter:
                 self.tosca_use_value = True
             if flag == keys.FLAG_VAR:
                 self.is_variable = True
+            if flag == keys.FLAG_TYPE_ROOT_DEF:
+                self.default_root = True
 
     def handle_flags(self, f_sol6_path, f_tosca_path):
         """
@@ -158,9 +162,17 @@ class Sol6Converter:
         value = self._format_as_ip(self.format_as_ip, f_sol6_path, value)
         value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
         value = self._handle_input(self.is_variable, f_sol6_path, value)
+        value = self._handle_default_root(self.default_root, f_sol6_path, value)
         return value
 
     # Flag option formatting methods
+    def _handle_default_root(self, option, path, value):
+        if not option:
+            return value
+        if not value:
+            return SOL6v2.VIRT_STORAGE_DEFAULT
+        return value
+
     def _handle_input(self, option, path, value):
         if not option:
             return value

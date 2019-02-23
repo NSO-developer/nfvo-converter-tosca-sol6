@@ -80,7 +80,9 @@ class TOSCAv2:
     virt_props                      = virt_storage + ".properties"
     virt_artifacts                  = virt_storage + ".artifacts"
     virt_vsb                        = virt_props + ".virtual_block_storage_data"
-    virt_size                       = virt_props + ".size_of_storage"
+    virt_size                       = virt_vsb + ".size_of_storage"
+    virt_type                       = virt_vsb + ".vdu_storage_requirements.type"
+
     sw_image_data                   = virt_props + ".sw_image_data"
     sw_name                         = sw_image_data + ".name"
     sw_version                      = sw_image_data + ".version"
@@ -157,7 +159,9 @@ class SOL6v2:
     vnfd_virt_storage_desc          = vnfd + ".virtual-storage-descriptor.{}"
     vnfd_virt_storage_id            = vnfd_virt_storage_desc + ".id"
     vnfd_virt_storage_type          = vnfd_virt_storage_desc + ".type-of-storage"
+    VIRT_STORAGE_DEFAULT            = "root"
     vnfd_virt_storage_size          = vnfd_virt_storage_desc + ".size-of-storage"
+    vnfd_virt_storage_sw_image      = vnfd_virt_storage_desc + ".sw-image-desc"
 
     # ***********************
     # ** Deployment Flavor **
@@ -216,6 +220,7 @@ class SOL6v2:
     vdu_boot_key                    = vdu_boot_order + ".key"
     vdu_boot_value                  = vdu_boot_order + ".value"
     vdu_vc_desc                     = vdu + ".virtual-compute-desc.{}"
+    vdu_vs_desc                     = vdu + ".virtual-storage-desc.{}"
 
     # *********************************
     # ** Internal Connection Points **
@@ -275,6 +280,8 @@ class V2Map(V2Mapping):
     # This means if the value to set is an input, to set it, if it is not an input, don't set
     # anything
     FLAG_VAR                        = "THISVARIABLE"
+    # Marks this as requiring a value, and if there isn't one, make it 'root'
+    FLAG_TYPE_ROOT_DEF              = "MUSTBESOMETHINGORROOT"
 
     mapping = {}
 
@@ -467,9 +474,11 @@ class V2Map(V2Mapping):
              # set the value to the key, and pass in '{}' so the mapping is the only thing we're
              # setting. This gives a list of numbers from 0->len
              (("{}", (self.FLAG_ONLY_NUMBERS, self.FLAG_LIST_FIRST, self.FLAG_USE_VALUE,
-                      self.FLAG_KEY_SET_VALUE)),
-              [S.vdu_boot_key, boot_map]),
+                      self.FLAG_KEY_SET_VALUE)),                [S.vdu_boot_key, boot_map]),
              ((T.vdu_boot, self.FLAG_LIST_FIRST),               [S.vdu_boot_value, boot_map]),
+
+             ((T.vdu_boot, self.FLAG_LIST_FIRST),              [S.vdu_vs_desc, boot_map]),
+
 
              # The first value in the map is what we want to set, so insert that into the 'key'
              (("{}", self.FLAG_KEY_SET_VALUE),                  [S.vnfd_vcd_id, vim_flavors_map]),
@@ -483,6 +492,12 @@ class V2Map(V2Mapping):
                                                                  mgmt_cps_map]),
              ((S.KEY_VIRT_LINK_ORCH, self.FLAG_KEY_SET_VALUE),  [S.int_cpd_virt_link_desc,
                                                                  orch_cps_map]),
+             # -- Virtual Storage Descriptor --
+             ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.vnfd_virt_storage_id, sw_map]),
+             ((T.virt_size, self.FLAG_ONLY_NUMBERS),            [S.vnfd_virt_storage_size, sw_map]),
+             ((T.virt_type, self.FLAG_TYPE_ROOT_DEF),                   [S.vnfd_virt_storage_type, sw_map]),
+             ((T.virt_storage, self.FLAG_KEY_SET_VALUE),    [S.vnfd_virt_storage_sw_image, sw_map]),
+             # -- End Virtual Storage Descriptor --
 
              # -- Software Image --
              ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.sw_id, sw_map]),
