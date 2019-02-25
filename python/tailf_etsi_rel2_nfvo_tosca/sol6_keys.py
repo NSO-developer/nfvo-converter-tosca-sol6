@@ -285,8 +285,8 @@ class V2Map(V2Mapping):
 
     mapping = {}
 
-    def __init__(self, dict_tosca, dict_sol6):
-        super().__init__(dict_tosca, dict_sol6)
+    def __init__(self, dict_tosca, dict_sol6, log=None):
+        super().__init__(dict_tosca, dict_sol6, log)
 
         self.override_deltas = False
         self.run_deltas = False

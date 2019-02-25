@@ -1,4 +1,5 @@
-import copy
+import logging
+log = logging.getLogger(__name__)
 
 
 def get_path_value(path, cur_dict, must_exist=True, ensure_dict=False, no_msg=False):
@@ -46,7 +47,7 @@ def get_path_value(path, cur_dict, must_exist=True, ensure_dict=False, no_msg=Fa
                 raise KeyError("Path '{}' not found in {}".format(val, path))
             else:
                 if not no_msg:
-                    print("{} not found in {}".format(val, path))
+                    log.warn("{} not found in {}".format(val, path))
                 return False
 
     if ensure_dict and isinstance(cur_context, list):

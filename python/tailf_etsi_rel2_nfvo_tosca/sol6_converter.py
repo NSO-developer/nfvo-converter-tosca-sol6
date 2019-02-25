@@ -4,6 +4,7 @@
 import re
 from sol6_keys import *
 from dict_utils import *
+import copy
 
 
 class Sol6Converter:
@@ -47,14 +48,14 @@ class Sol6Converter:
         Currently only handles converting a single VNF to VNFD
         """
         # TODO: Handle multiple vnfds
-        print("Starting TOSCA -> SOL6 (v{}) converter.".format(self.SUPPORTED_SOL6_VERSION))
+        self.log.info("Starting TOSCA -> SOL6 (v{}) converter.".format(self.SUPPORTED_SOL6_VERSION))
         # First, get the vnfd specifications model
         try:
             self.vnfd = copy.deepcopy(self.parsed_dict[SOL6v2.vnfd])
         except KeyError:
             self.vnfd = {}
 
-        keys = V2Map(self.tosca_vnf, self.vnfd)
+        keys = V2Map(self.tosca_vnf, self.vnfd, self.log)
         if keys.override_deltas:
             self.override_run_deltas = not keys.run_deltas
         else:
@@ -251,8 +252,8 @@ class Sol6Converter:
 
         # Determine if there are any duplicates
         if len(all_deltas) != len(set(all_deltas)):
-            print("WARNING: step_deltas were detected that have the same name, "
-                  "this is not suppported and thus deltas will not be processed.")
+            self.log.warning("step_deltas were detected that have the same name, "
+                             "this is not suppported and thus deltas will not be processed.")
             self.run_deltas = False
 
 # ******* Static Methods ********
