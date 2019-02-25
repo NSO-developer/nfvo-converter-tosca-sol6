@@ -4,7 +4,10 @@
 /.idea
 /test/internal/lux/lux_Logs
 /outputs
+/build
+/dist
 
+*.spec
 # Word temporary
 ~$*.doc*
 # Word Auto Backup File
