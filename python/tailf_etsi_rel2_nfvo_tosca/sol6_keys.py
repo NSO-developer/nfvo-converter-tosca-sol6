@@ -8,7 +8,7 @@ from dict_utils import *
 from list_utils import *
 
 
-class TOSCAv2:
+class TOSCA:
     """
     Second version of the definitions
     """
@@ -55,28 +55,31 @@ class TOSCAv2:
     # *********************************
     # ** Internal Connectiion Points **
     # *********************************
+
     @staticmethod
     def int_cp_mgmt(item):
         """Return if the current cp is assigned to management or not"""
         return key_exists(item, "properties.management") and \
-            get_path_value("properties.management", item[get_dict_key(item)], must_exist=False)
-
-    int_cpd                         = node_template + ".{}"
-    int_cpd_identifier              = ["type", "cisco.nodes.nfv.VduCp"]
-    int_cpd_mgmt_identifier         = ["type", "cisco.nodes.nfv.VduCp", int_cp_mgmt.__func__]
-    int_cpd_props                   = int_cpd + ".properties"
-    int_cpd_virt_binding            = int_cpd + ".requirements.virtual_binding"
-    int_cpd_virt_link               = int_cpd + ".requirements.virtual_link"
-    int_cpd_layer_prot              = int_cpd_props + ".layer_protocols"
+               get_path_value("properties.management", item[get_dict_key(item)], must_exist=False)
 
     @staticmethod
     def virt_filter(item):
         # Make sure that the virtual storage block we get has the {}.properties.sw_image_data field
         return key_exists(item, "properties.sw_image_data")
 
-    virt_storage                    = node_template + ".{}"
+    int_cpd_mgmt_identifier         = ["type", "cisco.nodes.nfv.VduCp", int_cp_mgmt.__func__]
     virt_storage_identifier         = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage",
                                        virt_filter.__func__]
+
+    int_cpd                         = node_template + ".{}"
+    int_cpd_identifier              = ["type", "cisco.nodes.nfv.VduCp"]
+    int_cpd_props                   = int_cpd + ".properties"
+    int_cpd_virt_binding            = int_cpd + ".requirements.virtual_binding"
+    int_cpd_virt_link               = int_cpd + ".requirements.virtual_link"
+    int_cpd_layer_prot              = int_cpd_props + ".layer_protocols"
+
+    virt_storage                    = node_template + ".{}"
+
     virt_props                      = virt_storage + ".properties"
     virt_artifacts                  = virt_storage + ".artifacts"
     virt_vsb                        = virt_props + ".virtual_block_storage_data"
@@ -123,7 +126,7 @@ class TOSCAv2:
     scaling_aspect_deltas_num       = scaling_aspect_item + ".deltas.{}.number_of_instances"
 
 
-class SOL6v2:
+class SOL6:
     """
     Second version of the definitions
     """
@@ -245,7 +248,7 @@ class SOL6v2:
     sw_img_desc                     = vnfd + ".sw-image-desc.{}"
     sw_id                           = sw_img_desc + ".id"
     sw_name                         = sw_img_desc + ".name"
-    sw_image_name_var               = sw_img_desc + "." +\
+    sw_image_name_var               = sw_img_desc + "." + \
                                       extensions_prefix + ":image-name-variable"
     sw_version                      = sw_img_desc + ".version"
     sw_checksum                     = sw_img_desc + ".checksum"
@@ -290,9 +293,12 @@ class V2Map(V2Mapping):
 
         self.override_deltas = False
         self.run_deltas = False
+        TOSCA.get_path_value = get_path_value
+        TOSCA.key_exists = key_exists
+        TOSCA.get_dict_key = get_dict_key
 
-        T = TOSCAv2
-        S = SOL6v2
+        T = TOSCA
+        S = SOL6
 
         # Generate VDU map
         vdu_map = self.generate_map(T.node_template, T.vdu_identifier)
@@ -559,7 +565,7 @@ class V2Map(V2Mapping):
 
     def _handle_deltas(self, aspect_f_map):
         """
-        ** WARNING: Here be bullshit **
+        ** WARNING: Here be dragons **
 
         This whole block of code gets the delta values from tosca (if they exist, they might not)
         then, it figures out what the deltas parent functions are, and it maps the delta values to
@@ -578,8 +584,8 @@ class V2Map(V2Mapping):
         So, just stick the value into a location that we know and can access easily.
         """
 
-        deltas_name = KeyUtils.get_path_last(TOSCAv2.scaling_aspect_deltas)
-        deltas_num = KeyUtils.get_path_last(TOSCAv2.scaling_aspect_deltas_num)
+        deltas_name = KeyUtils.get_path_last(TOSCA.scaling_aspect_deltas)
+        deltas_num = KeyUtils.get_path_last(TOSCA.scaling_aspect_deltas_num)
         # Get all the elements that have step_deltas
         deltas = get_roots_from_filter(self.dict_tosca, child_key=deltas_name)
 
@@ -609,7 +615,7 @@ class V2Map(V2Mapping):
                     if a_m.name == delta_links[d_m.name]:
                         MapElem.add_parent_mapping(d_m, a_m)
                         # Now place the value in delta_values into the path we have mapped
-                        cur_path = MapElem.format_path(d_m, TOSCAv2.scaling_aspect_deltas_num,
+                        cur_path = MapElem.format_path(d_m, TOSCA.scaling_aspect_deltas_num,
                                                        use_value=False)
                         # Remove the last element in the path (num-instances)
                         cur_path = KeyUtils.remove_path_elem(cur_path, -1)
@@ -636,8 +642,8 @@ class V2Map(V2Mapping):
 
             # Get the virtual_binding for this element from the filtered list
             # Remove the beginning of the path since we aren't dealing with the entire dict here
-            path_lvl = KeyUtils.remove_path_level(TOSCAv2.int_cpd_virt_binding,
-                                                  TOSCAv2.node_template)
+            path_lvl = KeyUtils.remove_path_level(TOSCA.int_cpd_virt_binding,
+                                                  TOSCA.node_template)
             vdu = get_path_value(path_lvl.format(name), entry)
 
             # We need to find the parent mapping so we can include it in the map definition
