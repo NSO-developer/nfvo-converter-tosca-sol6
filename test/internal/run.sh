@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-export PYTHONPATH=../../python/tailf_etsi_rel2_nfvo_tosca
+export PYTHONPATH=../../python/nfvo_solcon_tosca
 
 # Run the four examples that the program shouldn't *at least* crash with
 tosca=../../solcon.py
