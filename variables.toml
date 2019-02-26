@@ -1,3 +1,23 @@
 
-[a.b.c]
-a=''
+# These must match with 'provider-identifiers.$x'
+# If the given provider for a VNFD matches with one of these, then it will automatically
+# take the identifiers from this file
+providers=["cisco", "nokia"]
+
+# All of the identifiers must be the same for all instances of that object
+# Multiple IDs for a single type are not supported
+[provider-identifiers.cisco]
+    vdu = ["type", "cisco.nodes.nfv.Vdu.Compute"]
+    int-cpd = ["type", "cisco.nodes.nfv.VduCp"]
+    int-cpd-mgmt = ["type", "cisco.nodes.nfv.VduCp"]
+    instantiation-level = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
+    scaling-aspects = ["type", "tosca.policies.nfv.ScalingAspects"]
+    virtual-storage = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage"]
+
+[provider-identifiers.nokia]
+    vdu = ["type", "cisco.nodes.nfv.Vdu.Compute"]
+    int-cpd = ["type", "cisco.nodes.nfv.VduCp"]
+    int-cpd-mgmt = ["type", "cisco.nodes.nfv.VduCp"]
+    instantiation-level = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
+    scaling-aspects = ["type", "tosca.policies.nfv.ScalingAspects"]
+    virtual-storage = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage"]

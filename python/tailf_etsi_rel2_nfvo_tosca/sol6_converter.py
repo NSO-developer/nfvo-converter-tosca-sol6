@@ -17,10 +17,12 @@ class Sol6Converter:
     log = None
     keys = None
 
-    def __init__(self, tosca_vnf, parsed_dict, log=None):
+    def __init__(self, tosca_vnf, parsed_dict, variables=None, log=None):
         self.tosca_vnf = tosca_vnf
         self.parsed_dict = parsed_dict
         self.log = log
+        self.variables = variables
+
         # Set this up for _virtual_get_flavor_names
         self.flavor_names = []
         self.connection_points = {}
@@ -49,6 +51,12 @@ class Sol6Converter:
         """
         # TODO: Handle multiple vnfds
         self.log.info("Starting TOSCA -> SOL6 (v{}) converter.".format(self.SUPPORTED_SOL6_VERSION))
+
+        # The very first thing we want to do is set up the path variables
+        self.log.debug("Setting path variables: {}".format(self.variables))
+        TOSCA.set_variables(self.variables, self.tosca_vnf)
+        SOL6.set_variables(self.variables)
+
         # First, get the vnfd specifications model
         try:
             self.vnfd = copy.deepcopy(self.parsed_dict[SOL6.vnfd])
