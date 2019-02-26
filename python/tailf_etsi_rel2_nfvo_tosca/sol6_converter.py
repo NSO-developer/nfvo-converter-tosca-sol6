@@ -51,7 +51,7 @@ class Sol6Converter:
         self.log.info("Starting TOSCA -> SOL6 (v{}) converter.".format(self.SUPPORTED_SOL6_VERSION))
         # First, get the vnfd specifications model
         try:
-            self.vnfd = copy.deepcopy(self.parsed_dict[SOL6v2.vnfd])
+            self.vnfd = copy.deepcopy(self.parsed_dict[SOL6.vnfd])
         except KeyError:
             self.vnfd = {}
 
@@ -171,7 +171,7 @@ class Sol6Converter:
         if not option:
             return value
         if not value:
-            return SOL6v2.VIRT_STORAGE_DEFAULT
+            return SOL6.VIRT_STORAGE_DEFAULT
         return value
 
     def _handle_input(self, option, path, value):
@@ -201,7 +201,7 @@ class Sol6Converter:
     def _format_as_ip(self, option, path, value):
         if not option:
             return value
-        valid_opts = SOL6v2.VALID_PROTOCOLS
+        valid_opts = SOL6.VALID_PROTOCOLS
 
         def _fmt_val(val):
             for opt in valid_opts:
@@ -239,7 +239,7 @@ class Sol6Converter:
         We are only supporting step_deltas that have unique names across the entire yaml file
         I don't care that YAML supports more.
         """
-        step_deltas_name = KeyUtils.get_path_last(TOSCAv2.scaling_aspect_deltas)
+        step_deltas_name = KeyUtils.get_path_last(TOSCA.scaling_aspect_deltas)
         # Get all the elements that have step_deltas
         deltas = get_roots_from_filter(self.tosca_vnf, child_key=step_deltas_name)
         # Get all the values of 'step_deltas' and stick them in a list

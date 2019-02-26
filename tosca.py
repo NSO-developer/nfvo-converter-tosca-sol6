@@ -13,9 +13,12 @@ import logging
 import dict_utils
 import nso as nso
 from sol6_converter import Sol6Converter
+import toml
 
+desc = """Convert a SOL001 (TOSCA) to SOL006 format
+"""
 
-parser = argparse.ArgumentParser(description='Process some integers.')
+parser = argparse.ArgumentParser(description=desc)
 parser.add_argument('-f', '--file', required=True, help="The TOSCA VNF")
 parser.add_argument('-o', '--output', help="The output file for the convtered VNF (JSON format)")
 parser.add_argument('-l', '--log-level',
@@ -27,12 +30,18 @@ parser.add_argument('-H', '--hide-output', action='store_true',
 # parser.add_argument('-g', '--no-grouping', action='store_false',
 #                    help="Specify if there are no grouping tags in the specifications file")
 parser.add_argument('-p', '--prune', action='store_true', help='Prune empty values from the dict')
+parser.add_argument('-c', '--path-config', help='Location of the paths configuration file')
 
 args = parser.parse_args()
 
 log_format = "%(levelname)s - %(message)s"
 logging.basicConfig(level=args.log_level, format=log_format)
 log = logging.getLogger(__name__)
+
+# Read the path configuration file
+path_conf = toml.load(args.path_config)
+
+print(path_conf)
 
 # Parse the yang specifications file into an empty dictionary
 parsed_dict = {}
