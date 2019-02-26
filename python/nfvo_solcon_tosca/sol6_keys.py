@@ -13,7 +13,7 @@ class TOSCA:
     Second version of the definitions
     """
     topology_template               = "topology_template"
-    node_template                   = topology_template + ".node_templates"
+    node_templates                   = topology_template + ".node_templates"
     desc                            = "description"
     policies                        = topology_template + ".policies"
     inputs                          = "topology_template.inputs"
@@ -22,7 +22,7 @@ class TOSCA:
     # **************
     # ** Metadata **
     # **************
-    vnf                             = node_template + ".vnf"
+    vnf                             = node_templates + ".vnf"
     vnf_prop                        = vnf + ".properties"
     vnf_desc_id                     = vnf_prop + ".descriptor_id"
     vnf_desc_ver                    = vnf_prop + ".descriptor_version"
@@ -35,7 +35,7 @@ class TOSCA:
     # *********
     # ** VDU **
     # *********
-    vdu                             = node_template + ".{}"
+    vdu                             = node_templates + ".{}"
     vdu_identifier                  = None
     vdu_props                       = vdu + ".properties"
     vdu_name                        = vdu_props + ".name"
@@ -70,14 +70,14 @@ class TOSCA:
     int_cpd_mgmt_identifier         = None
     virt_storage_identifier         = None
 
-    int_cpd                         = node_template + ".{}"
+    int_cpd                         = node_templates + ".{}"
     int_cpd_identifier              = None
     int_cpd_props                   = int_cpd + ".properties"
     int_cpd_virt_binding            = int_cpd + ".requirements.virtual_binding"
     int_cpd_virt_link               = int_cpd + ".requirements.virtual_link"
     int_cpd_layer_prot              = int_cpd_props + ".layer_protocols"
 
-    virt_storage                    = node_template + ".{}"
+    virt_storage                    = node_templates + ".{}"
 
     virt_props                      = virt_storage + ".properties"
     virt_artifacts                  = virt_storage + ".artifacts"
@@ -159,6 +159,26 @@ class TOSCA:
         TOSCA.inst_level_identifier = inst_level_identifier
         TOSCA.scaling_aspects_identifier = scaling_aspects_identifier
         TOSCA.virt_storage_identifier = virt_storage_identifier
+
+        # Load the other paths
+        tosca = variables["tosca"]
+        key_list = V2Mapping.get_object_keys(TOSCA, exclude="identifier")
+
+        for k in key_list:
+            if k not in tosca:
+                raise KeyError("{} does not exist in the configuration file".format(k))
+            val = TOSCA.get_full_path(k, tosca)
+            setattr(TOSCA, k, val)
+
+    @staticmethod
+    def get_full_path(elem, dic):
+        try:
+            if not isinstance(dic[elem], list):
+                return dic[elem]
+        except KeyError:
+            raise KeyError("Could not find {} as a parent".format(elem))
+
+        return "{}.{}".format(TOSCA.get_full_path(dic[elem][0], dic), dic[elem][1])
 
 
 class SOL6:
@@ -343,9 +363,9 @@ class V2Map(V2Mapping):
         S = SOL6
 
         # Generate VDU map
-        vdu_map = self.generate_map(T.node_template, T.vdu_identifier)
+        vdu_map = self.generate_map(T.node_templates, T.vdu_identifier)
 
-        sw_map = self.generate_map(T.node_template, T.virt_storage_identifier)
+        sw_map = self.generate_map(T.node_templates, T.virt_storage_identifier)
 
         # This list has the VDUs the flavors are attached to
         vdu_vim_flavors = self.get_items_from_map(T.vdu_vim_flavor, vdu_map, dict_tosca,
@@ -400,11 +420,11 @@ class V2Map(V2Mapping):
 
         # *** Connection Point mappings ***
         # Map internal connection points to their VDUs
-        cps_map = self.generate_map(T.node_template, T.int_cpd_identifier,
+        cps_map = self.generate_map(T.node_templates, T.int_cpd_identifier,
                                     map_function=V2Map.int_cp_mapping,
                                     map_args={"vdu_map": vdu_map})
         # Filter internal connection points that are assigned to management
-        mgmt_cps_map = self.generate_map(T.node_template, T.int_cpd_mgmt_identifier,
+        mgmt_cps_map = self.generate_map(T.node_templates, T.int_cpd_mgmt_identifier,
                                          map_function=V2Map.int_cp_mapping,
                                          map_args={"vdu_map": vdu_map})
 
@@ -685,7 +705,7 @@ class V2Map(V2Mapping):
             # Get the virtual_binding for this element from the filtered list
             # Remove the beginning of the path since we aren't dealing with the entire dict here
             path_lvl = KeyUtils.remove_path_level(TOSCA.int_cpd_virt_binding,
-                                                  TOSCA.node_template)
+                                                  TOSCA.node_templates)
             vdu = get_path_value(path_lvl.format(name), entry)
 
             # We need to find the parent mapping so we can include it in the map definition

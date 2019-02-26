@@ -39,6 +39,7 @@ log = logging.getLogger(__name__)
 
 # Read the path configuration file
 path_conf = toml.load(args.path_config)
+print(path_conf)
 
 # Parse the yang specifications file into an empty dictionary
 parsed_dict = {}
