@@ -36,7 +36,7 @@ class TOSCA:
     # ** VDU **
     # *********
     vdu                             = node_template + ".{}"
-    vdu_identifier                  = ["type", "cisco.nodes.nfv.Vdu.Compute"]
+    vdu_identifier                  = None
     vdu_props                       = vdu + ".properties"
     vdu_name                        = vdu_props + ".name"
     vdu_boot                        = vdu_props + ".boot_order"
@@ -67,12 +67,11 @@ class TOSCA:
         # Make sure that the virtual storage block we get has the {}.properties.sw_image_data field
         return key_exists(item, "properties.sw_image_data")
 
-    int_cpd_mgmt_identifier         = ["type", "cisco.nodes.nfv.VduCp", int_cp_mgmt.__func__]
-    virt_storage_identifier         = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage",
-                                       virt_filter.__func__]
+    int_cpd_mgmt_identifier         = None
+    virt_storage_identifier         = None
 
     int_cpd                         = node_template + ".{}"
-    int_cpd_identifier              = ["type", "cisco.nodes.nfv.VduCp"]
+    int_cpd_identifier              = None
     int_cpd_props                   = int_cpd + ".properties"
     int_cpd_virt_binding            = int_cpd + ".requirements.virtual_binding"
     int_cpd_virt_link               = int_cpd + ".requirements.virtual_link"
@@ -107,14 +106,14 @@ class TOSCA:
     def_inst_key                    = "default"
     def_inst_prop                   = def_inst_level + ".properties.levels"
     def_inst_desc                   = def_inst_prop + "." + def_inst_key + ".description"
-    inst_level_identifier           = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
+    inst_level_identifier           = None
     inst_level                      = policies + ".{}"
     inst_level_targets              = inst_level + ".targets"
     inst_level_num_instances        = inst_level + ".properties.levels.default.number_of_instances"
 
     # Scaling Aspects
     scaling_aspects                 = policies + ".{}"
-    scaling_aspects_identifier      = ["type", "tosca.policies.nfv.ScalingAspects"]
+    scaling_aspects_identifier      = None
     scaling_props                   = scaling_aspects + ".properties"
     scaling_aspect_item_list        = scaling_props + ".aspects"
     scaling_aspect_item             = scaling_aspect_item_list + ".{}"
@@ -124,6 +123,42 @@ class TOSCA:
     scaling_aspect_deltas           = scaling_aspect_item + ".step_deltas"
     # Note: this is not a valid TOSCA path, it's for internal use
     scaling_aspect_deltas_num       = scaling_aspect_item + ".deltas.{}.number_of_instances"
+
+    @staticmethod
+    def set_variables(variables, dict_tosca):
+        """
+        Take the input from the config file, and set the variables that are identifiers here
+        This must be run before the values are used
+        """
+        cur_provider = get_path_value(TOSCA.vnf_provider, dict_tosca)
+        possible_providers = variables['providers']
+
+        # We must have a provider mapping
+        if cur_provider not in possible_providers:
+            raise KeyError("Provider {} not found in possible providers {}"
+                           .format(cur_provider, possible_providers))
+
+        provider_identifiers = variables["provider-identifiers"][cur_provider]
+
+        # Load the basic identifiers
+        vdu_identifier = provider_identifiers["vdu"]
+        int_cpd_identifier = provider_identifiers["int-cpd"]
+        inst_level_identifier = provider_identifiers["instantiation-level"]
+        scaling_aspects_identifier = provider_identifiers["scaling-aspects"]
+        virt_storage_identifier = provider_identifiers["virtual-storage"]
+        int_cpd_mgmt_identifier = provider_identifiers["int-cpd-mgmt"]
+
+        # Add the filter functions to the relevant identifiers
+        virt_storage_identifier.append(TOSCA.virt_filter)
+        int_cpd_mgmt_identifier.append(TOSCA.int_cp_mgmt)
+
+        # Assign the read values
+        TOSCA.vdu_identifier = vdu_identifier
+        TOSCA.int_cpd_identifier = int_cpd_identifier
+        TOSCA.int_cpd_mgmt_identifier = int_cpd_mgmt_identifier
+        TOSCA.inst_level_identifier = inst_level_identifier
+        TOSCA.scaling_aspects_identifier = scaling_aspects_identifier
+        TOSCA.virt_storage_identifier = virt_storage_identifier
 
 
 class SOL6:
@@ -257,6 +292,13 @@ class SOL6:
     sw_min_disk                     = sw_img_desc + ".min-disk"
     sw_size                         = sw_img_desc + ".size"
     sw_image                        = sw_img_desc + ".image"
+
+    @staticmethod
+    def set_variables(variables):
+        """
+        Take the input from the config file, and set the variables that are identifiers here
+        """
+        pass
 
 
 class V2Map(V2Mapping):

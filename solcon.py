@@ -30,7 +30,7 @@ parser.add_argument('-H', '--hide-output', action='store_true',
 # parser.add_argument('-g', '--no-grouping', action='store_false',
 #                    help="Specify if there are no grouping tags in the specifications file")
 parser.add_argument('-p', '--prune', action='store_true', help='Prune empty values from the dict')
-parser.add_argument('-c', '--path-config', help='Location of the paths configuration file')
+parser.add_argument('-c', '--path-config', required=True, help='Location of the paths configuration file')
 
 args = parser.parse_args()
 
@@ -40,7 +40,6 @@ log = logging.getLogger(__name__)
 
 # Read the path configuration file
 path_conf = toml.load(args.path_config)
-
 print(path_conf)
 
 # Parse the yang specifications file into an empty dictionary
@@ -52,7 +51,7 @@ with open(args.file, 'rb') as f:
     tosca_vnf = yaml.load(f.read())
 
 # Do the actual converting to SOL006
-converter = Sol6Converter(tosca_vnf, parsed_dict, log=log)
+converter = Sol6Converter(tosca_vnf, parsed_dict, variables=path_conf, log=log)
 cnfv = converter.parse()
 
 
