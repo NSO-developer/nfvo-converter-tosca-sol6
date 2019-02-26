@@ -15,8 +15,7 @@ import nso as nso
 from sol6_converter import Sol6Converter
 import toml
 
-desc = """Convert a SOL001 (TOSCA) to SOL006 format
-"""
+desc = "NFVO SOL6 Converter (SOLCon): Convert a SOL001 (TOSCA) YAML to SOL006 JSON"
 
 parser = argparse.ArgumentParser(description=desc)
 parser.add_argument('-f', '--file', required=True, help="The TOSCA VNF")
