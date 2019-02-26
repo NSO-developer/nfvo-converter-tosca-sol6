@@ -267,11 +267,6 @@ class Sol6Converter:
 # ******* Static Methods ********
 
 
-def get_object_keys(obj):
-    return [attr for attr in dir(obj) if not callable(getattr(obj, attr)) and
-            not (attr.startswith("__") or attr.startswith("_"))]
-
-
 def is_hashable(obj):
     """Determine whether 'obj' can be hashed."""
     try:
