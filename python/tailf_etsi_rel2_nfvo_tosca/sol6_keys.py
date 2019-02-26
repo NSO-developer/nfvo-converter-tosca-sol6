@@ -130,7 +130,7 @@ class TOSCA:
         Take the input from the config file, and set the variables that are identifiers here
         This must be run before the values are used
         """
-        cur_provider = get_path_value(TOSCA.vnf_provider, dict_tosca)
+        cur_provider = get_path_value(TOSCA.vnf_provider, dict_tosca).lower()
         possible_providers = variables['providers']
 
         # We must have a provider mapping
