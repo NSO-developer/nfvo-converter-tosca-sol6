@@ -79,4 +79,3 @@ if args.output:
 
 if not args.output:
     sys.stdout.write(json_output)
-

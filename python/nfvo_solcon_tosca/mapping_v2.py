@@ -1,5 +1,5 @@
 from dict_utils import *
-
+from functools import wraps
 
 class V2Mapping:
     """
@@ -230,6 +230,7 @@ class V2Mapping:
                 not (attr.startswith("__") or attr.startswith("_") or
                      (exclude and exclude in attr))]
 
+
 class MapElem:
     """
 
@@ -330,3 +331,10 @@ class MapElem:
 
     def __repr__(self):
         return self.__str__()
+
+
+
+def recfun(f):
+    @wraps(f)
+    def _f(*a, **kwa): return f(_f, *a, **kwa)
+    return _f
