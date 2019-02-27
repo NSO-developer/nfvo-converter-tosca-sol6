@@ -1,4 +1,7 @@
 # YANG To Dict Tool
+Note: The usage of this tool in SOLCon has been removed.
+
+
 This class is designed to be a semi-generic way of taking a specification YANG file and turning it
 into an empty dictionary to be used making it easier to assign values to the proper places with
 the correct names.

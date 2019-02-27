@@ -10,6 +10,7 @@ import argparse
 import json
 import yaml
 import logging
+import sys
 import dict_utils
 import nso as nso
 from sol6_converter import Sol6Converter
@@ -19,17 +20,15 @@ desc = "NFVO SOL6 Converter (SOLCon): Convert a SOL001 (TOSCA) YAML to SOL006 JS
 
 parser = argparse.ArgumentParser(description=desc)
 parser.add_argument('-f', '--file', required=True, help="The TOSCA VNF")
-parser.add_argument('-o', '--output', help="The output file for the convtered VNF (JSON format)")
+parser.add_argument('-o', '--output', help="The output file for the convtered VNF (JSON format), "
+                                           "outputs to stdout if not specified")
 parser.add_argument('-l', '--log-level',
                     choices=['DEBUG', 'INFO', 'WARNING'], default=logging.INFO, help="Log level")
-parser.add_argument('-H', '--hide-output', action='store_true',
-                    help="Do not show output in the console at the end of conversion")
 # parser.add_argument('-n', '--dry-run', action='store_true', help="Don't send VNFD to NSO")
-# parser.add_argument('-y', '--yang-template', help="The yang specifications file")
-# parser.add_argument('-g', '--no-grouping', action='store_false',
-#                    help="Specify if there are no grouping tags in the specifications file")
-parser.add_argument('-p', '--prune', action='store_true', help='Prune empty values from the dict')
-parser.add_argument('-c', '--path-config', required=True, help='Location of the paths configuration file')
+parser.add_argument('-p', '--prune', action='store_false',
+                    help='Do not prune empty values from the dict')
+parser.add_argument('-c', '--path-config', required=True,
+                    help='Location of the paths configuration file')
 
 args = parser.parse_args()
 
@@ -67,8 +66,8 @@ if args.output:
     with open(args.output, 'w') as f:
         f.writelines(json_output)
 
-if not args.hide_output:
-    log.info(json_output)
+if not args.output:
+    sys.stdout.write(json_output)
 
 # Always do dry run for now
 args.dry_run = True
