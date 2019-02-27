@@ -25,6 +25,7 @@ providers=["nokia"]
     inputs = ["topology_template", "inputs"]
     desc = "description"
     input_key = "get_input"
+    provider = ["vnf_prop", "provider"]
 
     # ** VNF Metadata **
     vnf      = ["node_templates", "vnf"]

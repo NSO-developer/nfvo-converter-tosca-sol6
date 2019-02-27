@@ -236,6 +236,20 @@ def get_dict_key(dic, n=0):
     return list(dic.keys())[n]
 
 
+def gen_dict_extract(key, var):
+    if hasattr(var, 'iteritems'):
+        for k, v in var.iteritems():
+            if k == key:
+                yield v
+            if isinstance(v, dict):
+                for result in gen_dict_extract(key, v):
+                    yield result
+            elif isinstance(v, list):
+                for d in v:
+                    for result in gen_dict_extract(key, d):
+                        yield result
+
+
 def merge_two_dicts(x, y):
     """
     https://stackoverflow.com/questions/38987/how-to-merge-two-dictionaries-in-a-single-expression

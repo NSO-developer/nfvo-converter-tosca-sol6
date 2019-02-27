@@ -230,7 +230,6 @@ class Sol6Converter:
             return value
         return value[0]
 
-
     @staticmethod
     def _only_number(option, value, is_float=False):
         if not option:
@@ -265,6 +264,21 @@ class Sol6Converter:
             self.run_deltas = False
 
 # ******* Static Methods ********
+    @staticmethod
+    def find_provider(tosca_lines):
+        """
+        Do a dumb search over the file to find the provider
+        """
+        found = None
+        for l in tosca_lines:
+            if "provider:" in str(l):
+                found = l
+                break
+        if not found:
+            raise ValueError("Provider not found")
+        prov = found.decode("utf-8").strip()
+        val = prov.split(":")[-1].strip()
+        return val.lower()
 
 
 def is_hashable(obj):
