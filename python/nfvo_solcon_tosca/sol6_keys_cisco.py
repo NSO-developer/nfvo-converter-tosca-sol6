@@ -3,13 +3,14 @@ These are automatically used without having to update anything else.
 The TOSCA variables are mapped to the SOL6 ones, they must have the same names.
 The program does not attempt to map variables beginning with '_'
 """
+from sol6_keys import TOSCA, SOL6, V2Map
 from key_utils import KeyUtils
 from mapping_v2 import V2Mapping, MapElem
 from dict_utils import *
 from list_utils import *
 
 
-class TOSCA:
+class TOSCA(TOSCA):
     """
     Second version of the definitions
     """
@@ -190,7 +191,7 @@ class TOSCA:
         return "{}.{}".format(TOSCA.get_full_path(dic[elem][0], dic), dic[elem][1])
 
 
-class SOL6:
+class SOL6(SOL6):
     """
     Second version of the definitions
     """
@@ -350,16 +351,6 @@ class SOL6:
                 val = SOL6.get_full_path(k, sol6)
 
             setattr(SOL6, k, val)
-
-    @staticmethod
-    def get_full_path(elem, dic):
-        try:
-            if not isinstance(dic[elem], list):
-                return dic[elem]
-        except KeyError:
-            raise KeyError("Could not find {} as a parent".format(elem))
-
-        return "{}.{}".format(TOSCA.get_full_path(dic[elem][0], dic), dic[elem][1])
 
 
 class V2Map(V2Mapping):
@@ -543,124 +534,124 @@ class V2Map(V2Mapping):
         # This now supports the same value mapped to different locations
         self.mapping = \
             [
-             # -- Metadata --
-             ((T.vnf_desc_id, self.FLAG_BLANK),                 S.vnfd_id),
-             ((T.vnf_provider, self.FLAG_BLANK),                S.vnfd_provider),
-             ((T.vnf_product_name, self.FLAG_BLANK),            S.vnfd_product),
-             ((T.vnf_software_ver, self.FLAG_BLANK),            S.vnfd_software_ver),
-             ((T.vnf_desc_ver, self.FLAG_BLANK),                S.vnfd_ver),
-             ((T.vnf_product_info_name, self.FLAG_BLANK),       S.vnfd_info_name),
-             ((T.desc, self.FLAG_BLANK),                        S.vnfd_info_desc),
-             ((T.vnf_vnfm_info, self.FLAG_BLANK),               S.vnfd_vnfm_info),
-             # -- End Metadata --
+                # -- Metadata --
+                ((T.vnf_desc_id, self.FLAG_BLANK),                 S.vnfd_id),
+                ((T.vnf_provider, self.FLAG_BLANK),                S.vnfd_provider),
+                ((T.vnf_product_name, self.FLAG_BLANK),            S.vnfd_product),
+                ((T.vnf_software_ver, self.FLAG_BLANK),            S.vnfd_software_ver),
+                ((T.vnf_desc_ver, self.FLAG_BLANK),                S.vnfd_ver),
+                ((T.vnf_product_info_name, self.FLAG_BLANK),       S.vnfd_info_name),
+                ((T.desc, self.FLAG_BLANK),                        S.vnfd_info_desc),
+                ((T.vnf_vnfm_info, self.FLAG_BLANK),               S.vnfd_vnfm_info),
+                # -- End Metadata --
 
-             # -- Set Values --
-             # This happens first because IDs need to be the first element, for now
-             # Setting specific values at specific indexes
-             # These are currently only the two virtual links and external links
-             (self.set_value(S.KEY_VIRT_LINK_MGMT, S.virt_link_desc_id, 0)),
-             (self.set_value(S.KEY_VIRT_LINK_MGMT_PROT, S.virt_link_desc_protocol, 0)),
-             (self.set_value(S.KEY_VIRT_LINK_ORCH, S.virt_link_desc_id, 1)),
-             (self.set_value(S.KEY_VIRT_LINK_ORCH_PROT, S.virt_link_desc_protocol, 1)),
+                # -- Set Values --
+                # This happens first because IDs need to be the first element, for now
+                # Setting specific values at specific indexes
+                # These are currently only the two virtual links and external links
+                (self.set_value(S.KEY_VIRT_LINK_MGMT, S.virt_link_desc_id, 0)),
+                (self.set_value(S.KEY_VIRT_LINK_MGMT_PROT, S.virt_link_desc_protocol, 0)),
+                (self.set_value(S.KEY_VIRT_LINK_ORCH, S.virt_link_desc_id, 1)),
+                (self.set_value(S.KEY_VIRT_LINK_ORCH_PROT, S.virt_link_desc_protocol, 1)),
 
-             (self.set_value(S.KEY_EXT_CP_MGMT, S.ext_cpd_id, 0)),
-             (self.set_value(S.KEY_EXT_CP_MGMT_PROT, S.ext_cpd_protocol, 0)),
-             (self.set_value(S.KEY_VIRT_LINK_MGMT, S.ext_cpd_virt_link, 0)),
-             (self.set_value(S.KEY_EXT_CP_ORCH, S.ext_cpd_id, 1)),
-             (self.set_value(S.KEY_EXT_CP_ORCH_PROT, S.ext_cpd_protocol, 1)),
-             (self.set_value(S.KEY_VIRT_LINK_ORCH, S.ext_cpd_virt_link, 1)),
-             # -- End Set Values --
+                (self.set_value(S.KEY_EXT_CP_MGMT, S.ext_cpd_id, 0)),
+                (self.set_value(S.KEY_EXT_CP_MGMT_PROT, S.ext_cpd_protocol, 0)),
+                (self.set_value(S.KEY_VIRT_LINK_MGMT, S.ext_cpd_virt_link, 0)),
+                (self.set_value(S.KEY_EXT_CP_ORCH, S.ext_cpd_id, 1)),
+                (self.set_value(S.KEY_EXT_CP_ORCH_PROT, S.ext_cpd_protocol, 1)),
+                (self.set_value(S.KEY_VIRT_LINK_ORCH, S.ext_cpd_virt_link, 1)),
+                # -- End Set Values --
 
-             # -- VDU --
-             ((T.vdu, self.FLAG_KEY_SET_VALUE),                 [S.vdu_id, vdu_map]),
-             ((T.vdu_name, self.FLAG_BLANK),                    [S.vdu_name, vdu_map]),
-             ((T.vdu_desc, self.FLAG_BLANK),                    [S.vdu_desc, vdu_map]),
+                # -- VDU --
+                ((T.vdu, self.FLAG_KEY_SET_VALUE),                 [S.vdu_id, vdu_map]),
+                ((T.vdu_name, self.FLAG_BLANK),                    [S.vdu_name, vdu_map]),
+                ((T.vdu_desc, self.FLAG_BLANK),                    [S.vdu_desc, vdu_map]),
 
-             # Each value is a list, but we've created a mapping that handles that, so only
-             # set the first value of the list
-             # We want a unique int for the key here, and we have that in the mapping, but it's
-             # the sol6 mapping, so swap the tosca map to the sol6 with FLAG_USE_VALUE, then
-             # set the value to the key, and pass in '{}' so the mapping is the only thing we're
-             # setting. This gives a list of numbers from 0->len
-             (("{}", (self.FLAG_ONLY_NUMBERS, self.FLAG_LIST_FIRST, self.FLAG_USE_VALUE,
-                      self.FLAG_KEY_SET_VALUE)),                [S.vdu_boot_key, boot_map]),
-             ((T.vdu_boot, self.FLAG_LIST_FIRST),               [S.vdu_boot_value, boot_map]),
+                # Each value is a list, but we've created a mapping that handles that, so only
+                # set the first value of the list
+                # We want a unique int for the key here, and we have that in the mapping, but it's
+                # the sol6 mapping, so swap the tosca map to the sol6 with FLAG_USE_VALUE, then
+                # set the value to the key, and pass in '{}' so the mapping is the only thing we're
+                # setting. This gives a list of numbers from 0->len
+                (("{}", (self.FLAG_ONLY_NUMBERS, self.FLAG_LIST_FIRST, self.FLAG_USE_VALUE,
+                         self.FLAG_KEY_SET_VALUE)),                [S.vdu_boot_key, boot_map]),
+                ((T.vdu_boot, self.FLAG_LIST_FIRST),               [S.vdu_boot_value, boot_map]),
 
-             ((T.vdu_boot, self.FLAG_LIST_FIRST),              [S.vdu_vs_desc, boot_map]),
-             # -- End VDU --
+                ((T.vdu_boot, self.FLAG_LIST_FIRST),              [S.vdu_vs_desc, boot_map]),
+                # -- End VDU --
 
-             # -- Virtual Compute Descriptor --
-             # The first value in the map is what we want to set, so insert that into the 'key'
-             (("{}", self.FLAG_KEY_SET_VALUE),                  [S.vnfd_vcd_id, vim_flavors_map]),
-             ((T.vdu_vim_flavor, self.FLAG_VAR),                [S.vnfd_vcd_flavor_name, flavor_map]),
-             ((T.vdu_virt_cpu_num, self.FLAG_ONLY_NUMBERS),     [S.vnfd_vcd_cpu_num, flavor_map]),
-             ((T.vdu_virt_mem_size, self.FLAG_ONLY_NUMBERS),    [S.vnfd_vcd_mem_size, flavor_map]),
-             # -- End Virtual Compute Descriptor --
+                # -- Virtual Compute Descriptor --
+                # The first value in the map is what we want to set, so insert that into the 'key'
+                (("{}", self.FLAG_KEY_SET_VALUE),                  [S.vnfd_vcd_id, vim_flavors_map]),
+                ((T.vdu_vim_flavor, self.FLAG_VAR),                [S.vnfd_vcd_flavor_name, flavor_map]),
+                ((T.vdu_virt_cpu_num, self.FLAG_ONLY_NUMBERS),     [S.vnfd_vcd_cpu_num, flavor_map]),
+                ((T.vdu_virt_mem_size, self.FLAG_ONLY_NUMBERS),    [S.vnfd_vcd_mem_size, flavor_map]),
+                # -- End Virtual Compute Descriptor --
 
-             # -- Internal Connction Points --
-             ((T.int_cpd, self.FLAG_KEY_SET_VALUE),             [S.int_cpd_id, cps_map]),
-             ((T.int_cpd_layer_prot, self.FLAG_FORMAT_IP),      [S.int_cpd_layer_prot, cps_map]),
-             ((S.KEY_VIRT_LINK_MGMT, self.FLAG_KEY_SET_VALUE),  [S.int_cpd_virt_link_desc,
-                                                                 mgmt_cps_map]),
-             ((S.KEY_VIRT_LINK_ORCH, self.FLAG_KEY_SET_VALUE),  [S.int_cpd_virt_link_desc,
-                                                                 orch_cps_map]),
-             # -- End Internal Connection Points
+                # -- Internal Connction Points --
+                ((T.int_cpd, self.FLAG_KEY_SET_VALUE),             [S.int_cpd_id, cps_map]),
+                ((T.int_cpd_layer_prot, self.FLAG_FORMAT_IP),      [S.int_cpd_layer_prot, cps_map]),
+                ((S.KEY_VIRT_LINK_MGMT, self.FLAG_KEY_SET_VALUE),  [S.int_cpd_virt_link_desc,
+                                                                    mgmt_cps_map]),
+                ((S.KEY_VIRT_LINK_ORCH, self.FLAG_KEY_SET_VALUE),  [S.int_cpd_virt_link_desc,
+                                                                    orch_cps_map]),
+                # -- End Internal Connection Points
 
-             # -- Virtual Storage Descriptor --
-             ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.vnfd_virt_storage_id, sw_map]),
-             ((T.virt_size, self.FLAG_ONLY_NUMBERS),            [S.vnfd_virt_storage_size, sw_map]),
-             ((T.virt_type, self.FLAG_TYPE_ROOT_DEF),           [S.vnfd_virt_storage_type, sw_map]),
-             ((T.virt_storage, self.FLAG_KEY_SET_VALUE),    [S.vnfd_virt_storage_sw_image, sw_map]),
-             # -- End Virtual Storage Descriptor --
+                # -- Virtual Storage Descriptor --
+                ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.vnfd_virt_storage_id, sw_map]),
+                ((T.virt_size, self.FLAG_ONLY_NUMBERS),            [S.vnfd_virt_storage_size, sw_map]),
+                ((T.virt_type, self.FLAG_TYPE_ROOT_DEF),           [S.vnfd_virt_storage_type, sw_map]),
+                ((T.virt_storage, self.FLAG_KEY_SET_VALUE),    [S.vnfd_virt_storage_sw_image, sw_map]),
+                # -- End Virtual Storage Descriptor --
 
-             # -- Software Image --
-             ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.sw_id, sw_map]),
-             ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.sw_name, sw_map]),
-             ((T.sw_name, self.FLAG_VAR),                       [S.sw_image_name_var, sw_map]),
-             ((T.sw_version, self.FLAG_BLANK),                  [S.sw_version, sw_map]),
-             ((T.sw_checksum, self.FLAG_BLANK),                 [S.sw_checksum, sw_map]),
-             ((T.sw_container_fmt, self.FLAG_BLANK),            [S.sw_container_format, sw_map]),
-             ((T.sw_disk_fmt, self.FLAG_BLANK),                 [S.sw_disk_format, sw_map]),
-             ((T.sw_min_disk, self.FLAG_ONLY_NUMBERS),          [S.sw_min_disk, sw_map]),
-             ((T.sw_size, self.FLAG_ONLY_NUMBERS),              [S.sw_size, sw_map]),
-             ((T.sw_image_file, self.FLAG_BLANK),               [S.sw_image, sw_map]),
-             # -- End Software Image --
+                # -- Software Image --
+                ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.sw_id, sw_map]),
+                ((T.virt_storage, self.FLAG_KEY_SET_VALUE),        [S.sw_name, sw_map]),
+                ((T.sw_name, self.FLAG_VAR),                       [S.sw_image_name_var, sw_map]),
+                ((T.sw_version, self.FLAG_BLANK),                  [S.sw_version, sw_map]),
+                ((T.sw_checksum, self.FLAG_BLANK),                 [S.sw_checksum, sw_map]),
+                ((T.sw_container_fmt, self.FLAG_BLANK),            [S.sw_container_format, sw_map]),
+                ((T.sw_disk_fmt, self.FLAG_BLANK),                 [S.sw_disk_format, sw_map]),
+                ((T.sw_min_disk, self.FLAG_ONLY_NUMBERS),          [S.sw_min_disk, sw_map]),
+                ((T.sw_size, self.FLAG_ONLY_NUMBERS),              [S.sw_size, sw_map]),
+                ((T.sw_image_file, self.FLAG_BLANK),               [S.sw_image, sw_map]),
+                # -- End Software Image --
 
-             # -- Deployment Flavor --
-             ((T.df_id, self.FLAG_BLANK),                       S.df_id),
-             # Assign the default instantiation level to the first element in the array
-             (self.set_value(def_inst_id, S.df_inst_level_id, 0)),
-             (self.set_value(def_inst_desc, S.df_inst_level_desc, 0)),
-             ((T.df_desc, self.FLAG_BLANK),                     S.df_desc),
-             ((T.vdu, self.FLAG_KEY_SET_VALUE),                 [S.df_vdu_prof_id, vdu_map]),
-             ((T.vdu_prof_inst_min, self.FLAG_BLANK),           [S.df_vdu_prof_inst_min, vdu_map]),
-             ((T.vdu_prof_inst_max, self.FLAG_BLANK),           [S.df_vdu_prof_inst_max, vdu_map]),
-             (("{}", self.FLAG_KEY_SET_VALUE),                  [S.df_inst_level_vdu_vdu,
-                                                                 target_map]),
-             ((T.inst_level_num_instances, self.FLAG_BLANK),    [S.df_inst_level_vdu_num,
-                                                                 vdu_inst_level_map])
+                # -- Deployment Flavor --
+                ((T.df_id, self.FLAG_BLANK),                       S.df_id),
+                # Assign the default instantiation level to the first element in the array
+                (self.set_value(def_inst_id, S.df_inst_level_id, 0)),
+                (self.set_value(def_inst_desc, S.df_inst_level_desc, 0)),
+                ((T.df_desc, self.FLAG_BLANK),                     S.df_desc),
+                ((T.vdu, self.FLAG_KEY_SET_VALUE),                 [S.df_vdu_prof_id, vdu_map]),
+                ((T.vdu_prof_inst_min, self.FLAG_BLANK),           [S.df_vdu_prof_inst_min, vdu_map]),
+                ((T.vdu_prof_inst_max, self.FLAG_BLANK),           [S.df_vdu_prof_inst_max, vdu_map]),
+                (("{}", self.FLAG_KEY_SET_VALUE),                  [S.df_inst_level_vdu_vdu,
+                                                                    target_map]),
+                ((T.inst_level_num_instances, self.FLAG_BLANK),    [S.df_inst_level_vdu_num,
+                                                                    vdu_inst_level_map])
 
-             # -- Scaling Aspect --
-             #((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_inst_scaling_aspect, aspect_f_map]),
-             #((T.scaling_aspect_level, self.FLAG_BLANK), [S.df_inst_scaling_level, aspect_f_map]),
+                # -- Scaling Aspect --
+                #((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_inst_scaling_aspect, aspect_f_map]),
+                #((T.scaling_aspect_level, self.FLAG_BLANK), [S.df_inst_scaling_level, aspect_f_map]),
 
-             #((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_scale_aspect_id, aspect_f_map]),
-             #((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_scale_aspect_name, aspect_f_map]),
-             #((T.scaling_aspect_level, self.FLAG_BLANK), [S.df_scale_aspect_max_level,
-             #                                             aspect_f_map]),
-             #((T.scaling_aspect_desc, self.FLAG_BLANK),  [S.df_scale_aspect_desc, aspect_f_map]),
+                #((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_scale_aspect_id, aspect_f_map]),
+                #((T.scaling_aspect_name, self.FLAG_BLANK),  [S.df_scale_aspect_name, aspect_f_map]),
+                #((T.scaling_aspect_level, self.FLAG_BLANK), [S.df_scale_aspect_max_level,
+                #                                             aspect_f_map]),
+                #((T.scaling_aspect_desc, self.FLAG_BLANK),  [S.df_scale_aspect_desc, aspect_f_map]),
 
 
-             #((T.scaling_aspect_deltas, self.FLAG_REQ_DELTA),
-             #[S.df_scale_aspect_deltas, aspect_f_map]),
+                #((T.scaling_aspect_deltas, self.FLAG_REQ_DELTA),
+                #[S.df_scale_aspect_deltas, aspect_f_map]),
 
-             #(("{}", (self.FLAG_REQ_DELTA, self.FLAG_KEY_SET_VALUE)),
-             # [S.df_scale_aspect_vdu_id, deltas_mapping]),
-             #((T.scaling_aspect_deltas_num, self.FLAG_REQ_DELTA),
-             # [S.df_scale_aspect_vdu_num, deltas_mapping])
-             # -- End Scaling Aspect
+                #(("{}", (self.FLAG_REQ_DELTA, self.FLAG_KEY_SET_VALUE)),
+                # [S.df_scale_aspect_vdu_id, deltas_mapping]),
+                #((T.scaling_aspect_deltas_num, self.FLAG_REQ_DELTA),
+                # [S.df_scale_aspect_vdu_num, deltas_mapping])
+                # -- End Scaling Aspect
 
-             # -- End Deployment Flavor --
+                # -- End Deployment Flavor --
             ]
 
     def set_value(self, val, path, index):
@@ -676,13 +667,13 @@ class V2Map(V2Mapping):
         After that, it goes and figures out what the delta's parent map is and assigns the proper
         parent map to that (from aspect_f_map).
         THEN, FINALLY, we have the finished mapping:
-        
+
         topology_template.policies.{scaling_aspects}.properties.aspects.{session-function}
                                                                    .step_deltas ==> ['delta_1']
         step_deltas_map = [data_1 -> 0, parent=(session-function -> 0)]
         vnfd.df.scaling-aspect.{session-function->0}.vdu-delta.{delta_1->0}.id = {}
                    topology_template.policies.{scaling_aspects}.properties.deltas.{delta_1}
-        
+
         Then (we're not done yet), we have the num_instances value, but not it's full location.
         So, just stick the value into a location that we know and can access easily.
         """
@@ -767,4 +758,4 @@ class V2Map(V2Mapping):
             mapping.append(MapElem(name, cur_num, cur_vdu_map))
 
         return mapping
-    
+

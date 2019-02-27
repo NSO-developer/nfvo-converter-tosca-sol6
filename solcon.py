@@ -14,6 +14,8 @@ import sys
 import dict_utils
 import nso as nso
 from sol6_converter import Sol6Converter
+from sol6_converter_nokia import SOL6ConverterNokia
+from sol6_converter_cisco import SOL6ConverterCisco
 import toml
 
 desc = "NFVO SOL6 Converter (SOLCon): Convert a SOL001 (TOSCA) YAML to SOL006 JSON"
@@ -44,11 +46,21 @@ parsed_dict = {}
 
 # Read the tosca vnf into a dict from yaml format
 log.info("Reading TOSCA YAML file {}".format(args.file))
-with open(args.file, 'rb') as f:
-    tosca_vnf = yaml.load(f.read())
+tosca_file = open(args.file, 'rb').read()
+tosca_lines = open(args.file, 'rb').readlines()
+tosca_vnf = yaml.load(tosca_file)
+
+# Figure out what class we want to use
+provider = Sol6Converter.find_provider(tosca_lines)
 
 # Do the actual converting to SOL006
-converter = Sol6Converter(tosca_vnf, parsed_dict, variables=path_conf, log=log)
+if "cisco" in provider:
+    converter = SOL6ConverterCisco(tosca_vnf, parsed_dict, variables=path_conf, log=log)
+elif "nokia" in provider:
+    converter = SOL6ConverterNokia(tosca_vnf, parsed_dict, variables=path_conf, log=log)
+else:
+    converter = Sol6Converter(tosca_vnf, parsed_dict, variables=path_conf, log=log)
+
 cnfv = converter.parse()
 
 
