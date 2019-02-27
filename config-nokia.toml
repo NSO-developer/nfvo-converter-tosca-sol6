@@ -5,12 +5,12 @@
 providers=["nokia"]
 
 [provider-identifiers.nokia]
-    vdu = ["type", "tosca.nodes.nfv.VDU"]
-    int-cpd = ["type", "tosca.nodes.nfv.ICP"]
+    vdu = ["type", "cisco.nodes.nfv.Vdu.Compute"]
+    int-cpd = ["type", "cisco.nodes.nfv.VduCp"]
     int-cpd-mgmt = ["type", "cisco.nodes.nfv.VduCp"]
     instantiation-level = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
     scaling-aspects = ["type", "tosca.policies.nfv.ScalingAspects"]
-    virtual-storage = ["type", "tosca.nodes.nfv.VirtualStorage"]
+    virtual-storage = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage"]
 
 
 # Note: If there is a variable with "path_VAL", that means it will not be parsed for the path
@@ -20,90 +20,16 @@ providers=["nokia"]
     topology_template = "topology_template"
     substitution_mappings = ["topology_template", "substitution_mappings"]
 
-    node_templates = ["topology_template", "node_templates"]
-    policies = ["topology_template", "policies"]
-    inputs = ["topology_template", "inputs"]
-    desc = "description"
-    input_key = "get_input"
-    provider = ["vnf_prop", "provider"]
+    sub_properties              = ["substitution_mappings", "properties"]
+    descriptor_id               = ["sub_properties", "descriptor_id"]
+    descriptor_version          = ["sub_properties", "descriptor_version"]
+    provider                    = ["sub_properties", "provider"]
+    product_name                = ["sub_properties", "product_name"]
+    software_version            = ["sub_properties", "software_version"]
+    vnfm_info                   = ["sub_properties", "vnfm_info"]
+    requirements                = ["sub_properties", "requirements"]
 
-    # ** VNF Metadata **
-    vnf      = ["node_templates", "vnf"]
-    vnf_prop = ["substitution_mappings", "properties"]
-    vnf_desc_id = ["vnf_prop", "descriptor_id"]
-    vnf_desc_ver = ["vnf_prop", "descriptor_version"]
-    vnf_provider = ["vnf_prop", "provider"]
-    vnf_product_name = ["vnf_prop", "product_name"]
-    vnf_software_ver = ["vnf_prop", "software_version"]
-    vnf_product_info_name = ["vnf_prop", "product_info_name"]
-    vnf_vnfm_info = ["vnf_prop", "vnfm_info"]
 
-    # ** VDU **
-    vdu = ["node_templates", "{}"]
-    vdu_props = ["vdu", "properties"]
-    vdu_name = ["vdu_props", "name"]
-    vdu_boot = ["vdu_props", "boot_order"]
-    vdu_desc = ["vdu_props", "description"]
-    vdu_conf_props = ["vdu_props", "configurable_properties.additional_vnfc_configurable_properties"]
-
-    vdu_vim_flavor = ["vdu_conf_props", "vim_flavor"]
-    vdu_cap_props = ["vdu", "capabilities.virtual_compute.properties"]
-    vdu_virt_cpu_num = ["vdu_cap_props", "virtual_cpu.num_virtual_cpu"]
-    vdu_virt_mem_size = ["vdu_cap_props", "virtual_memory.virtual_mem_size"]
-
-    vdu_profile = ["vdu_props", "vdu_profile"]
-    vdu_prof_inst_min = ["vdu_profile", "min_number_of_instances"]
-    vdu_prof_inst_max = ["vdu_profile", "max_number_of_instances"]
-
-    # ** Internal Connection Points **
-    int_cpd = ["node_templates", "{}"]
-    int_cpd_props = ["int_cpd", "properties"]
-    int_cpd_req = ["int_cpd", "requirements"]
-    int_cpd_virt_binding = ["int_cpd_req", "virtual_binding"]
-    int_cpd_virt_link = ["int_cpd_req", "virtual_link"]
-    int_cpd_layer_prot = ["int_cpd_props", "layer_protocols"]
-
-    virt_storage = ["node_templates", "{}"]
-
-    virt_props = ["virt_storage", "properties"]
-    virt_artifacts = ["virt_storage", "artifacts"]
-    virt_vsb = ["virt_props", "virtual_block_storage_data"]
-    virt_size = ["virt_vsb", "size_of_storage"]
-    virt_type = ["virt_vsb", "vdu_storage_requirements.type"]
-
-    sw_image_data = ["virt_props", "sw_image_data"]
-    sw_name = ["sw_image_data", "name"]
-    sw_version = ["sw_image_data", "version"]
-    sw_checksum = ["sw_image_data", "checksum"]
-    sw_container_fmt = ["sw_image_data", "container_format"]
-    sw_disk_fmt = ["sw_image_data", "disk_format"]
-    sw_min_disk = ["sw_image_data", "min_disk"]
-    sw_size = ["sw_image_data", "size"]
-    sw_image_file = ["virt_artifacts", "sw_image.file"]
-
-    # ** Deployment Flavor **
-    df_id = ["vnf_prop", "flavour_id"]
-    df_desc = ["vnf_prop", "flavour_description"]
-
-    def_inst_level = ["policies", "instantiation_levels"]
-    def_inst_key = "default"
-    def_inst_prop = ["def_inst_level", "properties.levels"]
-    def_inst_desc = ["def_inst_prop", "default.description"] # Matches def_inst_key
-    inst_level = ["policies", "{}"]
-    inst_level_targets = ["inst_level", "targets"]
-    inst_level_num_instances = ["inst_level", "properties.levels.default.number_of_instances"]
-
-    # ** Scaling Aspects **
-    scaling_aspects = ["policies", "{}"]
-    scaling_props = ["scaling_aspects", "properties"]
-    scaling_aspect_item_list = ["scaling_props", "aspects"]
-    scaling_aspect_item = ["scaling_aspect_item_list", "{}"]
-    scaling_aspect_name = ["scaling_aspect_item", "name"]
-    scaling_aspect_desc = ["scaling_aspect_item", "description"]
-    scaling_aspect_level = ["scaling_aspect_item", "max_scale_level"]
-    scaling_aspect_deltas = ["scaling_aspect_item", "step_deltas"]
-    # Note: this is not a valid TOSCA path, it's for internal use
-    scaling_aspect_deltas_num = ["scaling_aspect_item","deltas.{}.number_of_instances"]
 
 # Sol6 Path configurations
 [sol6]

@@ -127,7 +127,7 @@ class TOSCA(TOSCA):
     scaling_aspect_deltas_num       = scaling_aspect_item + ".deltas.{}.number_of_instances"
 
     @staticmethod
-    def set_variables(variables, dict_tosca):
+    def set_variables(variables, dict_tosca, obj):
         """
         Take the input from the config file, and set the variables that are identifiers here
         This must be run before the values are used
@@ -179,16 +179,6 @@ class TOSCA(TOSCA):
                 val = TOSCA.get_full_path(k, tosca)
 
             setattr(TOSCA, k, val)
-
-    @staticmethod
-    def get_full_path(elem, dic):
-        try:
-            if not isinstance(dic[elem], list):
-                return dic[elem]
-        except KeyError:
-            raise KeyError("Could not find {} as a parent".format(elem))
-
-        return "{}.{}".format(TOSCA.get_full_path(dic[elem][0], dic), dic[elem][1])
 
 
 class SOL6(SOL6):

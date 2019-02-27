@@ -6,7 +6,7 @@ import copy
 class SOL6ConverterNokia(Sol6Converter):
 
     def __init__(self, tosca_vnf, parsed_dict, variables=None, log=None):
-        super().__init__(tosca_vnf, parsed_dict, variables, log)
+        super().__init__(tosca_vnf, parsed_dict, variables=variables, log=log)
 
     def parse(self):
         """
@@ -15,15 +15,10 @@ class SOL6ConverterNokia(Sol6Converter):
         """
         self.log.info("Starting Nokia TOSCA -> SOL6 (v{}) converter.".format(self.SUPPORTED_SOL6_VERSION))
 
-        # The very first thing we want to do is set up the path variables
-        self.log.debug("Setting path variables: {}".format(self.variables))
-        TOSCA.set_variables(self.variables, self.tosca_vnf)
-        SOL6.set_variables(self.variables)
-
         self.vnfd = {}
 
-        keys = V2Map(self.tosca_vnf, self.vnfd, self.log)
+        keys = V2Map(self.tosca_vnf, self.vnfd, variables=self.variables, log=self.log)
 
-        self.run_v2_mapping(keys)
+        #self.run_v2_mapping(keys)
 
         return self.vnfd
