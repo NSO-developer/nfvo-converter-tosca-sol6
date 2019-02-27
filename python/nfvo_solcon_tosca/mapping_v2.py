@@ -227,7 +227,8 @@ class V2Mapping:
     @staticmethod
     def get_object_keys(obj, exclude=None):
         return [attr for attr in dir(obj) if not callable(getattr(obj, attr)) and
-                not (attr.startswith("__") or attr.startswith("_") or exclude in attr)]
+                not (attr.startswith("__") or attr.startswith("_") or
+                     (exclude and exclude in attr))]
 
 class MapElem:
     """

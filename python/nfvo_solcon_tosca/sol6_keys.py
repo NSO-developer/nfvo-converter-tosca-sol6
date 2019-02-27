@@ -165,9 +165,17 @@ class TOSCA:
         key_list = V2Mapping.get_object_keys(TOSCA, exclude="identifier")
 
         for k in key_list:
-            if k not in tosca:
+            set_val = False
+            if "{}_VAL".format(k) in tosca:
+                set_val = True
+
+            if k not in tosca and not set_val:
                 raise KeyError("{} does not exist in the configuration file".format(k))
-            val = TOSCA.get_full_path(k, tosca)
+            if set_val:
+                val = dict[k]
+            else:
+                val = TOSCA.get_full_path(k, tosca)
+
             setattr(TOSCA, k, val)
 
     @staticmethod
@@ -185,7 +193,7 @@ class SOL6:
     """
     Second version of the definitions
     """
-    extensions_prefix               = "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions"
+    _extensions_prefix               = "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions"
     # **********
     # ** VNFD **
     # **********
@@ -206,7 +214,7 @@ class SOL6:
     # ********************************
     vnfd_virt_compute_desc          = vnfd + ".virtual-compute-descriptor.{}"
     vnfd_vcd_id                     = vnfd_virt_compute_desc + ".id"
-    vnfd_vcd_flavor_name            = vnfd_virt_compute_desc + "." + extensions_prefix \
+    vnfd_vcd_flavor_name            = vnfd_virt_compute_desc + "." + _extensions_prefix \
                                       + ":flavor-name-variable"
     vnfd_vcd_cpu_num                = vnfd_virt_compute_desc + ".virtual-cpu.num-virtual-cpu"
     vnfd_vcd_mem_size               = vnfd_virt_compute_desc + ".virtual-memory.size"
@@ -280,9 +288,9 @@ class SOL6:
     vdu_vc_desc                     = vdu + ".virtual-compute-desc.{}"
     vdu_vs_desc                     = vdu + ".virtual-storage-desc.{}"
 
-    # *********************************
+    # ********************************
     # ** Internal Connection Points **
-    # *********************************
+    # ********************************
     int_cpd                         = vdu + ".int-cpd.{}"
     int_cpd_id                      = int_cpd + ".id"
     int_cpd_layer_prot              = int_cpd + ".layer-protocol"
@@ -304,7 +312,7 @@ class SOL6:
     sw_id                           = sw_img_desc + ".id"
     sw_name                         = sw_img_desc + ".name"
     sw_image_name_var               = sw_img_desc + "." + \
-                                      extensions_prefix + ":image-name-variable"
+                                      _extensions_prefix + ":image-name-variable"
     sw_version                      = sw_img_desc + ".version"
     sw_checksum                     = sw_img_desc + ".checksum"
     sw_container_format             = sw_img_desc + ".container-format"
@@ -317,8 +325,40 @@ class SOL6:
     def set_variables(variables):
         """
         Take the input from the config file, and set the variables that are identifiers here
+        This must be run before the values are used
         """
-        pass
+
+        # Load the other paths
+        try:
+            sol6 = variables["sol6"]
+        except KeyError:
+            raise KeyError("sol6 root not found in the configuration file")
+
+        key_list = V2Mapping.get_object_keys(SOL6)
+
+        for k in key_list:
+            set_val = False
+            if "{}_VAL".format(k) in sol6:
+                set_val = True
+
+            if k not in sol6 and not set_val:
+                raise KeyError("{} does not exist in the configuration file".format(k))
+            if set_val:
+                val = sol6["{}_VAL".format(k)]
+            else:
+                val = SOL6.get_full_path(k, sol6)
+
+            setattr(SOL6, k, val)
+
+    @staticmethod
+    def get_full_path(elem, dic):
+        try:
+            if not isinstance(dic[elem], list):
+                return dic[elem]
+        except KeyError:
+            raise KeyError("Could not find {} as a parent".format(elem))
+
+        return "{}.{}".format(TOSCA.get_full_path(dic[elem][0], dic), dic[elem][1])
 
 
 class V2Map(V2Mapping):
