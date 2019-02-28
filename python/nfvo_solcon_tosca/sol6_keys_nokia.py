@@ -11,6 +11,9 @@ class TOSCA(TOSCA):
     product_name = ""
     software_version = ""
     vnfm_info = ""
+    requirements = ""
+
+    vnf = ""
 
 
 class SOL6(SOL6):
