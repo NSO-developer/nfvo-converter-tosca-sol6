@@ -58,7 +58,7 @@ if "cisco" in provider:
 elif "nokia" in provider:
     converter = SOL6ConverterNokia(tosca_vnf, parsed_dict, variables=path_conf, log=log)
 else:
-    converter = Sol6Converter(tosca_vnf, parsed_dict, variables=path_conf, log=log)
+    raise TypeError("Unsupported provider")
 
 cnfv = converter.parse()
 

@@ -5,6 +5,7 @@ import re
 from sol6_keys import *
 from dict_utils import *
 import copy
+from key_utils import KeyUtils
 from functools import wraps
 
 
@@ -25,15 +26,85 @@ class Sol6Converter:
         self.variables = variables
 
         # Set this up for _virtual_get_flavor_names
-        self.flavor_names = []
-        self.connection_points = {}
-        self.tosca_vdus = {}
-        self.flavor_vars = {}
         self.run_deltas = True
         # If we want to hard skip the loop that runs the deltas
         self.override_run_deltas = False
 
         # Set up the flag variables
+        self.key_as_value = False
+        self.only_number = False
+        self.only_number_float = False
+        self.append_list = False
+        self.first_list_elem = False
+        self.tosca_use_value = False
+
+    def parse(self):
+        """
+        For overriding
+        Convert the tosca_vnf to sol6 VNFD
+        Currently only handles converting a single VNF to VNFD
+        """
+        return None
+
+    def run_v2_mapping(self, keys):
+        # The first parameter is always a tuple, with the flags as the second parameter
+        # If there are multiple flags, they will be grouped in a tuple as well
+
+        for ((tosca_path, flags), map_sol6) in keys.mapping:
+            self.set_flags_false()
+            self.set_flags_loop(flags, keys)
+
+            # Check if there is a mapping needed
+            if isinstance(map_sol6, list):
+                mapping_list = map_sol6[1]  # List of MapElems
+                sol6_path = map_sol6[0]
+
+                if self.override_run_deltas:
+                    if self.req_delta_valid and not mapping_list:
+                        continue
+
+                for elem in mapping_list:
+                    # Skip this mapping element if it is None, but allow a none name to pass
+                    if not elem:
+                        continue
+
+                    tosca_use_value = self.tosca_use_value
+                    f_tosca_path = MapElem.format_path(elem, tosca_path, use_value=tosca_use_value)
+                    f_sol6_path = MapElem.format_path(elem, sol6_path, use_value=True)
+
+                    # Skip this element if it requires deltas to be valid
+                    # This has to be outside the flag method
+                    if self.req_delta_valid:
+                        if not self.run_deltas:
+                            continue
+
+                    # Handle flags for mapped values
+                    value = self.handle_flags(f_sol6_path, f_tosca_path)
+
+                    # If the value doesn't exist, don't write it
+                    # Do write it if the value is 0, though
+                    write = True
+                    if not value:
+                        write = True if value is 0 else False
+
+                    if write:
+                        set_path_to(f_sol6_path, self.vnfd, value, create_missing=True)
+            else:  # No mapping needed
+                sol6_path = map_sol6
+
+                # Handle the various flags for no mappings
+                value = self.handle_flags(sol6_path, tosca_path)
+
+                set_path_to(sol6_path, self.vnfd, value, create_missing=True)
+
+    # ** Flag methods **
+
+    def set_flags_false(self):
+        """
+        Set all the given flags false.
+        If more flags need to be added, override this method
+        """
+        # Reset these for every mapping
         self.key_as_value = False
         self.only_number = False
         self.only_number_float = False
@@ -45,35 +116,69 @@ class Sol6Converter:
         self.is_variable = False
         self.default_root = False
 
-    def parse(self):
+    def set_flags_loop(self, flags, keys):
         """
-        Convert the tosca_vnf to sol6 VNFD
-        Currently only handles converting a single VNF to VNFD
+        Handle figuring out which flags need to be set in O(n) time
         """
-        # TODO: Handle multiple vnfds
-        self.log.info("Starting TOSCA -> SOL6 (v{}) converter.".format(self.SUPPORTED_SOL6_VERSION))
-        raise TypeError("Unsupported provider")
+        # Ensure flags is iterable
+        if not isinstance(flags, tuple):
+            flags = [flags]
+        for flag in flags:
+            if flag == keys.FLAG_KEY_SET_VALUE:
+                self.key_as_value = True
+            if flag == keys.FLAG_ONLY_NUMBERS:
+                self.only_number = True
+            if flag == keys.FLAG_APPEND_LIST:
+                self.append_list = True
+            if flag == keys.FLAG_ONLY_NUMBERS_FLOAT:
+                self.only_number_float = True
+            if flag == keys.FLAG_LIST_FIRST:
+                self.first_list_elem = True
+            if flag == keys.FLAG_USE_VALUE:
+                self.tosca_use_value = True
 
-        # The very first thing we want to do is set up the path variables
-        self.log.debug("Setting path variables: {}".format(self.variables))
-        TOSCA.set_variables(self.variables, self.tosca_vnf)
-        SOL6.set_variables(self.variables)
+    def handle_flags(self, f_sol6_path, f_tosca_path):
+        """
+        Returns the value after being formatted by the flags
+        """
+        value = self._key_as_value(self.key_as_value, f_tosca_path)
+        value = self._only_number(self.only_number, value, is_float=self.only_number_float)
+        value = self._append_to_list(self.append_list, f_sol6_path, value)
+        value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
 
-        # First, get the vnfd specifications model
-        try:
-            self.vnfd = copy.deepcopy(self.parsed_dict[SOL6.vnfd])
-        except KeyError:
-            self.vnfd = {}
+        return value
 
-        keys = V2Map(self.tosca_vnf, self.vnfd, self.log)
-        if keys.override_deltas:
-            self.override_run_deltas = not keys.run_deltas
-        else:
-            self.check_deltas_valid()
+    # ---------------------
+    # ** Specific flag methods **
+    def _append_to_list(self, option, path, value):
+        if not option:
+            return value
+        cur_list = get_path_value(path, self.vnfd, must_exist=False)
+        if cur_list:
+            if not isinstance(cur_list, list):
+                raise TypeError("{} is not a list".format(cur_list))
+            cur_list.append(value)
 
-        self.run_v2_mapping(keys)
+    def _key_as_value(self, option, path):
+        if option:
+            return KeyUtils.get_path_last(path)
+        return get_path_value(path, self.tosca_vnf, must_exist=False)
 
-        return self.vnfd
+    @staticmethod
+    def _only_number(option, value, is_float=False):
+        if not option:
+            return value
+        cur_type = int
+        if is_float:
+            cur_type = float
+        return cur_type(re.sub('[^0-9]', '', str(value)))
+
+    @staticmethod
+    def _first_list_elem(option, path, value):
+        if not option or not isinstance(value, list):
+            return value
+        return value[0]
+    # ---------------------
 
     @staticmethod
     def find_provider(tosca_lines):

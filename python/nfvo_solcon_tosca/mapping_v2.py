@@ -332,9 +332,3 @@ class MapElem:
     def __repr__(self):
         return self.__str__()
 
-
-
-def recfun(f):
-    @wraps(f)
-    def _f(*a, **kwa): return f(_f, *a, **kwa)
-    return _f

@@ -1,4 +1,3 @@
-
 # These must match with 'provider-identifiers.{}'
 # If the given provider for a VNFD matches with one of these, then it will automatically
 # take the identifiers from this file
