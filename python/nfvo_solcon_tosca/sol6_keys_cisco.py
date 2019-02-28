@@ -3,14 +3,14 @@ These are automatically used without having to update anything else.
 The TOSCA variables are mapped to the SOL6 ones, they must have the same names.
 The program does not attempt to map variables beginning with '_'
 """
-from sol6_keys import TOSCA, SOL6, V2Map
+from sol6_keys import TOSCA_BASE, SOL6_BASE, V2Map
 from key_utils import KeyUtils
 from mapping_v2 import V2Mapping, MapElem
 from dict_utils import *
 from list_utils import *
 
 
-class TOSCA(TOSCA):
+class TOSCA(TOSCA_BASE):
     """
     Second version of the definitions
     """
@@ -127,11 +127,14 @@ class TOSCA(TOSCA):
     scaling_aspect_deltas_num       = scaling_aspect_item + ".deltas.{}.number_of_instances"
 
     @staticmethod
-    def set_variables(variables, dict_tosca, obj):
+    def set_variables(cur_dict, obj, exclude="", variables=None, dict_tosca=None):
         """
         Take the input from the config file, and set the variables that are identifiers here
         This must be run before the values are used
         """
+        TOSCA_BASE.set_variables(cur_dict, obj, exclude="identifier")
+        print(TOSCA.vnf_provider)
+
         cur_provider = get_path_value(TOSCA.vnf_provider, dict_tosca).lower()
         possible_providers = variables['providers']
 
@@ -162,26 +165,8 @@ class TOSCA(TOSCA):
         TOSCA.scaling_aspects_identifier = scaling_aspects_identifier
         TOSCA.virt_storage_identifier = virt_storage_identifier
 
-        # Load the other paths
-        tosca = variables["tosca"]
-        key_list = V2Mapping.get_object_keys(TOSCA, exclude="identifier")
 
-        for k in key_list:
-            set_val = False
-            if "{}_VAL".format(k) in tosca:
-                set_val = True
-
-            if k not in tosca and not set_val:
-                raise KeyError("{} does not exist in the configuration file".format(k))
-            if set_val:
-                val = dict[k]
-            else:
-                val = TOSCA.get_full_path(k, tosca)
-
-            setattr(TOSCA, k, val)
-
-
-class SOL6(SOL6):
+class SOL6(SOL6_BASE):
     """
     Second version of the definitions
     """
@@ -312,35 +297,6 @@ class SOL6(SOL6):
     sw_min_disk                     = sw_img_desc + ".min-disk"
     sw_size                         = sw_img_desc + ".size"
     sw_image                        = sw_img_desc + ".image"
-
-    @staticmethod
-    def set_variables(variables):
-        """
-        Take the input from the config file, and set the variables that are identifiers here
-        This must be run before the values are used
-        """
-
-        # Load the other paths
-        try:
-            sol6 = variables["sol6"]
-        except KeyError:
-            raise KeyError("sol6 root not found in the configuration file")
-
-        key_list = V2Mapping.get_object_keys(SOL6)
-
-        for k in key_list:
-            set_val = False
-            if "{}_VAL".format(k) in sol6:
-                set_val = True
-
-            if k not in sol6 and not set_val:
-                raise KeyError("{} does not exist in the configuration file".format(k))
-            if set_val:
-                val = sol6["{}_VAL".format(k)]
-            else:
-                val = SOL6.get_full_path(k, sol6)
-
-            setattr(SOL6, k, val)
 
 
 class V2Map(V2Mapping):

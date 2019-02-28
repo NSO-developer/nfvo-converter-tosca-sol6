@@ -3,60 +3,49 @@ These are automatically used without having to update anything else.
 The TOSCA variables are mapped to the SOL6 ones, they must have the same names.
 The program does not attempt to map variables beginning with '_'
 """
-from key_utils import KeyUtils
 from mapping_v2 import *
-from dict_utils import *
-from list_utils import *
 
 
-class TOSCA:
-
+class PathMaping:
     @staticmethod
-    @recfun
-    def get_full_path(self, elem, dic):
-        try:
-            if not isinstance(dic[elem], list):
-                return dic[elem]
-        except KeyError:
-            raise KeyError("Could not find {} as a parent".format(elem))
-
-        return "{}.{}".format(self(dic[elem][0], dic), dic[elem][1])
-
-    @staticmethod
-    def set_variables(variables, dict_tosca, obj):
+    def set_variables(cur_dict, obj, exclude=""):
         """
         Take the input from the config file, and set the variables that are identifiers here
         This must be run before the values are used
         """
-        tosca = variables["tosca"]
-        key_list = V2Mapping.get_object_keys(obj, exclude="identifier")
+
+        key_list = V2Mapping.get_object_keys(obj, exclude=exclude)
 
         for k in key_list:
-            set_val = False
-            if "{}_VAL".format(k) in tosca:
-                set_val = True
+            var_val = "{}_VAL".format(k)
+            set_val = True if var_val in cur_dict else False
 
-            if k not in tosca and not set_val:
+            if k not in cur_dict and not set_val:
                 raise KeyError("{} does not exist in the configuration file".format(k))
             if set_val:
-                val = dict_tosca[k]
+                val = cur_dict[var_val]
             else:
-                val = TOSCA.get_full_path(k, tosca)
+                val = PathMaping.get_full_path(k, cur_dict)
 
             setattr(obj, k, val)
 
-
-class SOL6:
     @staticmethod
-    @recfun
-    def get_full_path(self, elem, dic):
+    def get_full_path(elem, dic):
         try:
             if not isinstance(dic[elem], list):
                 return dic[elem]
         except KeyError:
             raise KeyError("Could not find {} as a parent".format(elem))
 
-        return "{}.{}".format(self(dic[elem][0], dic), dic[elem][1])
+        return "{}.{}".format(PathMaping.get_full_path(dic[elem][0], dic), dic[elem][1])
+
+
+class TOSCA_BASE(PathMaping):
+    pass
+
+
+class SOL6_BASE(PathMaping):
+    pass
 
 
 class V2Map(V2Mapping):
