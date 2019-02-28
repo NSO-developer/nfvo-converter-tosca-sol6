@@ -5,7 +5,7 @@
 providers=["nokia"]
 
 [provider-identifiers.nokia]
-    vdu = ["type", "cisco.nodes.nfv.Vdu.Compute"]
+    vdu = ["type", "tosca.nodes.nfv.VDU"]
     int-cpd = ["type", "cisco.nodes.nfv.VduCp"]
     int-cpd-mgmt = ["type", "cisco.nodes.nfv.VduCp"]
     instantiation-level = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
@@ -28,6 +28,9 @@ providers=["nokia"]
     software_version            = ["sub_properties", "software_version"]
     vnfm_info                   = ["sub_properties", "vnfm_info"]
     requirements                = ["sub_properties", "requirements"]
+
+    capabilities                = ["substitution_mappings", "capabilities"]
+    vnf                         = ["capabilities", "vnf"]
 
 
 
