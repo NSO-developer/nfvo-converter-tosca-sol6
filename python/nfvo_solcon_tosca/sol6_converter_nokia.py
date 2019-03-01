@@ -1,6 +1,5 @@
 from sol6_keys_nokia import *
 from sol6_converter import Sol6Converter
-import copy
 
 
 class SOL6ConverterNokia(Sol6Converter):

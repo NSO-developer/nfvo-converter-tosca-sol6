@@ -4,9 +4,7 @@
 import re
 from sol6_keys import *
 from dict_utils import *
-import copy
 from key_utils import KeyUtils
-from functools import wraps
 
 
 class Sol6Converter:
@@ -109,12 +107,8 @@ class Sol6Converter:
         self.only_number = False
         self.only_number_float = False
         self.append_list = False
-        self.req_delta_valid = False
-        self.format_as_ip = False
         self.first_list_elem = False
         self.tosca_use_value = False
-        self.is_variable = False
-        self.default_root = False
 
     def set_flags_loop(self, flags, keys):
         """
