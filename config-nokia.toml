@@ -7,6 +7,7 @@ providers=["nokia"]
 [provider-identifiers.nokia]
     virtual-compute             = ["type", "tosca.nodes.nfv.VirtualCompute"]
     virtual-storage             = ["type", "tosca.nodes.nfv.VirtualStorage"]
+    sw-image                    = ["type", "tosca.nodes.nfv.SwImage"]
 
 
 # Note: If there is a variable with "path_VAL", that means it will not be parsed for the path
@@ -35,6 +36,29 @@ providers=["nokia"]
     virtual_compute             = ["node_templates", "{}"]
     virtual_compute_prop        = ["virtual_compute", "properties"]
     virtual_compute_mem_size    = ["virtual_compute_prop", "virtual_memory.virtual_mem_size"]
+    virtual_compute_virt_cpu    = ["virtual_compute_prop", "virtual_cpu"]
+    virtual_compute_cpu_num     = ["virtual_compute_virt_cpu", "num_virtual_cpu"]
+    virtual_compute_cpu_arch    = ["virtual_compute_virt_cpu", "cpu_architecture"]
+    virtual_compute_cpu_clock   = ["virtual_compute_virt_cpu", "virtual_cpu_clock"]
+
+    virtual_storage             = ["node_templates", "{}"]
+    virtual_storage_prop        = ["virtual_storage", "properties"]
+    virtual_storage_type        = ["virtual_storage_prop", "type_of_storage"]
+    virtual_storage_size        = ["virtual_storage_prop", "size_of_storage"]
+
+    sw_image_r                  = ["node_templates", "{}"]
+    sw_image                    = ["sw_image_r", "properties"]
+    sw_image_name               = ["sw_image", "name"]
+    sw_image_container_fmt      = ["sw_image", "container_format"]
+    sw_image_version            = ["sw_image", "version"]
+    sw_image_checksum           = ["sw_image", "checksum"]
+    sw_image_min_disk           = ["sw_image", "min_disk"]
+    sw_image_min_ram            = ["sw_image", "min_ram"]
+    sw_image_size               = ["sw_image", "size"]
+    sw_image_disk_fmt           = ["sw_image", "disk_format"]
+    sw_image_sw_image           = ["sw_image", "sw_image"]
+    sw_image_operating_system   = ["sw_image", "operating_system"]
+    sw_image_supp_virt_environs = ["sw_image", "supported_virtualisation_environments"]
 
 
 # Sol6 Path configurations
@@ -57,11 +81,16 @@ providers=["nokia"]
     # ********************************
     # ** Virtual Compute Descriptor **
     # ********************************
-    vnfd_virt_compute_desc = ["vnfd", "virtual-compute-descriptor.{}"]
-    vnfd_vcd_id = ["vnfd_virt_compute_desc", "id"]
-    vnfd_vcd_flavor_name = ["vnfd_virt_compute_desc", "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions:flavor-name-variable"]
-    vnfd_vcd_cpu_num = ["vnfd_virt_compute_desc", "virtual-cpu.num-virtual-cpu"]
-    vnfd_vcd_mem_size = ["vnfd_virt_compute_desc", "virtual-memory.size"]
+    vnfd_virt_compute_desc          = ["vnfd", "virtual-compute-descriptor.{}"]
+    vnfd_vcd_id                     = ["vnfd_virt_compute_desc", "id"]
+    vnfd_vcd_flavor_name            = ["vnfd_virt_compute_desc", "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions:flavor-name-variable"]
+    vnfd_virtual_cpu                = ["vnfd_virt_compute_desc", "virtual-cpu"]
+    vnfd_vcd_cpu_num                = ["vnfd_virtual_cpu", "num-virtual-cpu"]
+    vnfd_vcd_cpu_clock              = ["vnfd_virtual_cpu", "clock"]
+    vnfd_vcd_cpu_arch               = ["vnfd_virtual_cpu", "cpu-architecture"]
+    vnfd_vcd_cpu_oversub            = ["vnfd_virtual_cpu", "oversubscription-policy"]
+    vnfd_vcd_vdu_cpu_req            = ["vnfd_virtual_cpu", "vdu-cpu-requirements"]
+    vnfd_vcd_mem_size               = ["vnfd_virt_compute_desc", "virtual-memory.size"]
 
     # ********************************
     # ** Virtual Storage Descriptor **
@@ -162,5 +191,8 @@ providers=["nokia"]
     sw_container_format = ["sw_img_desc", "container-format"]
     sw_disk_format = ["sw_img_desc", "disk-format"]
     sw_min_disk = ["sw_img_desc", "min-disk"]
+    sw_min_ram = ["sw_img_desc", "min-ram"]
     sw_size = ["sw_img_desc", "size"]
     sw_image = ["sw_img_desc", "image"]
+    sw_operating_sys = ["sw_img_desc", "operating-system"]
+    sw_supp_virt_environ = ["sw_img_desc", "supported-virtualisation-environments"]
