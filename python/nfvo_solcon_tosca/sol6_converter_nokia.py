@@ -15,11 +15,12 @@ class SOL6ConverterNokia(Sol6Converter):
         self.log.info("Starting Nokia TOSCA -> SOL6 (v{}) converter.".format(self.SUPPORTED_SOL6_VERSION))
 
         self.vnfd = {}
-        TOSCA.set_variables(self.variables["tosca"], TOSCA, "identifiers")
+        TOSCA.set_variables(self.variables["tosca"], TOSCA, "identifiers", variables=self.variables,
+                            dict_tosca=self.tosca_vnf)
         SOL6.set_variables(self.variables["sol6"], SOL6)
 
         keys = V2Map(self.tosca_vnf, self.vnfd, variables=self.variables, log=self.log)
 
-        #self.run_v2_mapping(keys)
+        self.run_v2_mapping(keys)
 
         return self.vnfd

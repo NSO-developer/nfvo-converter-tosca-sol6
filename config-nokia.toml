@@ -5,12 +5,8 @@
 providers=["nokia"]
 
 [provider-identifiers.nokia]
-    vdu = ["type", "tosca.nodes.nfv.VDU"]
-    int-cpd = ["type", "cisco.nodes.nfv.VduCp"]
-    int-cpd-mgmt = ["type", "cisco.nodes.nfv.VduCp"]
-    instantiation-level = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
-    scaling-aspects = ["type", "tosca.policies.nfv.ScalingAspects"]
-    virtual-storage = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage"]
+    virtual-compute             = ["type", "tosca.nodes.nfv.VirtualCompute"]
+    virtual-storage             = ["type", "tosca.nodes.nfv.VirtualStorage"]
 
 
 # Note: If there is a variable with "path_VAL", that means it will not be parsed for the path
@@ -28,10 +24,11 @@ providers=["nokia"]
     software_version            = ["sub_properties", "software_version"]
     vnfm_info                   = ["sub_properties", "vnfm_info"]
     requirements                = ["sub_properties", "requirements"]
-
+    product_info_name           = ["sub_properties", "product_info_name"]
+    product_info_desc           = ["sub_properties", "product_info_description"]
     capabilities                = ["substitution_mappings", "capabilities"]
     vnf                         = ["capabilities", "vnf"]
-
+    vnf_provider                = ["sub_properties", "provider"]
 
 
 # Sol6 Path configurations
