@@ -203,6 +203,9 @@ class SOL6_BASE(PathMaping):
     sw_min_disk                     = sw_img_desc + ".min-disk"
     sw_size                         = sw_img_desc + ".size"
     sw_image                        = sw_img_desc + ".image"
+    sw_supp_virt_environ = ""
+    sw_operating_sys = ""
+    sw_min_ram = ""
 
 
 class V2Map(V2Mapping):
