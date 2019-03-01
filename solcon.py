@@ -12,7 +12,6 @@ import yaml
 import logging
 import sys
 import dict_utils
-import nso as nso
 from sol6_converter import Sol6Converter
 import toml
 
@@ -69,10 +68,3 @@ if args.output:
 if not args.output:
     sys.stdout.write(json_output)
 
-# Always do dry run for now
-args.dry_run = True
-# Store it in NSO if that's what we're doing
-# This probably won't work, I haven't tested it yet
-if not args.dry_run:
-    converted_json = json.dumps(cnfv, indent=4, separators=(',', ': '))
-    nso.store(converted_json)
