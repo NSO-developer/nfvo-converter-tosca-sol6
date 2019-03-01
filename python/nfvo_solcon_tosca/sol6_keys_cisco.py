@@ -478,6 +478,13 @@ class V2Map(V2Mapping):
         # as the second parameter
         # The first parameter is always a tuple
         # This now supports the same value mapped to different locations
+        """
+                TOSCA.vnf_desc_id -> SOL6.vnfd_id
+                vnfd.id = "topology_template.node_templates.vnf.properties.descriptor_id"
+                
+                dict_tosca = yaml
+                dict_sol6 = {}
+        """
         self.mapping = \
             [
                 # -- Metadata --

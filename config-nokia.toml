@@ -13,8 +13,9 @@ providers=["nokia"]
 # heirarchy, but will instead be set with the value given
 # The structure of the TOSCA file, in paths
 [tosca]
-    topology_template = "topology_template"
-    substitution_mappings = ["topology_template", "substitution_mappings"]
+    topology_template           = "topology_template"
+    substitution_mappings       = ["topology_template", "substitution_mappings"]
+    node_templates              = ["topology_template", "node_templates"]
 
     sub_properties              = ["substitution_mappings", "properties"]
     descriptor_id               = ["sub_properties", "descriptor_id"]
@@ -27,8 +28,13 @@ providers=["nokia"]
     product_info_name           = ["sub_properties", "product_info_name"]
     product_info_desc           = ["sub_properties", "product_info_description"]
     capabilities                = ["substitution_mappings", "capabilities"]
+
     vnf                         = ["capabilities", "vnf"]
     vnf_provider                = ["sub_properties", "provider"]
+
+    virtual_compute             = ["node_templates", "{}"]
+    virtual_compute_prop        = ["virtual_compute", "properties"]
+    virtual_compute_mem_size    = ["virtual_compute_prop", "virtual_memory.virtual_mem_size"]
 
 
 # Sol6 Path configurations
