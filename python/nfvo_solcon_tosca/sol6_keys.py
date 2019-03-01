@@ -8,6 +8,33 @@ from mapping_v2 import *
 
 class PathMaping:
     @staticmethod
+    def format_paths(variables):
+        """
+        Pass in the inputs variable, then create the full paths for 'tosca' and 'sol6'
+        """
+        var_tosca = variables["tosca"]
+        var_sol6 = variables["sol6"]
+        processed_tosca = {}
+        processed_sol6 = {}
+
+        for k in var_tosca:
+            if "_VAL" not in k:
+                val = PathMaping.get_full_path(k, var_tosca)
+            else:
+                val = k
+            processed_tosca[k] = val
+
+        for k in var_sol6:
+            if "_VAL" not in k:
+                val = PathMaping.get_full_path(k, var_sol6)
+            else:
+                val = k
+            processed_sol6[k] = val
+        variables["tosca"] = processed_tosca
+        variables["sol6"] = processed_sol6
+        return variables
+
+    @staticmethod
     def set_variables(cur_dict, obj, exclude=""):
         """
         Take the input from the config file, and set the variables that are identifiers here

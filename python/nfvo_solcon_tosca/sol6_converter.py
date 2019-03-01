@@ -57,10 +57,6 @@ class Sol6Converter:
                 mapping_list = map_sol6[1]  # List of MapElems
                 sol6_path = map_sol6[0]
 
-                if self.override_run_deltas:
-                    if self.req_delta_valid and not mapping_list:
-                        continue
-
                 for elem in mapping_list:
                     # Skip this mapping element if it is None, but allow a none name to pass
                     if not elem:
@@ -69,12 +65,6 @@ class Sol6Converter:
                     tosca_use_value = self.tosca_use_value
                     f_tosca_path = MapElem.format_path(elem, tosca_path, use_value=tosca_use_value)
                     f_sol6_path = MapElem.format_path(elem, sol6_path, use_value=True)
-
-                    # Skip this element if it requires deltas to be valid
-                    # This has to be outside the flag method
-                    if self.req_delta_valid:
-                        if not self.run_deltas:
-                            continue
 
                     # Handle flags for mapped values
                     value = self.handle_flags(f_sol6_path, f_tosca_path)

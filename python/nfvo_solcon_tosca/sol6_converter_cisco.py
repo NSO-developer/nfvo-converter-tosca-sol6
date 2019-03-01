@@ -46,6 +46,57 @@ class SOL6ConverterCisco(Sol6Converter):
 
         return self.vnfd
 
+    def run_v2_mapping(self, keys):
+        # The first parameter is always a tuple, with the flags as the second parameter
+        # If there are multiple flags, they will be grouped in a tuple as well
+
+        for ((tosca_path, flags), map_sol6) in keys.mapping:
+            self.set_flags_false()
+            self.set_flags_loop(flags, keys)
+
+            # Check if there is a mapping needed
+            if isinstance(map_sol6, list):
+                mapping_list = map_sol6[1]  # List of MapElems
+                sol6_path = map_sol6[0]
+
+                if self.override_run_deltas:
+                    if self.req_delta_valid and not mapping_list:
+                        continue
+
+                for elem in mapping_list:
+                    # Skip this mapping element if it is None, but allow a none name to pass
+                    if not elem:
+                        continue
+
+                    tosca_use_value = self.tosca_use_value
+                    f_tosca_path = MapElem.format_path(elem, tosca_path, use_value=tosca_use_value)
+                    f_sol6_path = MapElem.format_path(elem, sol6_path, use_value=True)
+
+                    # Skip this element if it requires deltas to be valid
+                    # This has to be outside the flag method
+                    if self.req_delta_valid:
+                        if not self.run_deltas:
+                            continue
+
+                    # Handle flags for mapped values
+                    value = self.handle_flags(f_sol6_path, f_tosca_path)
+
+                    # If the value doesn't exist, don't write it
+                    # Do write it if the value is 0, though
+                    write = True
+                    if not value:
+                        write = True if value is 0 else False
+
+                    if write:
+                        set_path_to(f_sol6_path, self.vnfd, value, create_missing=True)
+            else:  # No mapping needed
+                sol6_path = map_sol6
+
+                # Handle the various flags for no mappings
+                value = self.handle_flags(sol6_path, tosca_path)
+
+                set_path_to(sol6_path, self.vnfd, value, create_missing=True)
+
     def set_flags_false(self):
         """
         Set all the flags defined in this class to false.
