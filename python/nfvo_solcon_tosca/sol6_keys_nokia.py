@@ -54,36 +54,56 @@ class V2Map(V2Map):
             ((vaT["software_version"], self.FLAG_BLANK),     vaS["vnfd_software_ver"]),
             ((vaT["vnfm_info"], self.FLAG_BLANK),            vaS["vnfd_vnfm_info"]),
 
+
             ((vaT["virtual_compute"], self.FLAG_KEY_SET_VALUE),
              [vaS["vnfd_vcd_id"], virt_comp_mapping]),
+
             ((vaT["virtual_compute_mem_size"], self.FLAG_ONLY_NUMBERS),
              [vaS["vnfd_vcd_mem_size"], virt_comp_mapping]),
+
             ((vaT["virtual_compute_cpu_num"], self.FLAG_ONLY_NUMBERS),
              [vaS["vnfd_vcd_cpu_num"], virt_comp_mapping]),
+
             ((vaT["virtual_compute_cpu_arch"], self.FLAG_BLANK),
              [vaS["vnfd_vcd_cpu_arch"], virt_comp_mapping]),
+
             ((vaT["virtual_compute_cpu_clock"], self.FLAG_BLANK),
              [vaS["vnfd_vcd_cpu_clock"], virt_comp_mapping]),
 
+
             ((vaT["virtual_storage"], self.FLAG_KEY_SET_VALUE),
              [vaS["vnfd_virt_storage_id"], virt_storage_mapping]),
+
             ((vaT["virtual_storage_type"], self.FLAG_BLANK),
              [vaS["vnfd_virt_storage_type"], virt_storage_mapping]),
+
             ((vaT["virtual_storage_size"], self.FLAG_ONLY_NUMBERS),
              [vaS["vnfd_virt_storage_size"], virt_storage_mapping]),
 
-            ((vaT["sw_image_r"], self.FLAG_KEY_SET_VALUE), [vaS["sw_id"], sw_image_mapping]),
-            ((vaT["sw_image_name"], self.FLAG_BLANK),          [vaS["sw_name"], sw_image_mapping]),
-            ((vaT["sw_image_container_fmt"], self.FLAG_BLANK),  [vaS["sw_container_format"], sw_image_mapping]),
-            ((vaT["sw_image_version"], self.FLAG_BLANK), [vaS["sw_version"], sw_image_mapping]),
-            ((vaT["sw_image_checksum"], self.FLAG_BLANK), [vaS["sw_checksum"], sw_image_mapping]),
-            ((vaT["sw_image_min_disk"], self.FLAG_ONLY_NUMBERS), [vaS["sw_min_disk"], sw_image_mapping]),
-            ((vaT["sw_image_min_ram"], self.FLAG_ONLY_NUMBERS), [vaS["sw_min_ram"], sw_image_mapping]),
+
+            ((vaT["sw_image_r"], self.FLAG_KEY_SET_VALUE),  [vaS["sw_id"], sw_image_mapping]),
+            ((vaT["sw_image_name"], self.FLAG_BLANK),       [vaS["sw_name"], sw_image_mapping]),
+            ((vaT["sw_image_container_fmt"], self.FLAG_BLANK),
+             [vaS["sw_container_format"], sw_image_mapping]),
+
+            ((vaT["sw_image_version"], self.FLAG_BLANK),    [vaS["sw_version"], sw_image_mapping]),
+            ((vaT["sw_image_checksum"], self.FLAG_BLANK),   [vaS["sw_checksum"], sw_image_mapping]),
+            ((vaT["sw_image_min_disk"], self.FLAG_ONLY_NUMBERS),
+             [vaS["sw_min_disk"], sw_image_mapping]),
+
+            ((vaT["sw_image_min_ram"], self.FLAG_ONLY_NUMBERS),
+             [vaS["sw_min_ram"], sw_image_mapping]),
+
             ((vaT["sw_image_size"], self.FLAG_ONLY_NUMBERS), [vaS["sw_size"], sw_image_mapping]),
-            ((vaT["sw_image_disk_fmt"], self.FLAG_BLANK), [vaS["sw_disk_format"], sw_image_mapping]),
-            ((vaT["sw_image_sw_image"], self.FLAG_BLANK), [vaS["sw_image_name_var"], sw_image_mapping]),
+            ((vaT["sw_image_disk_fmt"], self.FLAG_BLANK),
+             [vaS["sw_disk_format"], sw_image_mapping]),
+
+            ((vaT["sw_image_sw_image"], self.FLAG_BLANK),
+             [vaS["sw_image_name_var"], sw_image_mapping]),
+
             ((vaT["sw_image_operating_system"], self.FLAG_BLANK),
              [vaS["sw_operating_sys"], sw_image_mapping]),
+
             ((vaT["sw_image_supp_virt_environs"], self.FLAG_BLANK),
              [vaS["sw_supp_virt_environ"], sw_image_mapping]),
 
