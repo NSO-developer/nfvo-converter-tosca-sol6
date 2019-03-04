@@ -5,6 +5,7 @@ Can be run as a package in NSO:
 ```
 Also can be run standalone:
 ```
+    PYTHONPATH=python/nfvo_solcon_tosca
     python3 tosca.py -f examples/standalone_vpc_vnfd_esc_4_4.yaml --dry-run -y etsi-nfv-vnf.yang
 ```
 ### TOSCA VNFD Relationships

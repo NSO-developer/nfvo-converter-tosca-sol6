@@ -246,9 +246,10 @@ class V2Map(V2Mapping):
     # Marks this as requiring a value, and if there isn't one, make it 'root'
     FLAG_TYPE_ROOT_DEF              = "MUSTBESOMETHINGORROOT"
 
-    mapping = {}
+    mapping = []
 
     def __init__(self, dict_tosca, dict_sol6, log=None):
         super().__init__(dict_tosca, dict_sol6, log)
 
-
+    def add_map(self, cur_map):
+        self.mapping.append(cur_map)
