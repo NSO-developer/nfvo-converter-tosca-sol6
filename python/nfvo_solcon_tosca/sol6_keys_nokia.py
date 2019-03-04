@@ -68,7 +68,7 @@ class V2Map(V2Map):
         add_map(((va_t["descriptor_id"], self.FLAG_BLANK),        va_s["vnfd_id"]))
 
         # ** Metadata **
-        add_map(((va_t["descriptor_version"], self.FLAG_BLANK),   va_s["vnfd_ver"]))
+        add_map(((va_t["software_version"], self.FLAG_BLANK),   va_s["vnfd_ver"]))
         add_map(((va_t["provider"], self.FLAG_BLANK),             va_s["vnfd_provider"]))
         add_map(((va_t["product_name"], self.FLAG_BLANK),         va_s["vnfd_product"]))
         add_map(((va_t["product_info_name"], self.FLAG_BLANK),    va_s["vnfd_info_name"]))
