@@ -33,79 +33,78 @@ class SOL6(SOL6_BASE):
 class V2Map(V2Map):
     def __init__(self, dict_tosca, dict_sol6, variables=None, log=None):
         super().__init__(dict_tosca, dict_sol6, log=log)
-        vaT = variables["tosca"]
-        vaS = variables["sol6"]
-        S = SOL6
+        va_t = variables["tosca"]
+        va_s = variables["sol6"]
 
         # Virtual compute & storage mapping
         # Get a mapping based on a type from the whole dict
-        virt_comp_mapping = self.generate_map(None, vaT["virtual_compute_identifier"])
-        virt_storage_mapping = self.generate_map(None, vaT["virtual_storage_identifier"])
-        sw_image_mapping = self.generate_map(None, vaT["sw_image_identifier"])
+        virt_comp_mapping = self.generate_map(None, va_t["virtual_compute_identifier"])
+        virt_storage_mapping = self.generate_map(None, va_t["virtual_storage_identifier"])
+        sw_image_mapping = self.generate_map(None, va_t["sw_image_identifier"])
 
         self.mapping = [
             # ** Metadata **
-            ((vaT["descriptor_id"], self.FLAG_BLANK),        vaS["vnfd_id"]),
-            ((vaT["descriptor_version"], self.FLAG_BLANK),   vaS["vnfd_ver"]),
-            ((vaT["provider"], self.FLAG_BLANK),             vaS["vnfd_provider"]),
-            ((vaT["product_name"], self.FLAG_BLANK),         vaS["vnfd_product"]),
-            ((vaT["product_info_name"], self.FLAG_BLANK),    vaS["vnfd_info_name"]),
-            ((vaT["product_info_desc"], self.FLAG_BLANK),    vaS["vnfd_info_desc"]),
-            ((vaT["software_version"], self.FLAG_BLANK),     vaS["vnfd_software_ver"]),
-            ((vaT["vnfm_info"], self.FLAG_BLANK),            vaS["vnfd_vnfm_info"]),
+            ((va_t["descriptor_id"], self.FLAG_BLANK),        va_s["vnfd_id"]),
+            ((va_t["descriptor_version"], self.FLAG_BLANK),   va_s["vnfd_ver"]),
+            ((va_t["provider"], self.FLAG_BLANK),             va_s["vnfd_provider"]),
+            ((va_t["product_name"], self.FLAG_BLANK),         va_s["vnfd_product"]),
+            ((va_t["product_info_name"], self.FLAG_BLANK),    va_s["vnfd_info_name"]),
+            ((va_t["product_info_desc"], self.FLAG_BLANK),    va_s["vnfd_info_desc"]),
+            ((va_t["software_version"], self.FLAG_BLANK),     va_s["vnfd_software_ver"]),
+            ((va_t["vnfm_info"], self.FLAG_BLANK),            va_s["vnfd_vnfm_info"]),
 
 
-            ((vaT["virtual_compute"], self.FLAG_KEY_SET_VALUE),
-             [vaS["vnfd_vcd_id"], virt_comp_mapping]),
+            ((va_t["virtual_compute"], self.FLAG_KEY_SET_VALUE),
+             [va_s["vnfd_vcd_id"], virt_comp_mapping]),
 
-            ((vaT["virtual_compute_mem_size"], self.FLAG_ONLY_NUMBERS),
-             [vaS["vnfd_vcd_mem_size"], virt_comp_mapping]),
+            ((va_t["virtual_compute_mem_size"], self.FLAG_ONLY_NUMBERS),
+             [va_s["vnfd_vcd_mem_size"], virt_comp_mapping]),
 
-            ((vaT["virtual_compute_cpu_num"], self.FLAG_ONLY_NUMBERS),
-             [vaS["vnfd_vcd_cpu_num"], virt_comp_mapping]),
+            ((va_t["virtual_compute_cpu_num"], self.FLAG_ONLY_NUMBERS),
+             [va_s["vnfd_vcd_cpu_num"], virt_comp_mapping]),
 
-            ((vaT["virtual_compute_cpu_arch"], self.FLAG_BLANK),
-             [vaS["vnfd_vcd_cpu_arch"], virt_comp_mapping]),
+            ((va_t["virtual_compute_cpu_arch"], self.FLAG_BLANK),
+             [va_s["vnfd_vcd_cpu_arch"], virt_comp_mapping]),
 
-            ((vaT["virtual_compute_cpu_clock"], self.FLAG_BLANK),
-             [vaS["vnfd_vcd_cpu_clock"], virt_comp_mapping]),
-
-
-            ((vaT["virtual_storage"], self.FLAG_KEY_SET_VALUE),
-             [vaS["vnfd_virt_storage_id"], virt_storage_mapping]),
-
-            ((vaT["virtual_storage_type"], self.FLAG_BLANK),
-             [vaS["vnfd_virt_storage_type"], virt_storage_mapping]),
-
-            ((vaT["virtual_storage_size"], self.FLAG_ONLY_NUMBERS),
-             [vaS["vnfd_virt_storage_size"], virt_storage_mapping]),
+            ((va_t["virtual_compute_cpu_clock"], self.FLAG_BLANK),
+             [va_s["vnfd_vcd_cpu_clock"], virt_comp_mapping]),
 
 
-            ((vaT["sw_image_r"], self.FLAG_KEY_SET_VALUE),  [vaS["sw_id"], sw_image_mapping]),
-            ((vaT["sw_image_name"], self.FLAG_BLANK),       [vaS["sw_name"], sw_image_mapping]),
-            ((vaT["sw_image_container_fmt"], self.FLAG_BLANK),
-             [vaS["sw_container_format"], sw_image_mapping]),
+            ((va_t["virtual_storage"], self.FLAG_KEY_SET_VALUE),
+             [va_s["vnfd_virt_storage_id"], virt_storage_mapping]),
 
-            ((vaT["sw_image_version"], self.FLAG_BLANK),    [vaS["sw_version"], sw_image_mapping]),
-            ((vaT["sw_image_checksum"], self.FLAG_BLANK),   [vaS["sw_checksum"], sw_image_mapping]),
-            ((vaT["sw_image_min_disk"], self.FLAG_ONLY_NUMBERS),
-             [vaS["sw_min_disk"], sw_image_mapping]),
+            ((va_t["virtual_storage_type"], self.FLAG_BLANK),
+             [va_s["vnfd_virt_storage_type"], virt_storage_mapping]),
 
-            ((vaT["sw_image_min_ram"], self.FLAG_ONLY_NUMBERS),
-             [vaS["sw_min_ram"], sw_image_mapping]),
+            ((va_t["virtual_storage_size"], self.FLAG_ONLY_NUMBERS),
+             [va_s["vnfd_virt_storage_size"], virt_storage_mapping]),
 
-            ((vaT["sw_image_size"], self.FLAG_ONLY_NUMBERS), [vaS["sw_size"], sw_image_mapping]),
-            ((vaT["sw_image_disk_fmt"], self.FLAG_BLANK),
-             [vaS["sw_disk_format"], sw_image_mapping]),
 
-            ((vaT["sw_image_sw_image"], self.FLAG_BLANK),
-             [vaS["sw_image_name_var"], sw_image_mapping]),
+            ((va_t["sw_image_r"], self.FLAG_KEY_SET_VALUE),  [va_s["sw_id"], sw_image_mapping]),
+            ((va_t["sw_image_name"], self.FLAG_BLANK),       [va_s["sw_name"], sw_image_mapping]),
+            ((va_t["sw_image_container_fmt"], self.FLAG_BLANK),
+             [va_s["sw_container_format"], sw_image_mapping]),
 
-            ((vaT["sw_image_operating_system"], self.FLAG_BLANK),
-             [vaS["sw_operating_sys"], sw_image_mapping]),
+            ((va_t["sw_image_version"], self.FLAG_BLANK),    [va_s["sw_version"], sw_image_mapping]),
+            ((va_t["sw_image_checksum"], self.FLAG_BLANK),   [va_s["sw_checksum"], sw_image_mapping]),
+            ((va_t["sw_image_min_disk"], self.FLAG_ONLY_NUMBERS),
+             [va_s["sw_min_disk"], sw_image_mapping]),
 
-            ((vaT["sw_image_supp_virt_environs"], self.FLAG_BLANK),
-             [vaS["sw_supp_virt_environ"], sw_image_mapping]),
+            ((va_t["sw_image_min_ram"], self.FLAG_ONLY_NUMBERS),
+             [va_s["sw_min_ram"], sw_image_mapping]),
+
+            ((va_t["sw_image_size"], self.FLAG_ONLY_NUMBERS), [va_s["sw_size"], sw_image_mapping]),
+            ((va_t["sw_image_disk_fmt"], self.FLAG_BLANK),
+             [va_s["sw_disk_format"], sw_image_mapping]),
+
+            ((va_t["sw_image_sw_image"], self.FLAG_BLANK),
+             [va_s["sw_image_name_var"], sw_image_mapping]),
+
+            ((va_t["sw_image_operating_system"], self.FLAG_BLANK),
+             [va_s["sw_operating_sys"], sw_image_mapping]),
+
+            ((va_t["sw_image_supp_virt_environs"], self.FLAG_BLANK),
+             [va_s["sw_supp_virt_environ"], sw_image_mapping]),
 
 
 

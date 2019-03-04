@@ -4,9 +4,18 @@ The TOSCA variables are mapped to the SOL6 ones, they must have the same names.
 The program does not attempt to map variables beginning with '_'
 """
 from mapping_v2 import *
+import logging
 
 
 class PathMaping:
+    _log = None
+
+    @staticmethod
+    def get_logger():
+        if not PathMaping._log:
+            PathMaping._log = logging.getLogger(__name__)
+        return PathMaping._log
+
     @staticmethod
     def format_paths(variables):
         """
@@ -40,7 +49,7 @@ class PathMaping:
         Take the input from the config file, and set the variables that are identifiers here
         This must be run before the values are used
         """
-
+        log = PathMaping.get_logger()
         key_list = V2Mapping.get_object_keys(obj, exclude=exclude)
 
         for k in key_list:
@@ -48,7 +57,7 @@ class PathMaping:
             set_val = True if var_val in cur_dict else False
 
             if k not in cur_dict and not set_val:
-                raise KeyError("{} does not exist in the configuration file".format(k))
+                log.error("{} does not exist in the configuration file".format(k))
             if set_val:
                 val = cur_dict[var_val]
             else:
@@ -58,11 +67,13 @@ class PathMaping:
 
     @staticmethod
     def get_full_path(elem, dic):
+        log = PathMaping.get_logger()
         try:
             if not isinstance(dic[elem], list):
                 return dic[elem]
         except KeyError:
-            raise KeyError("Could not find {} as a parent".format(elem))
+            log.error("Could not find {} as a parent".format(elem))
+            return ""
 
         return "{}.{}".format(PathMaping.get_full_path(dic[elem][0], dic), dic[elem][1])
 

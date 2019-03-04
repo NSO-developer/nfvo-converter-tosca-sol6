@@ -29,7 +29,9 @@ parser.add_argument('-l', '--log-level',
 parser.add_argument('-p', '--prune', action='store_false',
                     help='Do not prune empty values from the dict')
 parser.add_argument('-c', '--path-config', required=True,
-                    help='Location of the paths configuration file')
+                    help='Location of the paths configuration file for TOSCA')
+parser.add_argument('-s', '--path-config-sol6', required=True,
+                    help='Location of the paths configuration file for SOL6')
 
 args = parser.parse_args()
 
@@ -39,6 +41,8 @@ log = logging.getLogger(__name__)
 
 # Read the path configuration file
 path_conf = toml.load(args.path_config)
+path_conf_sol6 = toml.load(args.path_config_sol6)
+path_conf = dict_utils.merge_two_dicts(path_conf, path_conf_sol6)
 
 # Parse the yang specifications file into an empty dictionary
 parsed_dict = {}
