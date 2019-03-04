@@ -44,48 +44,92 @@ class Sol6Converter:
         """
         return None
 
+    # *************************
+    # ** Run Mapping Methods **
+    # *************************
     def run_mapping(self, keys):
-        # The first parameter is always a tuple, with the flags as the second parameter
-        # If there are multiple flags, they will be grouped in a tuple as well
-
+        """
+        The first parameter is always a tuple, with the flags as the second parameter
+        If there are multiple flags, they will be grouped in a tuple as well
+        """
         for ((tosca_path, flags), map_sol6) in keys.mapping:
-            self.set_flags_false()
-            self.set_flags_loop(flags, keys)
+            self.run_mapping_flags(flags, keys)
+            self.run_mapping_map_needed(tosca_path, map_sol6)
 
-            # Check if there is a mapping needed
-            if isinstance(map_sol6, list):
-                mapping_list = map_sol6[1]  # List of MapElems
-                sol6_path = map_sol6[0]
+    def run_mapping_islist(self, tosca_path, map_sol6):
+        """
+        What to do if there is a complex mapping needed
+        Called from run_mapping_map_needed
+        """
+        mapping_list = map_sol6[1]  # List of MapElems
+        sol6_path = map_sol6[0]
 
-                for elem in mapping_list:
-                    # Skip this mapping element if it is None, but allow a none name to pass
-                    if not elem:
-                        continue
+        for elem in mapping_list:
+            # Skip this mapping element if it is None, but allow a none name to pass
+            if not elem:
+                continue
 
-                    tosca_use_value = self.tosca_use_value
-                    f_tosca_path = MapElem.format_path(elem, tosca_path, use_value=tosca_use_value)
-                    f_sol6_path = MapElem.format_path(elem, sol6_path, use_value=True)
+            tosca_use_value = self.tosca_use_value
+            f_tosca_path = MapElem.format_path(elem, tosca_path, use_value=tosca_use_value)
+            f_sol6_path = MapElem.format_path(elem, sol6_path, use_value=True)
 
-                    # Handle flags for mapped values
-                    value = self.handle_flags(f_sol6_path, f_tosca_path)
+            # Handle flags for mapped values
+            value = self.handle_flags(f_sol6_path, f_tosca_path)
 
-                    # If the value doesn't exist, don't write it
-                    # Do write it if the value is 0, though
-                    write = True
-                    if not value:
-                        write = True if value is 0 else False
+            # If the value doesn't exist, don't write it
+            # Do write it if the value is 0, though
+            write = True
+            if not value:
+                write = True if value is 0 else False
 
-                    if write:
-                        set_path_to(f_sol6_path, self.vnfd, value, create_missing=True)
-            else:  # No mapping needed
-                sol6_path = map_sol6
+            if write:
+                set_path_to(f_sol6_path, self.vnfd, value, create_missing=True)
 
-                # Handle the various flags for no mappings
-                value = self.handle_flags(sol6_path, tosca_path)
+    def run_mapping_notlist(self, tosca_path, map_sol6):
+        """
+        What to do if there is no complex mapping specified
+        Called from run_mapping_map_needed
+        """
+        sol6_path = map_sol6
 
-                set_path_to(sol6_path, self.vnfd, value, create_missing=True)
+        # Handle the various flags for no mappings
+        value = self.handle_flags(sol6_path, tosca_path)
 
+        set_path_to(sol6_path, self.vnfd, value, create_missing=True)
+
+    def run_mapping_map_needed(self, tosca_path, map_sol6):
+        """
+        Determine if a mapping (list of MapElem) has been specified
+        Called by run_mapping
+        """
+        # Check if there is a mapping needed
+        if isinstance(map_sol6, list):
+            self.run_mapping_islist(tosca_path, map_sol6)
+
+        else:  # No mapping needed
+            self.run_mapping_notlist(tosca_path, map_sol6)
+
+    def run_mapping_flags(self, flags, keys):
+        """
+        Handle various flag operations, such as setting them to false and updating their values
+        Called from run_mapping
+        """
+        self.set_flags_false()
+        self.set_flags_loop(flags, keys)
+
+    # ******************
     # ** Flag methods **
+    # ******************
+    def handle_flags(self, f_sol6_path, f_tosca_path):
+        """
+        Returns the value after being formatted by the flags
+        """
+        value = self._key_as_value(self.key_as_value, f_tosca_path)
+        value = self._only_number(self.only_number, value, is_float=self.only_number_float)
+        value = self._append_to_list(self.append_list, f_sol6_path, value)
+        value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
+
+        return value
 
     def set_flags_false(self):
         """
@@ -120,17 +164,6 @@ class Sol6Converter:
                 self.first_list_elem = True
             if flag == keys.FLAG_USE_VALUE:
                 self.tosca_use_value = True
-
-    def handle_flags(self, f_sol6_path, f_tosca_path):
-        """
-        Returns the value after being formatted by the flags
-        """
-        value = self._key_as_value(self.key_as_value, f_tosca_path)
-        value = self._only_number(self.only_number, value, is_float=self.only_number_float)
-        value = self._append_to_list(self.append_list, f_sol6_path, value)
-        value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
-
-        return value
 
     # ---------------------
     # ** Specific flag methods **
