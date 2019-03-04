@@ -60,7 +60,7 @@ elif "nokia" in provider:
 else:
     raise TypeError("Unsupported provider")
 
-cnfv = converter.parse()
+cnfv = converter.convert()
 
 
 # Prune the empty fields

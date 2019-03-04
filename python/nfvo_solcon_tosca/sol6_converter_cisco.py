@@ -17,7 +17,7 @@ class SOL6ConverterCisco(Sol6Converter):
         self.is_variable = False
         self.default_root = False
 
-    def parse(self):
+    def convert(self):
         """
         Convert the tosca_vnf to sol6 VNFD
         Currently only handles converting a single VNF to VNFD
@@ -42,11 +42,11 @@ class SOL6ConverterCisco(Sol6Converter):
         else:
             self.check_deltas_valid()
 
-        self.run_v2_mapping(keys)
+        self.run_mapping(keys)
 
         return self.vnfd
 
-    def run_v2_mapping(self, keys):
+    def run_mapping(self, keys):
         # The first parameter is always a tuple, with the flags as the second parameter
         # If there are multiple flags, they will be grouped in a tuple as well
 
