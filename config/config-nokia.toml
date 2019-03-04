@@ -10,7 +10,6 @@ providers=["nokia"]
     sw-image                    = ["type", "tosca.nodes.nfv.SwImage"]
     vdu                         = ["type", "tosca.nodes.nfv.VDU"]
 
-
 # Note: If there is a variable with "path_VAL", that means it will not be parsed for the path
 # heirarchy, but will instead be set with the value given
 # The structure of the TOSCA file, in paths
