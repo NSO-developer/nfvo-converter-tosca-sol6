@@ -485,6 +485,7 @@ class V2Map(V2Mapping):
                 dict_tosca = yaml
                 dict_sol6 = {}
         """
+
         self.mapping = \
             [
                 # -- Metadata --

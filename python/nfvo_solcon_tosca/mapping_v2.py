@@ -65,6 +65,8 @@ class V2Mapping:
         :param start_num: The number to start mapping values to
         :optional parent_map:
         :optional value_map:
+        :optional none_value:
+        :optional none_key:
         :return: A dict of the mappings
         """
         parent_map = None
@@ -108,7 +110,7 @@ class V2Mapping:
         return result
 
     def generate_map(self, path, field_conditions, map_type="int", map_start=0,
-                     map_function=None, map_args=None):
+                     map_function=None, map_args=None, cur_dict=None, parent=None):
         """
         If map_function is not defined, look at map_type to determine what predefined mapping
         function to be used.
@@ -119,11 +121,18 @@ class V2Mapping:
         :param map_start:
         :param map_function:
         :param map_args:
+        :param cur_dict: If we are only specifying the path to generate a mapping, specify the dict
+        to read from
+        :param parent: Parent MapElem to assign, if it doesn't exist
         :return:
         """
-        field = field_conditions[0]
-        field_value = field_conditions[1]
-        field_filter = None if len(field_conditions) < 3 else field_conditions[2]
+        field = None
+        field_value = None
+        field_filter = None
+        if field_conditions:
+            field = field_conditions[0]
+            field_value = field_conditions[1]
+            field_filter = None if len(field_conditions) < 3 else field_conditions[2]
 
         # Get the value at path
         if path:
@@ -133,9 +142,22 @@ class V2Mapping:
             p_val = self.dict_tosca
 
         # Get the relevant nodes based on field and field_value
-        filtered = get_roots_from_filter(p_val, field, field_value, user_filter=field_filter)
+        filtered = None
+        if field and field_value:
+            filtered = get_roots_from_filter(p_val, field, field_value, user_filter=field_filter)
+        elif path:
+            # If we do not have field & field_value, but we do have path
+            filtered = get_path_value(path, cur_dict)
+            if not isinstance(filtered, list):
+                filtered = [filtered]
 
-        return self.generate_map_from_list(filtered, map_type, map_start, map_function, map_args)
+        result = self.generate_map_from_list(filtered, map_type, map_start, map_function, map_args)
+        if parent:
+            # We can't overwrite parent mappings, but there might be some, so just don't do anything
+            # if that is the case
+            MapElem.add_parent_mapping(result, parent, fail_silent=True)
+
+        return result
 
     def generate_map_from_list(self, to_map, map_type="int", map_start=0,
                                map_function=None, map_args=None):
@@ -280,18 +302,21 @@ class MapElem:
         return True
 
     @staticmethod
-    def add_parent_mapping(mapping_list, parent_mapping):
+    def add_parent_mapping(mapping_list, parent_mapping, fail_silent=False):
         if not isinstance(mapping_list, list):
             mapping_list = [mapping_list]
         for c_map in mapping_list:
             if c_map.parent_map:
+                if fail_silent:
+                    log.debug("SILENT: Expected an empty parent map, instead found {}".
+                              format(c_map.parent_map))
+                    continue
                 raise KeyError("Expected an empty parent map, instead found {}".
                                format(c_map.parent_map))
             if not isinstance(parent_mapping, MapElem):
                 raise ValueError("Expected a MapElem, instead {} was given".
                                  format(type(parent_mapping)))
             c_map.parent_map = parent_mapping
-
 
     @staticmethod
     def basic_map(num):

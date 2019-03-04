@@ -47,7 +47,7 @@ def get_path_value(path, cur_dict, must_exist=True, ensure_dict=False, no_msg=Fa
                 raise KeyError("Path '{}' not found in {}".format(val, path))
             else:
                 if not no_msg:
-                    log.warn("{} not found in {}".format(val, path))
+                    log.warning("{} not found in {}".format(val, path))
                 return False
 
     if ensure_dict and isinstance(cur_context, list):
@@ -263,7 +263,7 @@ def merge_list_of_dicts(lst):
     hold = None
     final = {}
     if len(lst) % 2 != 0:
-        hold = lst.pop()
+        hold = lst[-1]
 
     for count, item in enumerate(lst):
         final = merge_two_dicts(final, item)
