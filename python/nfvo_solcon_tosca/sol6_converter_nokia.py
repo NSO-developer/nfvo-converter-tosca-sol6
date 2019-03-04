@@ -7,7 +7,7 @@ class SOL6ConverterNokia(Sol6Converter):
     def __init__(self, tosca_vnf, parsed_dict, variables=None, log=None):
         super().__init__(tosca_vnf, parsed_dict, variables=variables, log=log)
 
-    def parse(self):
+    def convert(self):
         """
         Convert the tosca_vnf to sol6 VNFD
         Currently only handles converting a single VNF to VNFD
@@ -22,6 +22,6 @@ class SOL6ConverterNokia(Sol6Converter):
 
         keys = V2Map(self.tosca_vnf, self.vnfd, variables=self.variables, log=self.log)
 
-        self.run_v2_mapping(keys)
+        self.run_mapping(keys)
 
         return self.vnfd

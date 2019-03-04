@@ -36,7 +36,7 @@ class Sol6Converter:
         self.first_list_elem = False
         self.tosca_use_value = False
 
-    def parse(self):
+    def convert(self):
         """
         For overriding
         Convert the tosca_vnf to sol6 VNFD
@@ -44,7 +44,7 @@ class Sol6Converter:
         """
         return None
 
-    def run_v2_mapping(self, keys):
+    def run_mapping(self, keys):
         # The first parameter is always a tuple, with the flags as the second parameter
         # If there are multiple flags, they will be grouped in a tuple as well
 
