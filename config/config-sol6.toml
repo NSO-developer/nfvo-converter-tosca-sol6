@@ -98,6 +98,7 @@
     vdu_boot_value = ["vdu_boot_order", "value"]
     vdu_vc_desc = ["vdu", "virtual-compute-desc.{}"]
     vdu_vs_desc = ["vdu", "virtual-storage-desc.{}"]
+    vdu_sw_image_desc = ["vdu", "sw-image-desc.{}"]
 
     # ********************************
     # ** Internal Connection Points **

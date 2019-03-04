@@ -24,6 +24,7 @@ class TOSCA(TOSCA_BASE):
         variables["tosca"]["virtual_compute_identifier"] = provider_identifiers["virtual-compute"]
         variables["tosca"]["virtual_storage_identifier"] = provider_identifiers["virtual-storage"]
         variables["tosca"]["sw_image_identifier"] = provider_identifiers["sw-image"]
+        variables["tosca"]["vdu_identifier"] = provider_identifiers["vdu"]
 
 
 class SOL6(SOL6_BASE):
@@ -41,10 +42,29 @@ class V2Map(V2Map):
         virt_comp_mapping = self.generate_map(None, va_t["virtual_compute_identifier"])
         virt_storage_mapping = self.generate_map(None, va_t["virtual_storage_identifier"])
         sw_image_mapping = self.generate_map(None, va_t["sw_image_identifier"])
+        vdu_mapping = self.generate_map(None, va_t["vdu_identifier"])
+
+        vdu_vc_mapping = None
+        vdu_vs_mapping = None
+        vdu_sw_mapping = None
+        # TOSCA path only has one variable to fill, but SOL6 has 2.
+        # This means we need to skip the first one in TOSCA, so set the key to none with none_key
+        for vdu in vdu_mapping:
+            vc_path = MapElem.format_path(vdu, va_t["vdu_req_virt_compute"], use_value=False)
+            vs_path = MapElem.format_path(vdu, va_t["vdu_req_virt_storage"], use_value=False)
+            sw_path = MapElem.format_path(vdu, va_t["vdu_req_sw_image"], use_value=False)
+
+            vdu_vc_mapping = self.generate_map(vc_path, None, cur_dict=dict_tosca, parent=vdu,
+                                               map_args={"none_key": True})
+            vdu_vs_mapping = self.generate_map(vs_path, None, cur_dict=dict_tosca, parent=vdu,
+                                               map_args={"none_key": True})
+            vdu_sw_mapping = self.generate_map(sw_path, None, cur_dict=dict_tosca, parent=vdu,
+                                               map_args={"none_key": True})
 
         # Make the lines shorter
         add_map = self.add_map
-        
+
+        # TODO: Make handling errors here easier
         add_map(((va_t["descriptor_id"], self.FLAG_BLANK),        va_s["vnfd_id"]))
 
         # ** Metadata **
@@ -56,6 +76,7 @@ class V2Map(V2Map):
         add_map(((va_t["software_version"], self.FLAG_BLANK),     va_s["vnfd_software_ver"]))
         add_map(((va_t["vnfm_info"], self.FLAG_BLANK),            va_s["vnfd_vnfm_info"]))
 
+        # ** Virtual Compute **
         add_map(((va_t["virtual_compute"], self.FLAG_KEY_SET_VALUE),
                  [va_s["vnfd_vcd_id"], virt_comp_mapping]))
         add_map(((va_t["virtual_compute_mem_size"], self.FLAG_ONLY_NUMBERS),
@@ -67,6 +88,7 @@ class V2Map(V2Map):
         add_map(((va_t["virtual_compute_cpu_clock"], self.FLAG_BLANK),
                  [va_s["vnfd_vcd_cpu_clock"], virt_comp_mapping]))
 
+        # ** Virtual Storage **
         add_map(((va_t["virtual_storage"], self.FLAG_KEY_SET_VALUE),
                  [va_s["vnfd_virt_storage_id"], virt_storage_mapping]))
         add_map(((va_t["virtual_storage_type"], self.FLAG_BLANK),
@@ -74,6 +96,7 @@ class V2Map(V2Map):
         add_map(((va_t["virtual_storage_size"], self.FLAG_ONLY_NUMBERS),
                  [va_s["vnfd_virt_storage_size"], virt_storage_mapping]))
 
+        # ** SW Image **
         add_map(((va_t["sw_image_r"], self.FLAG_KEY_SET_VALUE),  [va_s["sw_id"], sw_image_mapping]))
         add_map(((va_t["sw_image_name"], self.FLAG_BLANK),
                  [va_s["sw_name"], sw_image_mapping]))
@@ -97,6 +120,18 @@ class V2Map(V2Map):
                  [va_s["sw_operating_sys"], sw_image_mapping]))
         add_map(((va_t["sw_image_supp_virt_environs"], self.FLAG_BLANK),
                  [va_s["sw_supp_virt_environ"], sw_image_mapping]))
+
+        # ** VDU **
+        add_map(((va_t["vdu"], self.FLAG_KEY_SET_VALUE),     [va_s["vdu_id"], vdu_mapping]))
+        add_map(((va_t["vdu"], self.FLAG_KEY_SET_VALUE),     [va_s["vdu_name"], vdu_mapping]))
+        add_map(((va_t["vdu_desc"], self.FLAG_BLANK),     [va_s["vdu_desc"], vdu_mapping]))
+        add_map(((va_t["vdu_req_virt_compute"], self.FLAG_BLANK),
+                 [va_s["vdu_vc_desc"], vdu_vc_mapping]))
+        add_map(((va_t["vdu_req_virt_storage"], self.FLAG_BLANK),
+                 [va_s["vdu_vs_desc"], vdu_vs_mapping]))
+        add_map(((va_t["vdu_req_sw_image"], self.FLAG_BLANK),
+                 [va_s["vdu_sw_image_desc"], vdu_sw_mapping]))
+
 
 
 

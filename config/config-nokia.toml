@@ -8,6 +8,7 @@ providers=["nokia"]
     virtual-compute             = ["type", "tosca.nodes.nfv.VirtualCompute"]
     virtual-storage             = ["type", "tosca.nodes.nfv.VirtualStorage"]
     sw-image                    = ["type", "tosca.nodes.nfv.SwImage"]
+    vdu                         = ["type", "tosca.nodes.nfv.VDU"]
 
 
 # Note: If there is a variable with "path_VAL", that means it will not be parsed for the path
@@ -59,4 +60,13 @@ providers=["nokia"]
     sw_image_sw_image           = ["sw_image", "sw_image"]
     sw_image_operating_system   = ["sw_image", "operating_system"]
     sw_image_supp_virt_environs = ["sw_image", "supported_virtualisation_environments"]
+
+    vdu                         = ["node_templates", "{}"]
+    vdu_props                   = ["vdu", "properties"]
+    vdu_desc                    = ["vdu_props", "description"]
+    vdu_req                     = ["vdu", "requirements"]
+    vdu_req_virt_compute        = ["vdu_req", "virtual_compute"]
+    vdu_req_virt_storage        = ["vdu_req", "virtual_storage"]
+    vdu_req_sw_image            = ["vdu_req", "sw_image"]
+
 
