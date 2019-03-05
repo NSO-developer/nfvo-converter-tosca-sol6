@@ -146,6 +146,9 @@ class V2Mapping:
         if field and field_value:
             filtered = get_roots_from_filter(p_val, field, field_value, user_filter=field_filter)
         elif path:
+            # If we forgot to pass in a dict, use tosca
+            if not cur_dict:
+                cur_dict = self.dict_tosca
             # If we do not have field & field_value, but we do have path
             filtered = get_path_value(path, cur_dict)
             if not isinstance(filtered, list):

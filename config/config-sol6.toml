@@ -42,13 +42,14 @@
     # ***********************
     # ** Deployment Flavor **
     # ***********************
-    deployment_flavor = ["vnfd", "df"]
-    df_id = ["deployment_flavor", "id"]
-    df_desc = ["deployment_flavor", "description"]
-    df_vdu_profile = ["deployment_flavor", "vdu-profile.{}"]
-    df_vdu_prof_id = ["df_vdu_profile", "id"]
-    df_vdu_prof_inst_min = ["df_vdu_profile", "min-number-of-instances"]
-    df_vdu_prof_inst_max = ["df_vdu_profile", "max-number-of-instances"]
+    deployment_flavor               = ["vnfd", "df"]
+    df_id                           = ["deployment_flavor", "id"]
+    df_desc                         = ["deployment_flavor", "description"]
+    df_inst_level_default           = ["deployment_flavor", "default-instantiation-level"]
+    df_vdu_profile                  = ["deployment_flavor", "vdu-profile.{}"]
+    df_vdu_prof_id                  = ["df_vdu_profile", "id"]
+    df_vdu_prof_inst_min            = ["df_vdu_profile", "min-number-of-instances"]
+    df_vdu_prof_inst_max            = ["df_vdu_profile", "max-number-of-instances"]
     # -- Instantiation Level
     df_inst_level = ["deployment_flavor", "instantiation-level"]
     df_inst_level_id = ["df_inst_level", "id"]
