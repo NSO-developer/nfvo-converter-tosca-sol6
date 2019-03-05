@@ -69,12 +69,12 @@ class V2Map(V2Map):
 
         # ** Metadata **
         add_map(((va_t["software_version"], self.FLAG_BLANK),   va_s["vnfd_ver"]))
-        add_map(((va_t["provider"], self.FLAG_BLANK),             va_s["vnfd_provider"]))
-        add_map(((va_t["product_name"], self.FLAG_BLANK),         va_s["vnfd_product"]))
-        add_map(((va_t["product_info_name"], self.FLAG_BLANK),    va_s["vnfd_info_name"]))
-        add_map(((va_t["product_info_desc"], self.FLAG_BLANK),    va_s["vnfd_info_desc"]))
-        add_map(((va_t["software_version"], self.FLAG_BLANK),     va_s["vnfd_software_ver"]))
-        add_map(((va_t["vnfm_info"], self.FLAG_BLANK),            va_s["vnfd_vnfm_info"]))
+        add_map(((va_t["provider"], self.FLAG_BLANK),           va_s["vnfd_provider"]))
+        add_map(((va_t["product_name"], self.FLAG_BLANK),       va_s["vnfd_product"]))
+        add_map(((va_t["product_info_name"], self.FLAG_BLANK),  va_s["vnfd_info_name"]))
+        add_map(((va_t["product_info_desc"], self.FLAG_BLANK),  va_s["vnfd_info_desc"]))
+        add_map(((va_t["software_version"], self.FLAG_BLANK),   va_s["vnfd_software_ver"]))
+        add_map(((va_t["vnfm_info"], self.FLAG_BLANK),          va_s["vnfd_vnfm_info"]))
 
         # ** Virtual Compute **
         add_map(((va_t["virtual_compute"], self.FLAG_KEY_SET_VALUE),
