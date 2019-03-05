@@ -1,5 +1,5 @@
 from sol6_keys import *
-
+from list_utils import *
 
 class TOSCA(TOSCA_BASE):
     @staticmethod
@@ -60,6 +60,17 @@ class V2Map(V2Map):
                                                map_args={"none_key": True})
             vdu_sw_mapping = self.generate_map(sw_path, None, cur_dict=dict_tosca, parent=vdu,
                                                map_args={"none_key": True})
+
+        df_vdu_prof_map = self.generate_map(va_t["df_vdu_profs"], None, cur_dict=dict_tosca)
+        df_inst_levels_map = self.generate_map(va_t["df_inst_levels"], None, cur_dict=dict_tosca)
+
+        # Generate vdu_level map inside of instantiation_levels map
+        df_inst_vdu_level_map = []
+        for df_inst in df_inst_levels_map:
+            cur_path = MapElem.format_path(df_inst, va_t["df_inst_vdu_levels"], use_value=False)
+            df_inst_vdu_level_map.append(self.generate_map(cur_path, None, cur_dict=dict_tosca,
+                                                           parent=df_inst))
+        df_inst_vdu_level_map = flatten(df_inst_vdu_level_map)  # Make sure it's a flat list
 
         # Make the lines shorter
         add_map = self.add_map
@@ -122,9 +133,9 @@ class V2Map(V2Map):
                  [va_s["sw_supp_virt_environ"], sw_image_mapping]))
 
         # ** VDU **
-        add_map(((va_t["vdu"], self.FLAG_KEY_SET_VALUE),     [va_s["vdu_id"], vdu_mapping]))
-        add_map(((va_t["vdu"], self.FLAG_KEY_SET_VALUE),     [va_s["vdu_name"], vdu_mapping]))
-        add_map(((va_t["vdu_desc"], self.FLAG_BLANK),     [va_s["vdu_desc"], vdu_mapping]))
+        add_map(((va_t["vdu"], self.FLAG_KEY_SET_VALUE),    [va_s["vdu_id"], vdu_mapping]))
+        add_map(((va_t["vdu"], self.FLAG_KEY_SET_VALUE),    [va_s["vdu_name"], vdu_mapping]))
+        add_map(((va_t["vdu_desc"], self.FLAG_BLANK),       [va_s["vdu_desc"], vdu_mapping]))
         add_map(((va_t["vdu_req_virt_compute"], self.FLAG_BLANK),
                  [va_s["vdu_vc_desc"], vdu_vc_mapping]))
         add_map(((va_t["vdu_req_virt_storage"], self.FLAG_BLANK),
@@ -132,6 +143,22 @@ class V2Map(V2Map):
         add_map(((va_t["vdu_req_sw_image"], self.FLAG_BLANK),
                  [va_s["vdu_sw_image_desc"], vdu_sw_mapping]))
 
+        # ** Deployment Flavor **
+        add_map(((va_t["df_id"], self.FLAG_BLANK), va_s["df_id"]))
+        # VDU Profiles
+        add_map(((va_t["df_vdu_profs"], self.FLAG_KEY_SET_VALUE),
+                 [va_s["df_vdu_prof_id"], df_vdu_prof_map]))
+        add_map(((va_t["df_vdu_prof_min_inst"], self.FLAG_BLANK),
+                 [va_s["df_vdu_prof_inst_min"], df_vdu_prof_map]))
+        add_map(((va_t["df_vdu_prof_max_inst"], self.FLAG_BLANK),
+                 [va_s["df_vdu_prof_inst_max"], df_vdu_prof_map]))
 
-
+        add_map(((va_t["df_inst_level_default"], self.FLAG_BLANK), va_s["df_inst_level_default"]))
+        # Instantiation Levels
+        add_map(((va_t["df_inst_level"], self.FLAG_KEY_SET_VALUE),
+                 [va_s["df_inst_level_id"], df_inst_levels_map]))
+        add_map(((va_t["df_inst_vdu_level"], self.FLAG_KEY_SET_VALUE),
+                 [va_s["df_inst_level_vdu_vdu"], df_inst_vdu_level_map]))
+        add_map(((va_t["df_inst_vdu_level_num"], self.FLAG_BLANK),
+                 [va_s["df_inst_level_vdu_num"], df_inst_vdu_level_map]))
 
