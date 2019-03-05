@@ -68,4 +68,8 @@ providers=["nokia"]
     vdu_req_virt_storage        = ["vdu_req", "virtual_storage"]
     vdu_req_sw_image            = ["vdu_req", "sw_image"]
 
+    df                          = ["capabilities", "deployment_flavour"]
+    df_prop                     = ["df", "properties"]
+    df_id                       = ["df_prop", "flavour_id"]
+
 
