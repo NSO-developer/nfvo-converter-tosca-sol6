@@ -48,9 +48,11 @@ class V2Map(V2Map):
         virt_storage_mapping = self.generate_map(None, va_t["virtual_storage_identifier"])
         sw_image_mapping = self.generate_map(None, va_t["sw_image_identifier"])
         vdu_mapping = self.generate_map(None, va_t["vdu_identifier"])
+
+        # Connection point mappings
+        # Internal CP
         va_t["int_cpd_identifier"].append(self.icp_mapped)
         icp_mapping = self.generate_map(None, va_t["int_cpd_identifier"])
-        ecp_mapping = self.generate_map(None, va_t["ext_cpd_identifier"])
 
         # We have the icp mapping, which is
         # [oamICpd -> 0, parent=(None), ...]
@@ -61,8 +63,12 @@ class V2Map(V2Map):
             cur_vdu_map = MapElem.get_mapping_name(vdu_mapping, cur_vdu)
             MapElem.add_parent_mapping(icp, cur_vdu_map)
 
-        print(icp_mapping)
+        # External CP
+        ecp_mapping = self.generate_map(None, va_t["ext_cpd_identifier"])
 
+        print(ecp_mapping)
+
+        # Virtual Compute, Virtual Storage, Software mappings
         vdu_vc_mapping = None
         vdu_vs_mapping = None
         vdu_sw_mapping = None
@@ -81,6 +87,7 @@ class V2Map(V2Map):
             vdu_sw_mapping = self.generate_map(sw_path, None, cur_dict=dict_tosca, parent=vdu,
                                                map_args={"none_key": True})
 
+        # VDU Profile and instantiationn levels mapping
         df_vdu_prof_map = self.generate_map(va_t["df_vdu_profs"], None, cur_dict=dict_tosca)
         df_inst_levels_map = self.generate_map(va_t["df_inst_levels"], None, cur_dict=dict_tosca)
 
@@ -194,6 +201,19 @@ class V2Map(V2Map):
         add_map(((va_t["int_cpd"],
                   (self.FLAG_KEY_SET_VALUE, self.FLAG_USE_VALUE, self.FLAG_ONLY_NUMBERS)),
                  [va_s["int_cpd_interface_id"], icp_mapping]))
+        # Map the virtual link descriptors, but expect that some don't have the links, so suppress
+        # warning messages
+        add_map(((va_t["int_cpd_link"], self.FLAG_FAIL_SILENT),
+                 [va_s["int_cpd_virt_link_desc"], icp_mapping]))
+
+        # External CPs
+        add_map(((va_t["ext_cpd"], self.FLAG_KEY_SET_VALUE),
+                 [va_s["ext_cpd_id"], ecp_mapping]))
+        add_map(((va_t["ext_cpd_protocol"], self.FLAG_FORMAT_IP),
+                 [va_s["ext_cpd_protocol"], ecp_mapping]))
+        add_map(((va_t["ext_cpd_role"], self.FLAG_BLANK),
+                 [va_s["ext_cpd_role"], ecp_mapping]))
+
 
     def icp_mapped(self, a):
         """Check if the given int_cpd has the required value"""

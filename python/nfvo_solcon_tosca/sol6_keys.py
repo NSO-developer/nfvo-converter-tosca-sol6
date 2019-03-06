@@ -249,6 +249,8 @@ class V2Map(V2Mapping):
     FLAG_VAR                        = "THISVARIABLE"
     # Marks this as requiring a value, and if there isn't one, make it 'root'
     FLAG_TYPE_ROOT_DEF              = "MUSTBESOMETHINGORROOT"
+    # Suppress any error or warning messages relating to this mapping
+    FLAG_FAIL_SILENT                = "FAILSIILENT"
 
     mapping = []
 
