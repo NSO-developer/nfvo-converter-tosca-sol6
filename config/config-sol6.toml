@@ -13,7 +13,9 @@
     vnfd_info_desc              = ["vnfd", "product-info-description"]
     vnfd_vnfm_info              = ["vnfd", "vnfm-info"]
 
-    VALID_PROTOCOLS_VAL = ["Ethernet", "IPv4", "IPv6", "MPLS", "ODU2", "Pseudo-Wire"]
+    VALID_PROTOCOLS_VAL         = ["Ethernet", "IPv4", "IPv6", "MPLS", "ODU2", "Pseudo-Wire"]
+    VALID_DISK_FORMATS_VAL      = ["qcow2", "raw", "vmdk"]
+    VALID_CONTAINER_FORMATS_VAL = ["aki", "ami", "ari", "bare", "docker", "ova", "ovf"]
 
     # ********************************
     # ** Virtual Compute Descriptor **
@@ -143,4 +145,4 @@
     sw_size                     = ["sw_img_desc", "size"]
     sw_image                    = ["sw_img_desc", "image"]
     sw_operating_sys            = ["sw_img_desc", "operating-system"]
-    sw_supp_virt_environ        = ["sw_img_desc", "supported-virtualisation-environments"]
+    sw_supp_virt_environ        = ["sw_img_desc", "supported-virtualization-environment"]

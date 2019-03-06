@@ -142,7 +142,7 @@ class V2Map(V2Map):
                  [va_s["vnfd_vcd_cpu_num"], virt_comp_mapping]))
         add_map(((va_t["virtual_compute_cpu_arch"], self.FLAG_BLANK),
                  [va_s["vnfd_vcd_cpu_arch"], virt_comp_mapping]))
-        add_map(((va_t["virtual_compute_cpu_clock"], self.FLAG_BLANK),
+        add_map(((va_t["virtual_compute_cpu_clock"], self.FLAG_ONLY_NUMBERS),
                  [va_s["vnfd_vcd_cpu_clock"], virt_comp_mapping]))
 
         # ** Virtual Storage **
@@ -157,7 +157,7 @@ class V2Map(V2Map):
         add_map(((va_t["sw_image_r"], self.FLAG_KEY_SET_VALUE),  [va_s["sw_id"], sw_image_mapping]))
         add_map(((va_t["sw_image_name"], self.FLAG_BLANK),
                  [va_s["sw_name"], sw_image_mapping]))
-        add_map(((va_t["sw_image_container_fmt"], self.FLAG_BLANK),
+        add_map(((va_t["sw_image_container_fmt"], self.FLAG_FORMAT_CONT_FMT),
                  [va_s["sw_container_format"], sw_image_mapping]))
         add_map(((va_t["sw_image_version"], self.FLAG_BLANK),
                  [va_s["sw_version"], sw_image_mapping]))
@@ -169,10 +169,12 @@ class V2Map(V2Map):
                  [va_s["sw_min_ram"], sw_image_mapping]))
         add_map(((va_t["sw_image_size"], self.FLAG_ONLY_NUMBERS),
                  [va_s["sw_size"], sw_image_mapping]))
-        add_map(((va_t["sw_image_disk_fmt"], self.FLAG_BLANK),
+        add_map(((va_t["sw_image_disk_fmt"], self.FLAG_FORMAT_DISK_FMT),
                  [va_s["sw_disk_format"], sw_image_mapping]))
         add_map(((va_t["sw_image_sw_image"], self.FLAG_BLANK),
                  [va_s["sw_image_name_var"], sw_image_mapping]))
+        add_map(((va_t["sw_image_sw_image"], self.FLAG_BLANK),
+                 [va_s["sw_image"], sw_image_mapping]))
         add_map(((va_t["sw_image_operating_system"], self.FLAG_BLANK),
                  [va_s["sw_operating_sys"], sw_image_mapping]))
         add_map(((va_t["sw_image_supp_virt_environs"], self.FLAG_BLANK),
@@ -192,7 +194,7 @@ class V2Map(V2Map):
         # ** Deployment Flavor **
         add_map(((va_t["df_id"], self.FLAG_BLANK), va_s["df_id"]))
         # VDU Profiles
-        add_map(((va_t["df_vdu_profs"], self.FLAG_KEY_SET_VALUE),
+        add_map(((va_t["df_id"], self.FLAG_BLANK),
                  [va_s["df_vdu_prof_id"], df_vdu_prof_map]))
         add_map(((va_t["df_vdu_prof_min_inst"], self.FLAG_BLANK),
                  [va_s["df_vdu_prof_inst_min"], df_vdu_prof_map]))
