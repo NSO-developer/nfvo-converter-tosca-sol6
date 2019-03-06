@@ -29,14 +29,15 @@ class Sol6Converter:
         self.override_run_deltas = False
 
         # Set up the flag variables
-        self.key_as_value = False
-        self.only_number = False
-        self.only_number_float = False
-        self.append_list = False
-        self.first_list_elem = False
-        self.tosca_use_value = False
-        self.format_as_ip = False
-        self.fail_silent = False
+        self.key_as_value       = False
+        self.only_number        = False
+        self.only_number_float  = False
+        self.append_list        = False
+        self.first_list_elem    = False
+        self.tosca_use_value    = False
+        self.format_as_ip       = False
+        self.fail_silent        = False
+        self.req_parent         = False
 
     def convert(self):
         """
@@ -65,15 +66,23 @@ class Sol6Converter:
         """
         mapping_list = map_sol6[1]  # List of MapElems
         sol6_path = map_sol6[0]
-
+        log.debug("Run mapping for tosca:{}, sol6:{}, mapping_list:{}".format(tosca_path, sol6_path,
+                                                                              mapping_list))
         for elem in mapping_list:
             # Skip this mapping element if it is None, but allow a none name to pass
             if not elem:
                 continue
+            if not elem.parent_map and self.req_parent:
+                if not self.fail_silent:
+                    log.warning("Parent mapping is required, but {} does not have one".format(elem))
+                continue
 
+            log.debug("")
             tosca_use_value = self.tosca_use_value
             f_tosca_path = MapElem.format_path(elem, tosca_path, use_value=tosca_use_value)
             f_sol6_path = MapElem.format_path(elem, sol6_path, use_value=True)
+
+            log.debug("Formatted paths, tosca: {}, sol6: {}".format(f_tosca_path, f_sol6_path))
 
             # Handle flags for mapped values
             value = self.handle_flags(f_sol6_path, f_tosca_path)
@@ -93,6 +102,8 @@ class Sol6Converter:
         Called from run_mapping_map_needed
         """
         sol6_path = map_sol6
+
+        log.debug("Run mapping for tosca:{}, sol6:{}".format(tosca_path, sol6_path))
 
         # Handle the various flags for no mappings
         value = self.handle_flags(sol6_path, tosca_path)
@@ -149,6 +160,7 @@ class Sol6Converter:
         self.tosca_use_value    = False
         self.format_as_ip       = False
         self.fail_silent        = False
+        self.req_parent         = False
 
     def set_flags_loop(self, flags, keys):
         """
@@ -157,6 +169,8 @@ class Sol6Converter:
         # Ensure flags is iterable
         if not isinstance(flags, tuple):
             flags = [flags]
+        log.debug("Flags: {}".format(flags))
+
         for flag in flags:
             if flag == keys.FLAG_KEY_SET_VALUE:
                 self.key_as_value = True
@@ -174,6 +188,8 @@ class Sol6Converter:
                 self.format_as_ip = True
             if flag == keys.FLAG_FAIL_SILENT:
                 self.fail_silent = True
+            if flag == keys.FLAG_REQ_PARENT:
+                self.req_parent = True
 
     # ---------------------
     # ** Specific flag methods **

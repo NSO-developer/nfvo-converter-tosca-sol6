@@ -51,8 +51,8 @@ class V2Map(V2Map):
 
         # Connection point mappings
         # Internal CP
-        va_t["int_cpd_identifier"].append(self.icp_mapped)
-        icp_mapping = self.generate_map(None, va_t["int_cpd_identifier"])
+        icp_mapping = self.generate_map(None, va_t["int_cpd_identifier"],
+                                        field_filter=self.icp_mapped)
 
         # We have the icp mapping, which is
         # [oamICpd -> 0, parent=(None), ...]
@@ -65,9 +65,25 @@ class V2Map(V2Map):
 
         # External CP
         ecp_mapping = self.generate_map(None, va_t["ext_cpd_identifier"])
+        ecp_icp_vdus = self.generate_map(None, va_t["ext_cpd_identifier"])
+        # Map ext cpds to connected ICPs then get the VDUs from those ICPs
+        for ecp in ecp_icp_vdus:
+            cur_icp = get_path_value(
+                MapElem.format_path(ecp, va_t["ext_cpd_icps"], use_value=False),
+                dict_tosca, must_exist=False, no_msg=True)
+            if not cur_icp:
+                continue
+            # These are the ICPs that this ECP is connected to
+            # Get the VDUs they are connected to, and assign the parent of the ECP to that
+            cur_icp_map = MapElem.get_mapping_name(icp_mapping, cur_icp)
+            print(cur_icp_map)
+            if not cur_icp_map:  # Make sure the VDU exists (it should)
+                log.warning("Internal connection point {} parent VDU not found".format(cur_icp))
+                continue
+            MapElem.add_parent_mapping(ecp, cur_icp_map.parent_map)
+            ecp.name = None  # Skip the ecp name so we can output the vdu (parent's) name
 
-        print(ecp_mapping)
-
+        print(ecp_icp_vdus)
         # Virtual Compute, Virtual Storage, Software mappings
         vdu_vc_mapping = None
         vdu_vs_mapping = None
@@ -211,11 +227,18 @@ class V2Map(V2Map):
                  [va_s["ext_cpd_id"], ecp_mapping]))
         add_map(((va_t["ext_cpd_protocol"], self.FLAG_FORMAT_IP),
                  [va_s["ext_cpd_protocol"], ecp_mapping]))
+        add_map(((va_t["ext_cpd_icps"], self.FLAG_BLANK),
+                 [va_s["ext_cpd_icp_cpd"], ecp_mapping]))
+        # Outputting the VDU the ICP is a part of
+        add_map(((va_t["ext_cpd"], (self.FLAG_KEY_SET_VALUE, self.FLAG_REQ_PARENT)),
+                 [va_s["ext_cpd_icp_vdu"], ecp_icp_vdus]))
         add_map(((va_t["ext_cpd_role"], self.FLAG_BLANK),
                  [va_s["ext_cpd_role"], ecp_mapping]))
 
+    # ----------------------------------------------------------------------------------------------
 
     def icp_mapped(self, a):
         """Check if the given int_cpd has the required value"""
         return get_path_value(self.va_t["int_cpd_cond"], a[get_dict_key(a)], must_exist=False,
                               no_msg=True)
+

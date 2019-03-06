@@ -110,7 +110,8 @@ class V2Mapping:
         return result
 
     def generate_map(self, path, field_conditions, map_type="int", map_start=0,
-                     map_function=None, map_args=None, cur_dict=None, parent=None):
+                     map_function=None, map_args=None, cur_dict=None, parent=None,
+                     field_filter=None):
         """
         If map_function is not defined, look at map_type to determine what predefined mapping
         function to be used.
@@ -128,11 +129,11 @@ class V2Mapping:
         """
         field = None
         field_value = None
-        field_filter = None
         if field_conditions:
             field = field_conditions[0]
             field_value = field_conditions[1]
-            field_filter = None if len(field_conditions) < 3 else field_conditions[2]
+            if not field_filter:
+                field_filter = None if len(field_conditions) < 3 else field_conditions[2]
 
         # Get the value at path
         if path:

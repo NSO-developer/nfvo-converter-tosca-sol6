@@ -85,6 +85,9 @@
     ext_cpd_protocol            = ["ext_cpd", "layer-protocol"]
     ext_cpd_virt_link           = ["ext_cpd", "int-virtual-link-desc"]
     ext_cpd_role                = ["ext_cpd", "role"]
+    ext_cpd_int_cpd             = ["ext_cpd", "int-cpd"]
+    ext_cpd_icp_vdu             = ["ext_cpd_int_cpd", "vdu"]
+    ext_cpd_icp_cpd             = ["ext_cpd_int_cpd", "cpd"]
 
 
     # *********
