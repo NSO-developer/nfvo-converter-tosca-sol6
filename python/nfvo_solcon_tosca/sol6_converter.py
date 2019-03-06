@@ -36,6 +36,7 @@ class Sol6Converter:
         self.first_list_elem = False
         self.tosca_use_value = False
         self.format_as_ip = False
+        self.fail_silent = False
 
     def convert(self):
         """
@@ -140,13 +141,14 @@ class Sol6Converter:
         If more flags need to be added, override this method
         """
         # Reset these for every mapping
-        self.key_as_value = False
-        self.only_number = False
-        self.only_number_float = False
-        self.append_list = False
-        self.first_list_elem = False
-        self.tosca_use_value = False
-        self.format_as_ip = False
+        self.key_as_value       = False
+        self.only_number        = False
+        self.only_number_float  = False
+        self.append_list        = False
+        self.first_list_elem    = False
+        self.tosca_use_value    = False
+        self.format_as_ip       = False
+        self.fail_silent        = False
 
     def set_flags_loop(self, flags, keys):
         """
@@ -170,13 +172,15 @@ class Sol6Converter:
                 self.tosca_use_value = True
             if flag == keys.FLAG_FORMAT_IP:
                 self.format_as_ip = True
+            if flag == keys.FLAG_FAIL_SILENT:
+                self.fail_silent = True
 
     # ---------------------
     # ** Specific flag methods **
     def _append_to_list(self, option, path, value):
         if not option:
             return value
-        cur_list = get_path_value(path, self.vnfd, must_exist=False)
+        cur_list = get_path_value(path, self.vnfd, must_exist=False, no_msg=self.fail_silent)
         if cur_list:
             if not isinstance(cur_list, list):
                 raise TypeError("{} is not a list".format(cur_list))
@@ -185,7 +189,7 @@ class Sol6Converter:
     def _key_as_value(self, option, path):
         if option:
             return KeyUtils.get_path_last(path)
-        return get_path_value(path, self.tosca_vnf, must_exist=False)
+        return get_path_value(path, self.tosca_vnf, must_exist=False, no_msg=self.fail_silent)
 
     @staticmethod
     def _only_number(option, value, is_float=False):

@@ -94,4 +94,12 @@ providers=["nokia"]
     int_cpd_protocol            = ["int_cpd_prop", "layer_protocol"]
     int_cpd_role                = ["int_cpd_prop", "role"]
 
+    ext_cpd                     = ["node_templates", "{}"]
+    ext_cpd_props               = ["ext_cpd", "properties"]
+    ext_cpd_protocol            = ["ext_cpd_props", "layer_protocol"]
+    ext_cpd_role                = ["ext_cpd_props", "role"]
+    ext_cpd_reqs                = ["ext_cpd", "requirements"]
+    ext_cpd_icps                = ["ext_cpd_reqs", "internal_connection_point"]
+
+
 
