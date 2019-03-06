@@ -1,5 +1,5 @@
 # SOLCon: TOSCA (SOL001) to SOL006 VNFD Converter
-Can be run as a package in NSO: 
+Can be run as a package in NSO, eventually: 
 ```
     NSO command to be put here
 ```
@@ -24,12 +24,11 @@ Also can be run standalone:
 - -o --output: The name of the file to be output in JSON format, outputs to stdout if not specified
 - -c --path-config (REQ): Location of the paths configuration file for TOSCA paths (TOML format)
 - -s --path-config-sol6 (REQ): Location of the paths configuration file for SOL6 paths (TOML format)
-- -l --log-level: Set the log level for NSO and standalone logging
-- -n --dry-run: Don't send the converted information to NSO
-- -y --yang-template: The given YANG specifications file for the tool to fill out (optional)
-- -g --no-grouping: If there are no grouping tags in the YANG specifications file give this tag,
-                  otherwise it will fail to parse the file
+- -l --log-level: Set the log level for standalone logging
 - -p --prune: Do not prune empty values from the dict at the end
+- -r --provider: Specifically provide the provider instead of trying to
+                        read it from the file. (Supported providers here when run in program)
+- -h --help: Show the help message
 
 **Wiki**  
 See https://confluence-eng-sjc1.cisco.com/conf/display/NSOUS/TOSCA+to+SOL006+Converter
@@ -37,4 +36,4 @@ See https://confluence-eng-sjc1.cisco.com/conf/display/NSOUS/TOSCA+to+SOL006+Con
 
 ### Current Limitations
 * Scaling aspects are not converted at this time
-* Only the default instantiation level is supported
+* Only the default instantiation level is supported in ESC VNFDs

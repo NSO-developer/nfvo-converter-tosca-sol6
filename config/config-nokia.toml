@@ -2,17 +2,9 @@
 # These must match with 'provider-identifiers.{}'
 # If the given provider for a VNFD matches with one of these, then it will automatically
 # take the identifiers from this file
-providers=["nokia", "f5-networks"]
+providers=["nokia"]
 
 [provider_identifiers.nokia]
-    virtual_compute             = ["type", "tosca.nodes.nfv.VirtualCompute"]
-    virtual_storage             = ["type", "tosca.nodes.nfv.VirtualStorage"]
-    sw_image                    = ["type", "tosca.nodes.nfv.SwImage"]
-    vdu                         = ["type", "tosca.nodes.nfv.VDU"]
-    ext_cpd                     = ["type", "tosca.nodes.nfv.ECP"]
-    int_cpd                     = ["type", "tosca.nodes.nfv.ICP"]
-    virtual_link                = ["type", "tosca.nodes.nfv.VL"]
-[provider_identifiers.f5-networks]
     virtual_compute             = ["type", "tosca.nodes.nfv.VirtualCompute"]
     virtual_storage             = ["type", "tosca.nodes.nfv.VirtualStorage"]
     sw_image                    = ["type", "tosca.nodes.nfv.SwImage"]
