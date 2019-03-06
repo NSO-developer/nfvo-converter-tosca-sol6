@@ -243,6 +243,9 @@ class V2Map(V2Mapping):
     FLAG_REQ_DELTA                  = "YAMLSUCKS"
     # Try to format the value as a valid input for layer-protocol
     FLAG_FORMAT_IP                  = "FORMATIPVER"
+    FLAG_FORMAT_DISK_FMT            = "FORMATDISK"
+    FLAG_FORMAT_CONT_FMT            = "FORMATCONTAINER"
+
     # Label if this is a variable output
     # This means if the value to set is an input, to set it, if it is not an input, don't set
     # anything
