@@ -188,7 +188,14 @@ class V2Map(V2Map):
                  [va_s["int_cpd_id"], icp_mapping]))
         add_map(((va_t["int_cpd_protocol"], self.FLAG_FORMAT_IP),
                  [va_s["int_cpd_layer_prot"], icp_mapping]))
+        add_map(((va_t["int_cpd_role"], self.FLAG_BLANK),
+                 [va_s["int_cpd_role"], icp_mapping]))
+        # Interface id, with incrementing number, use the sol6 array index
+        add_map(((va_t["int_cpd"],
+                  (self.FLAG_KEY_SET_VALUE, self.FLAG_USE_VALUE, self.FLAG_ONLY_NUMBERS)),
+                 [va_s["int_cpd_interface_id"], icp_mapping]))
 
     def icp_mapped(self, a):
+        """Check if the given int_cpd has the required value"""
         return get_path_value(self.va_t["int_cpd_cond"], a[get_dict_key(a)], must_exist=False,
                               no_msg=True)
