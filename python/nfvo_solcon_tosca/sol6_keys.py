@@ -251,6 +251,8 @@ class V2Map(V2Mapping):
     FLAG_TYPE_ROOT_DEF              = "MUSTBESOMETHINGORROOT"
     # Suppress any error or warning messages relating to this mapping
     FLAG_FAIL_SILENT                = "FAILSIILENT"
+    # Throw an error/warning if this mapping element doesn't have a parent
+    FLAG_REQ_PARENT                 = "REQPARENT"
 
     mapping = []
 
