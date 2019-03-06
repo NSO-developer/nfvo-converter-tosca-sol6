@@ -1,6 +1,7 @@
 from sol6_keys import *
 from list_utils import *
 
+
 class TOSCA(TOSCA_BASE):
     @staticmethod
     def set_variables(cur_dict, obj, exclude="", variables=None, dict_tosca=None):
@@ -25,6 +26,8 @@ class TOSCA(TOSCA_BASE):
         variables["tosca"]["virtual_storage_identifier"] = provider_identifiers["virtual-storage"]
         variables["tosca"]["sw_image_identifier"] = provider_identifiers["sw-image"]
         variables["tosca"]["vdu_identifier"] = provider_identifiers["vdu"]
+        variables["tosca"]["int_cpd_identifier"] = provider_identifiers["int-cpd"]
+        variables["tosca"]["ext_cpd_identifier"] = provider_identifiers["ext-cpd"]
 
 
 class SOL6(SOL6_BASE):
@@ -36,6 +39,8 @@ class V2Map(V2Map):
         super().__init__(dict_tosca, dict_sol6, log=log)
         va_t = variables["tosca"]
         va_s = variables["sol6"]
+        self.va_t = va_t
+        self.va_s = va_s
 
         # Virtual compute & storage mapping
         # Get a mapping based on a type from the whole dict
@@ -43,12 +48,27 @@ class V2Map(V2Map):
         virt_storage_mapping = self.generate_map(None, va_t["virtual_storage_identifier"])
         sw_image_mapping = self.generate_map(None, va_t["sw_image_identifier"])
         vdu_mapping = self.generate_map(None, va_t["vdu_identifier"])
+        va_t["int_cpd_identifier"].append(self.icp_mapped)
+        icp_mapping = self.generate_map(None, va_t["int_cpd_identifier"])
+        ecp_mapping = self.generate_map(None, va_t["ext_cpd_identifier"])
+
+        # We have the icp mapping, which is
+        # [oamICpd -> 0, parent=(None), ...]
+        # Now we need to set the parent to the VDU mapping that matches cur_vdu
+        for icp in icp_mapping:
+            cur_vdu = get_path_value(MapElem.format_path(icp, va_t["int_cpd_binding"],
+                                                         use_value=False), dict_tosca)
+            cur_vdu_map = MapElem.get_mapping_name(vdu_mapping, cur_vdu)
+            MapElem.add_parent_mapping(icp, cur_vdu_map)
+
+        print(icp_mapping)
 
         vdu_vc_mapping = None
         vdu_vs_mapping = None
         vdu_sw_mapping = None
         # TOSCA path only has one variable to fill, but SOL6 has 2.
         # This means we need to skip the first one in TOSCA, so set the key to none with none_key
+        # TODO: I think this will fail with multiple VDUs
         for vdu in vdu_mapping:
             vc_path = MapElem.format_path(vdu, va_t["vdu_req_virt_compute"], use_value=False)
             vs_path = MapElem.format_path(vdu, va_t["vdu_req_virt_storage"], use_value=False)
@@ -162,3 +182,13 @@ class V2Map(V2Map):
         add_map(((va_t["df_inst_vdu_level_num"], self.FLAG_BLANK),
                  [va_s["df_inst_level_vdu_num"], df_inst_vdu_level_map]))
 
+        # ** Connection Points **
+        # Internal CPs
+        add_map(((va_t["int_cpd"], self.FLAG_KEY_SET_VALUE),
+                 [va_s["int_cpd_id"], icp_mapping]))
+        add_map(((va_t["int_cpd_protocol"], self.FLAG_FORMAT_IP),
+                 [va_s["int_cpd_layer_prot"], icp_mapping]))
+
+    def icp_mapped(self, a):
+        return get_path_value(self.va_t["int_cpd_cond"], a[get_dict_key(a)], must_exist=False,
+                              no_msg=True)
