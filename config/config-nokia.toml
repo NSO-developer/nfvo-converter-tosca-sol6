@@ -92,5 +92,6 @@ providers=["nokia"]
     int_cpd_link                = ["int_cpd_req", "virtual_link"]
     int_cpd_prop                = ["int_cpd", "properties"]
     int_cpd_protocol            = ["int_cpd_prop", "layer_protocol"]
+    int_cpd_role                = ["int_cpd_prop", "role"]
 
 

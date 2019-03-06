@@ -104,10 +104,12 @@
     # ********************************
     # ** Internal Connection Points **
     # ********************************
-    int_cpd = ["vdu", "int-cpd.{}"]
-    int_cpd_id = ["int_cpd", "id"]
-    int_cpd_layer_prot = ["int_cpd", "layer-protocol"]
-    int_cpd_virt_link_desc = ["int_cpd", "int-virtual-link-desc"]
+    int_cpd                     = ["vdu", "int-cpd.{}"]
+    int_cpd_id                  = ["int_cpd", "id"]
+    int_cpd_layer_prot          = ["int_cpd", "layer-protocol"]
+    int_cpd_virt_link_desc      = ["int_cpd", "int-virtual-link-desc"]
+    int_cpd_role                = ["int_cpd", "role"]
+    int_cpd_interface_id        = ["int_cpd", "tailf-etsi-rel3-nfvo-vnfm:interface-id"]
 
     KEY_VIRT_LINK_MGMT_VAL = "CP_MGMT"
     KEY_VIRT_LINK_MGMT_PROT_VAL = "IPv4"

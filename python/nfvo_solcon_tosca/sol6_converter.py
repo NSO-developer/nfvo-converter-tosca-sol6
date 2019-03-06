@@ -206,7 +206,7 @@ class Sol6Converter:
     def _format_as_ip(option, path, value, valid_protocols):
         if not option:
             return value
-        print(valid_protocols)
+
         def _fmt_val(val):
             for opt in valid_protocols:
                 # We found a valid mapping, so set the value to the actual formatted value
