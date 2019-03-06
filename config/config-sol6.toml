@@ -53,7 +53,7 @@
     df_vdu_prof_inst_min        = ["df_vdu_profile", "min-number-of-instances"]
     df_vdu_prof_inst_max        = ["df_vdu_profile", "max-number-of-instances"]
     # -- Instantiation Level
-    df_inst_level               = ["deployment_flavor", "instantiation-level"]
+    df_inst_level               = ["deployment_flavor", "instantiation-level.{}"]
     df_inst_level_id            = ["df_inst_level", "id"]
     df_inst_level_desc          = ["df_inst_level", "description"]
     df_inst_level_vdu_level     = ["df_inst_level", "vdu-level.{}"]

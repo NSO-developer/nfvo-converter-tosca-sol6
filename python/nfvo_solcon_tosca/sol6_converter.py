@@ -40,6 +40,7 @@ class Sol6Converter:
         self.format_as_container = False
         self.fail_silent        = False
         self.req_parent         = False
+        self.first_list_output  = False
 
     def convert(self):
         """
@@ -142,14 +143,13 @@ class Sol6Converter:
         value = self._key_as_value(self.key_as_value, f_tosca_path)
         value = self._only_number(self.only_number, value, is_float=self.only_number_float)
         value = self._append_to_list(self.append_list, f_sol6_path, value)
-        value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
         value = self._format_as_valid(self.format_as_ip, f_sol6_path, value,
                                       self.variables["sol6"]["VALID_PROTOCOLS_VAL"])
         value = self._format_as_valid(self.format_as_disk, f_sol6_path, value,
                                       self.variables["sol6"]["VALID_DISK_FORMATS_VAL"])
         value = self._format_as_valid(self.format_as_container, f_sol6_path, value,
                                       self.variables["sol6"]["VALID_CONTAINER_FORMATS_VAL"])
-
+        value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
         return value
 
     def set_flags_false(self):
@@ -236,6 +236,10 @@ class Sol6Converter:
 
     @staticmethod
     def _format_as_valid(option, path, value, valid_formats):
+        """
+        Take the value, and a list of valid options, see if the value is any of the valid ones.
+        Return the outpust as a list (for some reason)
+        """
         if not option:
             return value
         # Turn it into a list if it isn't already
