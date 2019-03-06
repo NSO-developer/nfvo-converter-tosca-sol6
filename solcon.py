@@ -2,7 +2,7 @@
 """
 
 """
-__author__ = "Aaron Steele"
+__author__ = "Aaron Steeleso"
 __credits__ = ["Frederick Jansson"]
 __version__ = "0.0.1"
 
