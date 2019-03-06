@@ -6,7 +6,7 @@ Can be run as a package in NSO, eventually:
 Also can be run standalone:
 ```
     PYTHONPATH=python/nfvo_solcon_tosca
-    python3 tosca.py -f examples/standalone_vpc_vnfd_esc_4_4.yaml --dry-run -y etsi-nfv-vnf.yang
+    python3 tosca.py -f examples/standalone_vpc_vnfd_esc_4_4.yaml -o output.json -c config-esc.toml -s config-sol6.coml
 ```
 ### TOSCA VNFD Relationships
 
@@ -15,7 +15,7 @@ Also can be run standalone:
 ### USAGE
 **Standalone**  
 `solcon.py` is the entry point for the standalone version of the converter.  
-`config.toml` has the default and configurable paths and values for TOSCA.
+`config-esc.toml` has the default and configurable paths and values for TOSCA ESC.
 `config-sol6.toml` has the default and configurable paths and values for SOL6.
 
 

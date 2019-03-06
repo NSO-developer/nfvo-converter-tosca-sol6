@@ -2,7 +2,7 @@
 """
 
 """
-__author__ = "Aaron Steele, Niraj Chandak"
+__author__ = "Aaron Steele"
 __credits__ = ["Frederick Jansson"]
 __version__ = "0.0.1"
 
