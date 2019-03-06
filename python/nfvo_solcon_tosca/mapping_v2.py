@@ -152,7 +152,10 @@ class V2Mapping:
                 cur_dict = self.dict_tosca
             # If we do not have field & field_value, but we do have path
             filtered = get_path_value(path, cur_dict)
-            if not isinstance(filtered, list):
+            # Check if we have a dict that should be split into a list
+            if isinstance(filtered, dict) and len(filtered.keys()) > 1:
+                filtered = listify(filtered)
+            elif not isinstance(filtered, list):
                 filtered = [filtered]
 
         result = self.generate_map_from_list(filtered, map_type, map_start, map_function, map_args)

@@ -237,7 +237,7 @@ class V2Map(V2Mapping):
     FLAG_USE_VALUE                  = "USESOLMAPFORTOSCA"
     # Append the items to a list, create the list if it doesn't exist
     FLAG_APPEND_LIST                = "APPENDLIST"
-    # Get the first element in the input list
+    # Get the first element in the output list
     FLAG_LIST_FIRST                 = "GETFIRSTLISTELEM"
     # Require delta validation
     FLAG_REQ_DELTA                  = "YAMLSUCKS"
