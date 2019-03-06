@@ -55,14 +55,15 @@ tosca_vnf = yaml.load(tosca_file)
 
 # Figure out what class we want to use
 provider = Sol6Converter.find_provider(tosca_lines)
+provider = "-".join(provider.split(" "))
 
 # Do the actual converting to SOL006
 if "cisco" in provider:
     converter = SOL6ConverterCisco(tosca_vnf, parsed_dict, variables=path_conf, log=log)
-elif "nokia" in provider:
+elif "nokia" in provider or "f5-networks" in provider:
     converter = SOL6ConverterNokia(tosca_vnf, parsed_dict, variables=path_conf, log=log)
 else:
-    raise TypeError("Unsupported provider")
+    raise TypeError("Unsupported provider: '{}'".format(provider))
 
 cnfv = converter.convert()
 

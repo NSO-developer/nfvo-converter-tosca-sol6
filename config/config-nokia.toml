@@ -2,9 +2,17 @@
 # These must match with 'provider-identifiers.{}'
 # If the given provider for a VNFD matches with one of these, then it will automatically
 # take the identifiers from this file
-providers=["nokia"]
+providers=["nokia", "f5-networks"]
 
 [provider_identifiers.nokia]
+    virtual_compute             = ["type", "tosca.nodes.nfv.VirtualCompute"]
+    virtual_storage             = ["type", "tosca.nodes.nfv.VirtualStorage"]
+    sw_image                    = ["type", "tosca.nodes.nfv.SwImage"]
+    vdu                         = ["type", "tosca.nodes.nfv.VDU"]
+    ext_cpd                     = ["type", "tosca.nodes.nfv.ECP"]
+    int_cpd                     = ["type", "tosca.nodes.nfv.ICP"]
+    virtual_link                = ["type", "tosca.nodes.nfv.VL"]
+[provider_identifiers.f5-networks]
     virtual_compute             = ["type", "tosca.nodes.nfv.VirtualCompute"]
     virtual_storage             = ["type", "tosca.nodes.nfv.VirtualStorage"]
     sw_image                    = ["type", "tosca.nodes.nfv.SwImage"]
@@ -54,6 +62,8 @@ providers=["nokia"]
     sw_image_name               = ["sw_image", "name"]
     # NOTE: Disk & Container format paths are switched because the VNFDs have invalid values
     # for them, and we want the program to run properly
+    #sw_image_container_fmt      = ["sw_image", "container_format"]
+    #sw_image_disk_fmt           = ["sw_image", "disk_format"]
     sw_image_container_fmt      = ["sw_image", "disk_format"]
     sw_image_disk_fmt           = ["sw_image", "container_format"]
     sw_image_version            = ["sw_image", "version"]

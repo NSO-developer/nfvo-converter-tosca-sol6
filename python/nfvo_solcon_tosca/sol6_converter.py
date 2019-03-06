@@ -226,6 +226,8 @@ class Sol6Converter:
         cur_type = int
         if is_float:
             cur_type = float
+        if not isinstance(value, str):
+            return value
         return cur_type(re.sub('[^0-9]', '', str(value)))
 
     @staticmethod

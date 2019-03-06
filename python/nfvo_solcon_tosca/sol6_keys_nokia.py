@@ -10,6 +10,7 @@ class TOSCA(TOSCA_BASE):
         This must be run before the values are used
         """
         cur_provider = get_path_value(variables["tosca"]["vnf_provider"], dict_tosca).lower()
+        cur_provider = "-".join(cur_provider.split(" "))
         possible_providers = variables['providers']
         
         # We must have a provider mapping
@@ -88,9 +89,9 @@ class V2Map(V2Map):
         virt_link_mapping = self.generate_map(None, va_t["virtual_link_identifier"])
 
         # ** Virtual Compute, Virtual Storage, Software mappings **
-        vdu_vc_mapping = None
-        vdu_vs_mapping = None
-        vdu_sw_mapping = None
+        vdu_vc_mapping = []
+        vdu_vs_mapping = []
+        vdu_sw_mapping = []
         # TOSCA path only has one variable to fill, but SOL6 has 2.
         # This means we need to skip the first one in TOSCA, so set the key to none with none_key
         # TODO: I think this will fail with multiple VDUs
@@ -99,12 +100,15 @@ class V2Map(V2Map):
             vs_path = MapElem.format_path(vdu, va_t["vdu_req_virt_storage"], use_value=False)
             sw_path = MapElem.format_path(vdu, va_t["vdu_req_sw_image"], use_value=False)
 
-            vdu_vc_mapping = self.generate_map(vc_path, None, cur_dict=dict_tosca, parent=vdu,
-                                               map_args={"none_key": True})
-            vdu_vs_mapping = self.generate_map(vs_path, None, cur_dict=dict_tosca, parent=vdu,
-                                               map_args={"none_key": True})
-            vdu_sw_mapping = self.generate_map(sw_path, None, cur_dict=dict_tosca, parent=vdu,
-                                               map_args={"none_key": True})
+            vdu_vc_mapping.append(self.generate_map(vc_path, None, cur_dict=dict_tosca, parent=vdu,
+                                                    map_args={"none_key": True}))
+            vdu_vs_mapping.append(self.generate_map(vs_path, None, cur_dict=dict_tosca, parent=vdu,
+                                                    map_args={"none_key": True}))
+            vdu_sw_mapping.append(self.generate_map(sw_path, None, cur_dict=dict_tosca, parent=vdu,
+                                                    map_args={"none_key": True}))
+        vdu_vc_mapping = flatten(vdu_vc_mapping)
+        vdu_vs_mapping = flatten(vdu_vs_mapping)
+        vdu_sw_mapping = flatten(vdu_sw_mapping)
 
         # VDU Profile and instantiationn levels mapping
         df_vdu_prof_map = self.generate_map(va_t["df_vdu_profs"], None, cur_dict=dict_tosca)
