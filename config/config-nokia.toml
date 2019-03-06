@@ -4,13 +4,14 @@
 # take the identifiers from this file
 providers=["nokia"]
 
-[provider-identifiers.nokia]
-    virtual-compute             = ["type", "tosca.nodes.nfv.VirtualCompute"]
-    virtual-storage             = ["type", "tosca.nodes.nfv.VirtualStorage"]
-    sw-image                    = ["type", "tosca.nodes.nfv.SwImage"]
+[provider_identifiers.nokia]
+    virtual_compute             = ["type", "tosca.nodes.nfv.VirtualCompute"]
+    virtual_storage             = ["type", "tosca.nodes.nfv.VirtualStorage"]
+    sw_image                    = ["type", "tosca.nodes.nfv.SwImage"]
     vdu                         = ["type", "tosca.nodes.nfv.VDU"]
-    ext-cpd                     = ["type", "tosca.nodes.nfv.ECP"]
-    int-cpd                     = ["type", "tosca.nodes.nfv.ICP"]
+    ext_cpd                     = ["type", "tosca.nodes.nfv.ECP"]
+    int_cpd                     = ["type", "tosca.nodes.nfv.ICP"]
+    virtual_link                = ["type", "tosca.nodes.nfv.VL"]
 
 # Note: If there is a variable with "path_VAL", that means it will not be parsed for the path
 # heirarchy, but will instead be set with the value given
@@ -100,6 +101,13 @@ providers=["nokia"]
     ext_cpd_role                = ["ext_cpd_props", "role"]
     ext_cpd_reqs                = ["ext_cpd", "requirements"]
     ext_cpd_icps                = ["ext_cpd_reqs", "internal_connection_point"]
+
+    virt_link                   = ["node_templates", "{}"]
+    virt_link_props             = ["virt_link", "properties"]
+    virt_link_desc              = ["virt_link_props", "description"]
+    virt_link_conn_type         = ["virt_link_props", "connectivity_type"]
+    virt_link_protocol          = ["virt_link_conn_type", "layer_protocol"]
+    virt_link_flow_pattern      = ["virt_link_conn_type", "flow_pattern"]
 
 
 

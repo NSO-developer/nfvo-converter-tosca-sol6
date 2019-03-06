@@ -18,16 +18,17 @@ class TOSCA(TOSCA_BASE):
                            .format(cur_provider, possible_providers))
 
         # Get the values for the given provider
-        provider_identifiers = variables["provider-identifiers"][cur_provider]
+        provider_identifiers = variables["provider_identifiers"][cur_provider]
 
         # Get the identifiers and assign them to the relevant locations
         # It is unlikely we will ever have sol6 identifiers
-        variables["tosca"]["virtual_compute_identifier"] = provider_identifiers["virtual-compute"]
-        variables["tosca"]["virtual_storage_identifier"] = provider_identifiers["virtual-storage"]
-        variables["tosca"]["sw_image_identifier"] = provider_identifiers["sw-image"]
+        variables["tosca"]["virtual_compute_identifier"] = provider_identifiers["virtual_compute"]
+        variables["tosca"]["virtual_storage_identifier"] = provider_identifiers["virtual_storage"]
+        variables["tosca"]["sw_image_identifier"] = provider_identifiers["sw_image"]
         variables["tosca"]["vdu_identifier"] = provider_identifiers["vdu"]
-        variables["tosca"]["int_cpd_identifier"] = provider_identifiers["int-cpd"]
-        variables["tosca"]["ext_cpd_identifier"] = provider_identifiers["ext-cpd"]
+        variables["tosca"]["int_cpd_identifier"] = provider_identifiers["int_cpd"]
+        variables["tosca"]["ext_cpd_identifier"] = provider_identifiers["ext_cpd"]
+        variables["tosca"]["virtual_link_identifier"] = provider_identifiers["virtual_link"]
 
 
 class SOL6(SOL6_BASE):
@@ -49,7 +50,7 @@ class V2Map(V2Map):
         sw_image_mapping = self.generate_map(None, va_t["sw_image_identifier"])
         vdu_mapping = self.generate_map(None, va_t["vdu_identifier"])
 
-        # Connection point mappings
+        # ** Connection point mappings **
         # Internal CP
         icp_mapping = self.generate_map(None, va_t["int_cpd_identifier"],
                                         field_filter=self.icp_mapped)
@@ -76,15 +77,17 @@ class V2Map(V2Map):
             # These are the ICPs that this ECP is connected to
             # Get the VDUs they are connected to, and assign the parent of the ECP to that
             cur_icp_map = MapElem.get_mapping_name(icp_mapping, cur_icp)
-            print(cur_icp_map)
+
             if not cur_icp_map:  # Make sure the VDU exists (it should)
                 log.warning("Internal connection point {} parent VDU not found".format(cur_icp))
                 continue
             MapElem.add_parent_mapping(ecp, cur_icp_map.parent_map)
             ecp.name = None  # Skip the ecp name so we can output the vdu (parent's) name
 
-        print(ecp_icp_vdus)
-        # Virtual Compute, Virtual Storage, Software mappings
+        # Virtual Link mapping
+        virt_link_mapping = self.generate_map(None, va_t["virtual_link_identifier"])
+
+        # ** Virtual Compute, Virtual Storage, Software mappings **
         vdu_vc_mapping = None
         vdu_vs_mapping = None
         vdu_sw_mapping = None
@@ -234,6 +237,16 @@ class V2Map(V2Map):
                  [va_s["ext_cpd_icp_vdu"], ecp_icp_vdus]))
         add_map(((va_t["ext_cpd_role"], self.FLAG_BLANK),
                  [va_s["ext_cpd_role"], ecp_mapping]))
+
+        # Virtual Links
+        add_map(((va_t["virt_link"], self.FLAG_KEY_SET_VALUE),
+                 [va_s["virt_link_desc_id"], virt_link_mapping]))
+        add_map(((va_t["virt_link_desc"], self.FLAG_BLANK),
+                 [va_s["virt_link_desc_desc"], virt_link_mapping]))
+        add_map(((va_t["virt_link_protocol"], self.FLAG_FORMAT_IP),
+                 [va_s["virt_link_desc_protocol"], virt_link_mapping]))
+        add_map(((va_t["virt_link_flow_pattern"], self.FLAG_BLANK),
+                 [va_s["virt_link_desc_flow"], virt_link_mapping]))
 
     # ----------------------------------------------------------------------------------------------
 
