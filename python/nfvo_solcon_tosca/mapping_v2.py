@@ -125,6 +125,8 @@ class V2Mapping:
         :param cur_dict: If we are only specifying the path to generate a mapping, specify the dict
         to read from
         :param parent: Parent MapElem to assign, if it doesn't exist
+        :param field_filter: To pass in a conditional function somewhere other than the 3rd element
+        of the field_conditions array
         :return:
         """
         field = None
@@ -137,7 +139,11 @@ class V2Mapping:
 
         # Get the value at path
         if path:
-            p_val = get_path_value(path, self.dict_tosca, ensure_dict=True)
+            try:
+                p_val = get_path_value(path, self.dict_tosca, ensure_dict=True)
+            except KeyError:
+                # The given path doesn't exist
+                return []
         else:
             # If there is no path, search the entire dict
             p_val = self.dict_tosca
