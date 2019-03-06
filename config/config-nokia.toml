@@ -9,6 +9,8 @@ providers=["nokia"]
     virtual-storage             = ["type", "tosca.nodes.nfv.VirtualStorage"]
     sw-image                    = ["type", "tosca.nodes.nfv.SwImage"]
     vdu                         = ["type", "tosca.nodes.nfv.VDU"]
+    ext-cpd                     = ["type", "tosca.nodes.nfv.ECP"]
+    int-cpd                     = ["type", "tosca.nodes.nfv.ICP"]
 
 # Note: If there is a variable with "path_VAL", that means it will not be parsed for the path
 # heirarchy, but will instead be set with the value given
@@ -81,5 +83,14 @@ providers=["nokia"]
     df_inst_vdu_levels          = ["df_inst_level", "vdu_levels"]
     df_inst_vdu_level           = ["df_inst_vdu_levels", "{}"]
     df_inst_vdu_level_num       = ["df_inst_vdu_level", "number_of_instances"]
+
+    int_cpd                     = ["node_templates", "{}"]
+    # This path must exist for an ICP to be created inside a VDU
+    int_cpd_cond                = "requirements.virtual_binding"
+    int_cpd_req                 = ["int_cpd", "requirements"]
+    int_cpd_binding             = ["int_cpd_req", "virtual_binding"]
+    int_cpd_link                = ["int_cpd_req", "virtual_link"]
+    int_cpd_prop                = ["int_cpd", "properties"]
+    int_cpd_protocol            = ["int_cpd_prop", "layer_protocol"]
 
 

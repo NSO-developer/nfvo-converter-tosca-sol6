@@ -106,14 +106,11 @@ class SOL6ConverterCisco(Sol6Converter):
                 self.default_root = True
             if flag == keys.FLAG_REQ_DELTA:
                 self.req_delta_valid = True
-            if flag == keys.FLAG_FORMAT_IP:
-                self.format_as_ip = True
 
     def handle_flags(self, f_sol6_path, f_tosca_path):
         value = super().handle_flags(f_sol6_path, f_tosca_path)
         value = self._handle_input(self.is_variable, f_sol6_path, value)
         value = self._handle_default_root(self.default_root, f_sol6_path, value)
-        value = self._format_as_ip(self.format_as_ip, f_sol6_path, value)
 
         return value
 
@@ -136,26 +133,6 @@ class SOL6ConverterCisco(Sol6Converter):
         if not is_input:
             return None
         return V2Mapping.tosca_get_input_key(value)
-
-    @staticmethod
-    def _format_as_ip(option, path, value):
-        if not option:
-            return value
-        valid_opts = SOL6.VALID_PROTOCOLS
-
-        def _fmt_val(val):
-            for opt in valid_opts:
-                # We found a valid mapping, so set the value to the actual formatted value
-                if val.lower() == opt.lower():
-                    return opt
-        # Turn it into a list if it isn't already
-        if not isinstance(value, list):
-            value = [value]
-
-        for i, item in enumerate(value):
-            value[i] = _fmt_val(item)
-        # If we don't find a matching value, pass the original value through so it's not lost
-        return value
 
     # ----------------------------------------------------------------------------------------------
 

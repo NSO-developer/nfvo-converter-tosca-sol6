@@ -322,6 +322,16 @@ class MapElem:
             c_map.parent_map = parent_mapping
 
     @staticmethod
+    def get_mapping_name(mapping_list, req_name):
+        if isinstance(mapping_list, list):
+            for c_map in mapping_list:
+                if not isinstance(c_map, MapElem):
+                    continue
+                if c_map.name == req_name:
+                    return c_map
+        return None
+
+    @staticmethod
     def basic_map(num):
         return MapElem(num, num)
 

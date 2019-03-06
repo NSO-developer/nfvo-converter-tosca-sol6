@@ -35,6 +35,7 @@ class Sol6Converter:
         self.append_list = False
         self.first_list_elem = False
         self.tosca_use_value = False
+        self.format_as_ip = False
 
     def convert(self):
         """
@@ -128,6 +129,8 @@ class Sol6Converter:
         value = self._only_number(self.only_number, value, is_float=self.only_number_float)
         value = self._append_to_list(self.append_list, f_sol6_path, value)
         value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
+        value = self._format_as_ip(self.format_as_ip, f_sol6_path, value,
+                                   self.variables["sol6"]["VALID_PROTOCOLS_VAL"])
 
         return value
 
@@ -143,6 +146,7 @@ class Sol6Converter:
         self.append_list = False
         self.first_list_elem = False
         self.tosca_use_value = False
+        self.format_as_ip = False
 
     def set_flags_loop(self, flags, keys):
         """
@@ -164,6 +168,8 @@ class Sol6Converter:
                 self.first_list_elem = True
             if flag == keys.FLAG_USE_VALUE:
                 self.tosca_use_value = True
+            if flag == keys.FLAG_FORMAT_IP:
+                self.format_as_ip = True
 
     # ---------------------
     # ** Specific flag methods **
@@ -195,6 +201,25 @@ class Sol6Converter:
         if not option or not isinstance(value, list):
             return value
         return value[0]
+
+    @staticmethod
+    def _format_as_ip(option, path, value, valid_protocols):
+        if not option:
+            return value
+        print(valid_protocols)
+        def _fmt_val(val):
+            for opt in valid_protocols:
+                # We found a valid mapping, so set the value to the actual formatted value
+                if val.lower() == opt.lower():
+                    return opt
+        # Turn it into a list if it isn't already
+        if not isinstance(value, list):
+            value = [value]
+
+        for i, item in enumerate(value):
+            value[i] = _fmt_val(item)
+        # If we don't find a matching value, pass the original value through so it's not lost
+        return value
     # ---------------------
 
     @staticmethod

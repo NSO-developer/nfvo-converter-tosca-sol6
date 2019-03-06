@@ -33,6 +33,9 @@ def get_path_value(path, cur_dict, must_exist=True, ensure_dict=False, no_msg=Fa
                 else:
                     cur_context = cur_context[0]
 
+        if cur_context is None:
+            return _path_val_existant(must_exist, no_msg, val, path)
+
         if val.isdigit():
             try:
                 cur_context = cur_context[int(val)]
@@ -43,18 +46,22 @@ def get_path_value(path, cur_dict, must_exist=True, ensure_dict=False, no_msg=Fa
         elif val in cur_context:
             cur_context = cur_context[val]
         else:
-            if must_exist:
-                raise KeyError("Path '{}' not found in {}".format(val, path))
-            else:
-                if not no_msg:
-                    log.warning("{} not found in {}".format(val, path))
-                return False
+            return _path_val_existant(must_exist, no_msg, val, path)
 
     if ensure_dict and isinstance(cur_context, list):
         # Merge the list into a dict
         return merge_list_of_dicts(cur_context)
 
     return cur_context
+
+
+def _path_val_existant(must_exist, no_msg, val, path):
+    if must_exist:
+        raise KeyError("Path '{}' not found in {}".format(val, path))
+    else:
+        if not no_msg:
+            log.warning("{} not found in {}".format(val, path))
+        return False
 
 
 def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
