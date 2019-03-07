@@ -76,14 +76,14 @@ if provider.lower() not in supported_providers:
     for s_p in supported_providers:
         if s_p in provider.lower():
             provider = s_p
-            
+
 if provider.lower() in supported_providers:
     log.info("Starting conversion with provider '{}'".format(provider))
     converter = supported_providers[provider](tosca_vnf, parsed_dict, variables=path_conf, log=log)
 else:
     raise TypeError("Unsupported provider: '{}'".format(provider))
 # Do the actual converting logic
-cnfv = converter.convert()
+cnfv = converter.convert(provider=provider.lower())
 
 
 # Prune the empty fields

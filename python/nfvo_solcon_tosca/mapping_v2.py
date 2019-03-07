@@ -222,8 +222,10 @@ class V2Mapping:
 
     @staticmethod
     def get_input_values(in_list, input_path, dict_tosca):
-        tosca_inputs = get_path_value(input_path, dict_tosca)
-        return [{item["get_input"]: V2Mapping.get_input_value(item, tosca_inputs=tosca_inputs)} for item in in_list]
+        tosca_inputs = get_path_value(input_path, dict_tosca, must_exist=False)
+        if tosca_inputs:
+            return [{item["get_input"]: V2Mapping.get_input_value(item, tosca_inputs=tosca_inputs)} for item in in_list]
+        return []
 
     @staticmethod
     def get_input_value(item, input_path=None, dict_tosca=None, tosca_inputs=None):

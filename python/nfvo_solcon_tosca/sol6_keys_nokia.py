@@ -4,12 +4,14 @@ from list_utils import *
 
 class TOSCA(TOSCA_BASE):
     @staticmethod
-    def set_variables(cur_dict, obj, exclude="", variables=None, dict_tosca=None):
+    def set_variables(cur_dict, obj, exclude="", variables=None, dict_tosca=None,
+                      cur_provider=None):
         """
         Take the input from the config file, and set the variables that are identifiers here
         This must be run before the values are used
         """
-        cur_provider = get_path_value(variables["tosca"]["vnf_provider"], dict_tosca).lower()
+        if not cur_provider:
+            cur_provider = get_path_value(variables["tosca"]["vnf_provider"], dict_tosca).lower()
         cur_provider = "-".join(cur_provider.split(" "))
         possible_providers = variables['providers']
         
@@ -38,7 +40,7 @@ class SOL6(SOL6_BASE):
 
 class V2Map(V2MapBase):
     def __init__(self, dict_tosca, dict_sol6, variables=None, log=None):
-        super().__init__(dict_tosca, dict_sol6, log=log, variables=variables)
+        super().__init__(dict_tosca, dict_sol6, c_log=log, variables=variables)
 
         # Make the lines shorter
         add_map = self.add_map
