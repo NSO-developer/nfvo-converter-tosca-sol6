@@ -259,8 +259,31 @@ class V2MapBase(V2Mapping):
 
     mapping = []
 
-    def __init__(self, dict_tosca, dict_sol6, log=None):
+    def __init__(self, dict_tosca, dict_sol6, log=None, variables=None):
         super().__init__(dict_tosca, dict_sol6, log)
+        self.va_s = None
+        self.va_t = None
+
+        if variables:
+            self.va_t = variables["tosca"]
+            self.va_s = variables["sol6"]
+
 
     def add_map(self, cur_map):
         self.mapping.append(cur_map)
+
+    def get_tosca_value(self, value):
+        return self.get_value(value, self.va_t)
+
+    def get_sol6_value(self, value):
+        return self.get_value(value, self.va_s)
+
+    @staticmethod
+    def get_value(value, dic):
+        """
+        Handle missing keys in here so the external program doesn't crash when exceptions are thrown
+        """
+        try:
+            return dic[value]
+        except KeyError:
+            log.warning("Key '{}' not found in config file".format(value))
