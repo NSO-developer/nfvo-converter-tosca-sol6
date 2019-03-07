@@ -30,7 +30,7 @@ providers=["cisco", "nokia"]
     int-cpd = ["type", "cisco.nodes.nfv.VduCp"]
 
 [provider-identifiers.nokia]    
-    vdu = ["type", "nokia.nodes.nfv.Vdu.Compute"]    
+    vdu = ["type", "nokia.nodes.nfv.Vdu.Compute"]
     int-cpd = ["type", "nokia.nodes.nfv.VduCp"]
 
 ```

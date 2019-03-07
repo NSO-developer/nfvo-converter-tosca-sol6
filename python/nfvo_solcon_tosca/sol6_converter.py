@@ -42,7 +42,7 @@ class Sol6Converter:
         self.req_parent         = False
         self.first_list_output  = False
 
-    def convert(self):
+    def convert(self, provider=None):
         """
         For overriding
         Convert the tosca_vnf to sol6 VNFD

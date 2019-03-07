@@ -278,7 +278,7 @@ class V2MapBase(V2Mapping):
         return self.get_value(value, self.va_s, "sol6")
 
     @staticmethod
-    def get_value(value, dic, cfile):
+    def get_value(value, dic, cfile="unspecified"):
         """
         Handle missing keys in here so the external program doesn't crash when exceptions are thrown
         """

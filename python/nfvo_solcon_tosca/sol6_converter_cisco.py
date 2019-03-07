@@ -18,7 +18,7 @@ class SOL6ConverterCisco(Sol6Converter):
         self.is_variable = False
         self.default_root = False
 
-    def convert(self):
+    def convert(self, provider=None):
         """
         Convert the tosca_vnf to sol6 VNFD
         Currently only handles converting a single VNF to VNFD
@@ -30,7 +30,7 @@ class SOL6ConverterCisco(Sol6Converter):
         formatted_vars = PathMaping.format_paths(self.variables)
 
         TOSCA.set_variables(self.variables["tosca"], TOSCA, variables=formatted_vars,
-                            dict_tosca=self.tosca_vnf)
+                            dict_tosca=self.tosca_vnf, cur_provider=provider)
 
         self.vnfd = {}
 
