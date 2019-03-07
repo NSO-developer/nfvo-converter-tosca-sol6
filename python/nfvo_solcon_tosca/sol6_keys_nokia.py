@@ -36,7 +36,7 @@ class SOL6(SOL6_BASE):
     pass
 
 
-class V2Map(V2Map):
+class V2Map(V2MapBase):
     def __init__(self, dict_tosca, dict_sol6, variables=None, log=None):
         super().__init__(dict_tosca, dict_sol6, log=log)
         va_t = variables["tosca"]

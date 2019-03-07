@@ -223,7 +223,7 @@ class SOL6_BASE(PathMaping):
     sw_min_ram = ""
 
 
-class V2Map(V2Mapping):
+class V2MapBase(V2Mapping):
     """
 
     """

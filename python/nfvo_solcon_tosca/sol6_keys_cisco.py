@@ -3,9 +3,9 @@ These are automatically used without having to update anything else.
 The TOSCA variables are mapped to the SOL6 ones, they must have the same names.
 The program does not attempt to map variables beginning with '_'
 """
-from sol6_keys import TOSCA_BASE, SOL6_BASE, V2Map
+from sol6_keys import TOSCA_BASE, SOL6_BASE, V2MapBase
 from key_utils import KeyUtils
-from mapping_v2 import V2Mapping, MapElem
+from mapping_v2 import MapElem
 from dict_utils import *
 from list_utils import *
 
@@ -299,34 +299,18 @@ class SOL6(SOL6_BASE):
     sw_image                        = sw_img_desc + ".image"
 
 
-class V2Map(V2Mapping):
+class V2Map(V2MapBase):
     """
 
     """
-    FLAG_BLANK                      = ""
-    # Pass this flag if you want to set the value with the key and not the value
-    FLAG_KEY_SET_VALUE              = "KSV"
-    # Will remove all non-numeric characters
-    FLAG_ONLY_NUMBERS               = "NUMBERS"
-    FLAG_ONLY_NUMBERS_FLOAT         = "NUMBERSFLOAT"
-    # Make the tosca MapElem format use the value of the mapping instead of the key
-    FLAG_USE_VALUE                  = "USESOLMAPFORTOSCA"
-    # Append the items to a list, create the list if it doesn't exist
-    FLAG_APPEND_LIST                = "APPENDLIST"
-    # Get the first element in the input list
-    FLAG_LIST_FIRST                 = "GETFIRSTLISTELEM"
     # Require delta validation
     FLAG_REQ_DELTA                  = "YAMLSUCKS"
-    # Try to format the value as a valid input for layer-protocol
-    FLAG_FORMAT_IP                  = "FORMATIPVER"
     # Label if this is a variable output
     # This means if the value to set is an input, to set it, if it is not an input, don't set
     # anything
     FLAG_VAR                        = "THISVARIABLE"
     # Marks this as requiring a value, and if there isn't one, make it 'root'
     FLAG_TYPE_ROOT_DEF              = "MUSTBESOMETHINGORROOT"
-
-    mapping = {}
 
     def __init__(self, dict_tosca, dict_sol6, log=None):
         super().__init__(dict_tosca, dict_sol6, log)

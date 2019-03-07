@@ -128,11 +128,11 @@ class SOL6ConverterCisco(Sol6Converter):
         if not option:
             return value
         # See if this is actually an input, if can not be
-        is_input = V2Mapping.is_tosca_input(value)
+        is_input = V2MapBase.is_tosca_input(value)
         # If this isn't actually an input, then don't assign it
         if not is_input:
             return None
-        return V2Mapping.tosca_get_input_key(value)
+        return V2MapBase.tosca_get_input_key(value)
 
     # ----------------------------------------------------------------------------------------------
 
