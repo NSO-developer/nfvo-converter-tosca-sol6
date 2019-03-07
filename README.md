@@ -1,4 +1,4 @@
-# SOLCon: TOSCA (SOL001) to SOL006 VNFD Converter
+# SolCon: TOSCA (SOL001) to SOL006 VNFD Converter
 Can be run as a package in NSO, eventually: 
 ```
     NSO command to be put here
