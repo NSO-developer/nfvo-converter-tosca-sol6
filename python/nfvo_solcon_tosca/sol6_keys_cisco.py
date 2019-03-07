@@ -167,7 +167,7 @@ class V2Map(V2MapBase):
 
         # *** Instantiation Level mapping ***
         # Get the default instantiation level, if it exists
-        def_inst = get_path_value(tv("def_inst_level"), self.dict_tosca)
+        def_inst = get_path_value(tv("def_inst_level"), self.dict_tosca, must_exist=False)
         def_inst = get_roots_from_filter(def_inst, child_key=tv("def_inst_key"))
         if def_inst:
             def_inst_id = tv("def_inst_key")
@@ -205,20 +205,22 @@ class V2Map(V2MapBase):
         # ** Scaling Aspect info **
         # Get all of the scaling aspects information
         # Only handle 1 for now. TODO: Handle more
-        scaling_map = self.generate_map(tv("policies"), tv("scaling_aspects_identifier"))[0]
-        aspects = get_path_value(tv("scaling_aspect_item_list").format(scaling_map.name),
-                                 self.dict_tosca)
+        scaling_map = self.generate_map(tv("policies"), tv("scaling_aspects_identifier"))
+        if scaling_map:
+            scaling_map = scaling_map[0]
+            aspects = get_path_value(tv("scaling_aspect_item_list").format(scaling_map.name),
+                                     self.dict_tosca)
 
-        aspect_f_map = self.generate_map_from_list(list(aspects.keys()))
-        MapElem.add_parent_mapping(aspect_f_map, scaling_map)
+            aspect_f_map = self.generate_map_from_list(list(aspects.keys()))
+            MapElem.add_parent_mapping(aspect_f_map, scaling_map)
 
-        # This is in a separate method because it's a dumpster fire
-        deltas_mapping = self._handle_deltas(aspect_f_map)
-        # It is possible for there to be no step deltas, in that case don't run them even
-        # if the input is valid
-        if not deltas_mapping:
-            self.override_deltas = True
-            self.run_deltas = False
+            # This is in a separate method because it's a dumpster fire
+            deltas_mapping = self._handle_deltas(aspect_f_map)
+            # It is possible for there to be no step deltas, in that case don't run them even
+            # if the input is valid
+            if not deltas_mapping:
+                self.override_deltas = True
+                self.run_deltas = False
 
         # *** End Instantiation Level mapping ***
 
@@ -251,17 +253,17 @@ class V2Map(V2MapBase):
                 # This happens first because IDs need to be the first element, for now
                 # Setting specific values at specific indexes
                 # These are currently only the two virtual links and external links
-                (self.set_value(sv("KEY_VIRT_LINK_MGMT"), sv("virt_link_desc_id"), 0)),
-                (self.set_value(sv("KEY_VIRT_LINK_MGMT_PROT"), sv("virt_link_desc_protocol"), 0)),
-                (self.set_value(sv("KEY_VIRT_LINK_ORCH"), sv("virt_link_desc_id"), 1)),
-                (self.set_value(sv("KEY_VIRT_LINK_ORCH_PROT"), sv("virt_link_desc_protocol"), 1)),
+                (self.set_value(sv("KEY_VIRT_LINK_MGMT_VAL"), sv("virt_link_desc_id"), 0)),
+                (self.set_value(sv("KEY_VIRT_LINK_MGMT_PROT_VAL"), sv("virt_link_desc_protocol"), 0)),
+                (self.set_value(sv("KEY_VIRT_LINK_ORCH_VAL"), sv("virt_link_desc_id"), 1)),
+                (self.set_value(sv("KEY_VIRT_LINK_ORCH_PROT_VAL"), sv("virt_link_desc_protocol"), 1)),
 
-                (self.set_value(sv("KEY_EXT_CP_MGMT"), sv("ext_cpd_id"), 0)),
-                (self.set_value(sv("KEY_EXT_CP_MGMT_PROT"), sv("ext_cpd_protocol"), 0)),
-                (self.set_value(sv("KEY_VIRT_LINK_MGMT"), sv("ext_cpd_virt_link"), 0)),
-                (self.set_value(sv("KEY_EXT_CP_ORCH"), sv("ext_cpd_id"), 1)),
-                (self.set_value(sv("KEY_EXT_CP_ORCH_PROT"), sv("ext_cpd_protocol"), 1)),
-                (self.set_value(sv("KEY_VIRT_LINK_ORCH"), sv("ext_cpd_virt_link"), 1)),
+                (self.set_value(sv("KEY_EXT_CP_MGMT_VAL"), sv("ext_cpd_id"), 0)),
+                (self.set_value(sv("KEY_EXT_CP_MGMT_PROT_VAL"), sv("ext_cpd_protocol"), 0)),
+                (self.set_value(sv("KEY_VIRT_LINK_MGMT_VAL"), sv("ext_cpd_virt_link"), 0)),
+                (self.set_value(sv("KEY_EXT_CP_ORCH_VAL"), sv("ext_cpd_id"), 1)),
+                (self.set_value(sv("KEY_EXT_CP_ORCH_PROT_VAL"), sv("ext_cpd_protocol"), 1)),
+                (self.set_value(sv("KEY_VIRT_LINK_ORCH_VAL"), sv("ext_cpd_virt_link"), 1)),
                 # -- End Set Values --
 
                 # -- VDU --
@@ -276,44 +278,56 @@ class V2Map(V2MapBase):
                 # set the value to the key, and pass in '{}' so the mapping is the only thing we're
                 # setting. This gives a list of numbers from 0->len
                 (("{}", (self.FLAG_ONLY_NUMBERS, self.FLAG_LIST_FIRST, self.FLAG_USE_VALUE,
-                         self.FLAG_KEY_SET_VALUE)),                [sv("vdu_boot_key"), boot_map]),
-                ((tv("vdu_boot"), self.FLAG_LIST_FIRST),               [sv("vdu_boot_value"), boot_map]),
+                         self.FLAG_KEY_SET_VALUE)),             [sv("vdu_boot_key"), boot_map]),
+                ((tv("vdu_boot"), self.FLAG_LIST_FIRST),        [sv("vdu_boot_value"), boot_map]),
 
-                ((tv("vdu_boot"), self.FLAG_LIST_FIRST),              [sv("vdu_vs_desc"), boot_map]),
+                ((tv("vdu_boot"), self.FLAG_LIST_FIRST),        [sv("vdu_vs_desc"), boot_map]),
                 # -- End VDU --
 
                 # -- Virtual Compute Descriptor --
                 # The first value in the map is what we want to set, so insert that into the 'key'
-                (("{}", self.FLAG_KEY_SET_VALUE),                  [sv("vnfd_vcd_id"), vim_flavors_map]),
-                ((tv("vdu_vim_flavor"), self.FLAG_VAR),                [sv("vnfd_vcd_flavor_name"), flavor_map]),
-                ((tv("vdu_virt_cpu_num"), self.FLAG_ONLY_NUMBERS),     [sv("vnfd_vcd_cpu_num"), flavor_map]),
-                ((tv("vdu_virt_mem_size"), self.FLAG_ONLY_NUMBERS),    [sv("vnfd_vcd_mem_size"), flavor_map]),
+                (("{}", self.FLAG_KEY_SET_VALUE),
+                 [sv("vnfd_vcd_id"), vim_flavors_map]),
+                ((tv("vdu_vim_flavor"), self.FLAG_VAR),
+                 [sv("vnfd_vcd_flavor_name"), flavor_map]),
+                ((tv("vdu_virt_cpu_num"), self.FLAG_ONLY_NUMBERS),
+                 [sv("vnfd_vcd_cpu_num"), flavor_map]),
+                ((tv("vdu_virt_mem_size"), self.FLAG_ONLY_NUMBERS),
+                 [sv("vnfd_vcd_mem_size"), flavor_map]),
                 # -- End Virtual Compute Descriptor --
 
                 # -- Internal Connction Points --
                 ((tv("int_cpd"), self.FLAG_KEY_SET_VALUE),             [sv("int_cpd_id"), cps_map]),
-                ((tv("int_cpd_layer_prot"), self.FLAG_FORMAT_IP),      [sv("int_cpd_layer_prot"), cps_map]),
-                ((sv("KEY_VIRT_LINK_MGMT"), self.FLAG_KEY_SET_VALUE),  [sv("int_cpd_virt_link_desc"),
-                                                                    mgmt_cps_map]),
-                ((sv("KEY_VIRT_LINK_ORCH"), self.FLAG_KEY_SET_VALUE),  [sv("int_cpd_virt_link_desc"),
-                                                                    orch_cps_map]),
+                ((tv("int_cpd_layer_prot"), self.FLAG_FORMAT_IP),
+                 [sv("int_cpd_layer_prot"), cps_map]),
+                ((sv("KEY_VIRT_LINK_MGMT_VAL"), self.FLAG_KEY_SET_VALUE),
+                 [sv("int_cpd_virt_link_desc"), mgmt_cps_map]),
+                ((sv("KEY_VIRT_LINK_ORCH_VAL"), self.FLAG_KEY_SET_VALUE),
+                 [sv("int_cpd_virt_link_desc"), orch_cps_map]),
                 # -- End Internal Connection Points
 
                 # -- Virtual Storage Descriptor --
-                ((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),        [sv("vnfd_virt_storage_id"), sw_map]),
-                ((tv("virt_size"), self.FLAG_ONLY_NUMBERS),            [sv("vnfd_virt_storage_size"), sw_map]),
-                ((tv("virt_type"), self.FLAG_TYPE_ROOT_DEF),           [sv("vnfd_virt_storage_type"), sw_map]),
-                ((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),    [sv("vnfd_virt_storage_sw_image"), sw_map]),
+                ((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),
+                 [sv("vnfd_virt_storage_id"), sw_map]),
+                ((tv("virt_size"), self.FLAG_ONLY_NUMBERS),
+                 [sv("vnfd_virt_storage_size"), sw_map]),
+                ((tv("virt_type"), self.FLAG_TYPE_ROOT_DEF),
+                 [sv("vnfd_virt_storage_type"), sw_map]),
+                ((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),
+                 [sv("vnfd_virt_storage_sw_image"), sw_map]),
                 # -- End Virtual Storage Descriptor --
 
                 # -- Software Image --
                 ((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),        [sv("sw_id"), sw_map]),
                 ((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),        [sv("sw_name"), sw_map]),
-                ((tv("sw_name"), self.FLAG_VAR),                       [sv("sw_image_name_var"), sw_map]),
+                ((tv("sw_name"), self.FLAG_VAR),
+                 [sv("sw_image_name_var"), sw_map]),
                 ((tv("sw_version"), self.FLAG_BLANK),                  [sv("sw_version"), sw_map]),
                 ((tv("sw_checksum"), self.FLAG_BLANK),                 [sv("sw_checksum"), sw_map]),
-                ((tv("sw_container_fmt"), self.FLAG_BLANK),            [sv("sw_container_format"), sw_map]),
-                ((tv("sw_disk_fmt"), self.FLAG_BLANK),                 [sv("sw_disk_format"), sw_map]),
+                ((tv("sw_container_fmt"), self.FLAG_BLANK),
+                 [sv("sw_container_format"), sw_map]),
+                ((tv("sw_disk_fmt"), self.FLAG_BLANK),
+                 [sv("sw_disk_format"), sw_map]),
                 ((tv("sw_min_disk"), self.FLAG_ONLY_NUMBERS),          [sv("sw_min_disk"), sw_map]),
                 ((tv("sw_size"), self.FLAG_ONLY_NUMBERS),              [sv("sw_size"), sw_map]),
                 ((tv("sw_image_file"), self.FLAG_BLANK),               [sv("sw_image"), sw_map]),
@@ -322,26 +336,34 @@ class V2Map(V2MapBase):
                 # -- Deployment Flavor --
                 ((tv("df_id"), self.FLAG_BLANK),                       sv("df_id")),
                 # Assign the default instantiation level to the first element in the array
-                (self.set_value(def_inst_id, sv("df_inst_level_id"), 0)),
-                (self.set_value(def_inst_desc, sv("df_inst_level_desc"), 0)),
+                (self.set_value(def_inst_id,                sv("df_inst_level_id"), 0)),
+                (self.set_value(def_inst_desc,              sv("df_inst_level_desc"), 0)),
                 ((tv("df_desc"), self.FLAG_BLANK),                     sv("df_desc")),
-                ((tv("vdu"), self.FLAG_KEY_SET_VALUE),                 [sv("df_vdu_prof_id"), vdu_map]),
-                ((tv("vdu_prof_inst_min"), self.FLAG_BLANK),           [sv("df_vdu_prof_inst_min"), vdu_map]),
-                ((tv("vdu_prof_inst_max"), self.FLAG_BLANK),           [sv("df_vdu_prof_inst_max"), vdu_map]),
-                (("{}", self.FLAG_KEY_SET_VALUE),                  [sv("df_inst_level_vdu_vdu"),
-                                                                    target_map]),
-                ((tv("inst_level_num_instances"), self.FLAG_BLANK),    [sv("df_inst_level_vdu_num"),
-                                                                    vdu_inst_level_map])
+                ((tv("vdu"), self.FLAG_KEY_SET_VALUE),
+                 [sv("df_vdu_prof_id"), vdu_map]),
+                ((tv("vdu_prof_inst_min"), self.FLAG_BLANK),
+                 [sv("df_vdu_prof_inst_min"), vdu_map]),
+                ((tv("vdu_prof_inst_max"), self.FLAG_BLANK),
+                 [sv("df_vdu_prof_inst_max"), vdu_map]),
+                (("{}", self.FLAG_KEY_SET_VALUE),
+                 [sv("df_inst_level_vdu_vdu"), target_map]),
+                ((tv("inst_level_num_instances"), self.FLAG_BLANK),
+                 [sv("df_inst_level_vdu_num"), vdu_inst_level_map])
 
                 # -- Scaling Aspect --
-                #((tv("scaling_aspect_name"), self.FLAG_BLANK),  [sv("df_inst_scaling_aspect, aspect_f_map]),
-                #((tv("scaling_aspect_level"), self.FLAG_BLANK), [sv("df_inst_scaling_level, aspect_f_map]),
+                #((tv("scaling_aspect_name"), self.FLAG_BLANK),
+                # [sv("df_inst_scaling_aspect, aspect_f_map]),
+                #((tv("scaling_aspect_level"), self.FLAG_BLANK),
+                # [sv("df_inst_scaling_level, aspect_f_map]),
 
-                #((tv("scaling_aspect_name"), self.FLAG_BLANK),  [sv("df_scale_aspect_id, aspect_f_map]),
-                #((tv("scaling_aspect_name"), self.FLAG_BLANK),  [sv("df_scale_aspect_name, aspect_f_map]),
-                #((tv("scaling_aspect_level"), self.FLAG_BLANK), [sv("df_scale_aspect_max_level,
-                #                                             aspect_f_map]),
-                #((tv("scaling_aspect_desc"), self.FLAG_BLANK),  [sv("df_scale_aspect_desc, aspect_f_map]),
+                #((tv("scaling_aspect_name"), self.FLAG_BLANK),
+                # [sv("df_scale_aspect_id, aspect_f_map]),
+                #((tv("scaling_aspect_name"), self.FLAG_BLANK),
+                # [sv("df_scale_aspect_name, aspect_f_map]),
+                #((tv("scaling_aspect_level"), self.FLAG_BLANK),
+                # [sv("df_scale_aspect_max_level, aspect_f_map]),
+                #((tv("scaling_aspect_desc"), self.FLAG_BLANK),
+                # [sv("df_scale_aspect_desc, aspect_f_map]),
 
 
                 #((tv("scaling_aspect_deltas"), self.FLAG_REQ_DELTA),
