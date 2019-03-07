@@ -33,6 +33,9 @@ def get_path_value(path, cur_dict, must_exist=True, ensure_dict=False, no_msg=Fa
                 else:
                     cur_context = cur_context[0]
 
+        if cur_context is None:
+            return _path_val_existant(must_exist, no_msg, val, path)
+
         if val.isdigit():
             try:
                 cur_context = cur_context[int(val)]
@@ -43,18 +46,22 @@ def get_path_value(path, cur_dict, must_exist=True, ensure_dict=False, no_msg=Fa
         elif val in cur_context:
             cur_context = cur_context[val]
         else:
-            if must_exist:
-                raise KeyError("Path '{}' not found in {}".format(val, path))
-            else:
-                if not no_msg:
-                    log.warn("{} not found in {}".format(val, path))
-                return False
+            return _path_val_existant(must_exist, no_msg, val, path)
 
     if ensure_dict and isinstance(cur_context, list):
         # Merge the list into a dict
         return merge_list_of_dicts(cur_context)
 
     return cur_context
+
+
+def _path_val_existant(must_exist, no_msg, val, path):
+    if must_exist:
+        raise KeyError("Path '{}' not found in {}".format(val, path))
+    else:
+        if not no_msg:
+            log.warning("{} not found in {}".format(val, path))
+        return False
 
 
 def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
@@ -236,6 +243,20 @@ def get_dict_key(dic, n=0):
     return list(dic.keys())[n]
 
 
+def gen_dict_extract(key, var):
+    if hasattr(var, 'iteritems'):
+        for k, v in var.iteritems():
+            if k == key:
+                yield v
+            if isinstance(v, dict):
+                for result in gen_dict_extract(key, v):
+                    yield result
+            elif isinstance(v, list):
+                for d in v:
+                    for result in gen_dict_extract(key, d):
+                        yield result
+
+
 def merge_two_dicts(x, y):
     """
     https://stackoverflow.com/questions/38987/how-to-merge-two-dictionaries-in-a-single-expression
@@ -249,7 +270,7 @@ def merge_list_of_dicts(lst):
     hold = None
     final = {}
     if len(lst) % 2 != 0:
-        hold = lst.pop()
+        hold = lst[-1]
 
     for count, item in enumerate(lst):
         final = merge_two_dicts(final, item)

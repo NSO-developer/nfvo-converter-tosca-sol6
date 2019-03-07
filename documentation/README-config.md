@@ -30,10 +30,16 @@ providers=["cisco", "nokia"]
     int-cpd = ["type", "cisco.nodes.nfv.VduCp"]
 
 [provider-identifiers.nokia]    
-    vdu = ["type", "nokia.nodes.nfv.Vdu.Compute"]    
+    vdu = ["type", "nokia.nodes.nfv.Vdu.Compute"]
     int-cpd = ["type", "nokia.nodes.nfv.VduCp"]
 
 ```
+
+If the configuration file has items that the program does not use, it will just ignore them.
+
+On the other hand, if the program expects a configuration value in the file and does not find it, a warning
+will be displayed, but the program will continue as much as it can with the other mappings that have been
+specified.
 
 **Note**  
 If there is a variable postfixed with `_VAL`, that means it will not be parsed for the path
