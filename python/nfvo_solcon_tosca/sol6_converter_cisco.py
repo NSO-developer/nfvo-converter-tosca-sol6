@@ -1,6 +1,7 @@
 import re
 from sol6_keys_cisco import *
 from sol6_converter import Sol6Converter
+from sol6_keys import *
 from dict_utils import *
 import copy
 
@@ -26,21 +27,18 @@ class SOL6ConverterCisco(Sol6Converter):
 
         # The very first thing we want to do is set up the path variables
         self.log.debug("Setting path variables: {}".format(self.variables))
-        TOSCA.set_variables(self.variables["tosca"], TOSCA, variables=self.variables,
+        formatted_vars = PathMaping.format_paths(self.variables)
+
+        TOSCA.set_variables(self.variables["tosca"], TOSCA, variables=formatted_vars,
                             dict_tosca=self.tosca_vnf)
-        SOL6.set_variables(self.variables["sol6"], SOL6)
 
-        # First, get the vnfd specifications model
-        try:
-            self.vnfd = copy.deepcopy(self.parsed_dict[SOL6.vnfd])
-        except KeyError:
-            self.vnfd = {}
+        self.vnfd = {}
 
-        keys = V2Map(self.tosca_vnf, self.vnfd, self.log)
+        keys = V2Map(self.tosca_vnf, self.vnfd, log=self.log, variables=self.variables)
         if keys.override_deltas:
             self.override_run_deltas = not keys.run_deltas
         else:
-            self.check_deltas_valid()
+            self.check_deltas_valid(keys.get_tosca_value("scaling_aspect_deltas"))
 
         self.run_mapping(keys)
 
@@ -136,12 +134,12 @@ class SOL6ConverterCisco(Sol6Converter):
 
     # ----------------------------------------------------------------------------------------------
 
-    def check_deltas_valid(self):
+    def check_deltas_valid(self, scaling_aspect):
         """
         We are only supporting step_deltas that have unique names across the entire yaml file
         I don't care that YAML supports more.
         """
-        step_deltas_name = KeyUtils.get_path_last(TOSCA.scaling_aspect_deltas)
+        step_deltas_name = KeyUtils.get_path_last(scaling_aspect)
         # Get all the elements that have step_deltas
         deltas = get_roots_from_filter(self.tosca_vnf, child_key=step_deltas_name)
         # Get all the values of 'step_deltas' and stick them in a list

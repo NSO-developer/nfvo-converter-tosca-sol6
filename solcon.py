@@ -72,6 +72,11 @@ else:
     provider = "-".join(provider.split(" "))
 
 # Initialize the proper converter object for the given provider
+if provider.lower() not in supported_providers:
+    for s_p in supported_providers:
+        if s_p in provider.lower():
+            provider = s_p
+            
 if provider.lower() in supported_providers:
     log.info("Starting conversion with provider '{}'".format(provider))
     converter = supported_providers[provider](tosca_vnf, parsed_dict, variables=path_conf, log=log)
