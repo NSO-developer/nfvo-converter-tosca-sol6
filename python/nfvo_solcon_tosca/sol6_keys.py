@@ -259,8 +259,8 @@ class V2MapBase(V2Mapping):
 
     mapping = []
 
-    def __init__(self, dict_tosca, dict_sol6, log=None, variables=None):
-        super().__init__(dict_tosca, dict_sol6, log)
+    def __init__(self, dict_tosca, dict_sol6, c_log=None, variables=None):
+        super().__init__(dict_tosca, dict_sol6, c_log)
         self.va_s = None
         self.va_t = None
 

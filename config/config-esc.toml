@@ -1,27 +1,19 @@
 # These must match with 'provider-identifiers.{}'
 # If the given provider for a VNFD matches with one of these, then it will automatically
 # take the identifiers from this file
-providers=["cisco", "nokia"]
+providers=["cisco"]
 
 version = "0.1.0"
 
 # All of the identifiers must be the same for all instances of that object,
 # multiple IDs for a single type are not supported
-[provider-identifiers.cisco]
+[provider_identifiers.cisco]
     vdu = ["type", "cisco.nodes.nfv.Vdu.Compute"]
-    int-cpd = ["type", "cisco.nodes.nfv.VduCp"]
-    int-cpd-mgmt = ["type", "cisco.nodes.nfv.VduCp"]
-    instantiation-level = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
-    scaling-aspects = ["type", "tosca.policies.nfv.ScalingAspects"]
-    virtual-storage = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage"]
-
-[provider-identifiers.nokia]
-    vdu = ["type", "cisco.nodes.nfv.Vdu.Compute"]
-    int-cpd = ["type", "cisco.nodes.nfv.VduCp"]
-    int-cpd-mgmt = ["type", "cisco.nodes.nfv.VduCp"]
-    instantiation-level = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
-    scaling-aspects = ["type", "tosca.policies.nfv.ScalingAspects"]
-    virtual-storage = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage"]
+    int_cpd = ["type", "cisco.nodes.nfv.VduCp"]
+    int_cpd_mgmt = ["type", "cisco.nodes.nfv.VduCp"]
+    instantiation_level = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
+    scaling_aspects = ["type", "tosca.policies.nfv.ScalingAspects"]
+    virtual_storage = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage"]
 
 # Note: If there is a variable with "path_VAL", that means it will not be parsed for the path
 # heirarchy, but will instead just be set with the value
