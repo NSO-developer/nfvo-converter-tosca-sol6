@@ -273,17 +273,17 @@ class V2MapBase(V2Mapping):
         self.mapping.append(cur_map)
 
     def get_tosca_value(self, value):
-        return self.get_value(value, self.va_t)
+        return self.get_value(value, self.va_t, "tosca")
 
     def get_sol6_value(self, value):
-        return self.get_value(value, self.va_s)
+        return self.get_value(value, self.va_s, "sol6")
 
     @staticmethod
-    def get_value(value, dic):
+    def get_value(value, dic, cfile):
         """
         Handle missing keys in here so the external program doesn't crash when exceptions are thrown
         """
         try:
             return dic[value]
         except KeyError:
-            log.warning("Key '{}' not found in config file".format(value))
+            log.warning("Key '{}' not found in '{}' config file".format(value, cfile))
