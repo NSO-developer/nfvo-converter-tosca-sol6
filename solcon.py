@@ -4,7 +4,7 @@
 """
 __author__ = "Aaron Steele"
 __credits__ = ["Frederick Jansson"]
-__version__ = "0.0.1"
+__version__ = "0.2.0"
 
 import argparse
 import json
