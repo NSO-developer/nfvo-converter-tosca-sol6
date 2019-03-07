@@ -19,13 +19,12 @@ class TOSCA(TOSCA_BASE):
     def int_cp_mgmt(item):
         """Return if the current cp is assigned to management or not"""
         return key_exists(item, "properties.management") and \
-               get_path_value("properties.management", item[get_dict_key(item)], must_exist=False)
+            get_path_value("properties.management", item[get_dict_key(item)], must_exist=False)
 
     @staticmethod
     def virt_filter(item):
         # Make sure that the virtual storage block we get has the {}.properties.sw_image_data field
         return key_exists(item, "properties.sw_image_data")
-
 
     @staticmethod
     def set_variables(cur_dict, obj, exclude="", variables=None, dict_tosca=None):
@@ -91,7 +90,8 @@ class V2Map(V2MapBase):
         # Generate VDU map
         vdu_map = self.generate_map(tv("node_templates"), tv("vdu_identifier"))
 
-        sw_map = self.generate_map(tv("node_templates"), tv("virt_storage_identifier"))
+        sw_map = self.generate_map(tv("node_templates"), tv("virt_storage_identifier"),
+                                   field_filter=TOSCA.virt_filter)
 
         # This list has the VDUs the flavors are attached to
         vdu_vim_flavors = self.get_items_from_map(tv("vdu_vim_flavor"), vdu_map, dict_tosca,
@@ -151,6 +151,7 @@ class V2Map(V2MapBase):
                                     map_args={"vdu_map": vdu_map})
         # Filter internal connection points that are assigned to management
         mgmt_cps_map = self.generate_map(tv("node_templates"), tv("int_cpd_mgmt_identifier"),
+                                         field_filter=TOSCA.int_cp_mgmt,
                                          map_function=self.int_cp_mapping,
                                          map_args={"vdu_map": vdu_map})
 
@@ -392,7 +393,6 @@ class V2Map(V2MapBase):
         # -- End Scaling Aspect
 
         # -- End Deployment Flavor --
-    
 
     def set_value(self, val, path, index):
         return (val, self.FLAG_KEY_SET_VALUE), [path, [MapElem(val, index)]]
