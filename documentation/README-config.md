@@ -35,6 +35,12 @@ providers=["cisco", "nokia"]
 
 ```
 
+If the configuration file has items that the program does not use, it will just ignore them.
+
+On the other hand, if the program expects a configuration value in the file and does not find it, a warning
+will be displayed, but the program will continue as much as it can with the other mappings that have been
+specified.
+
 **Note**  
 If there is a variable postfixed with `_VAL`, that means it will not be parsed for the path
 heirarchy, but will instead just be set to the value in the configuration file.
