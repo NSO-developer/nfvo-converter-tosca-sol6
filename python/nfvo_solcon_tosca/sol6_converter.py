@@ -106,6 +106,10 @@ class Sol6Converter:
         """
         sol6_path = map_sol6
 
+        if sol6_path is None:
+            log.debug("SOL6 path is None, skipping with no error message")
+            return
+
         log.debug("Run mapping for tosca:{}, sol6:{}".format(tosca_path, sol6_path))
 
         # Handle the various flags for no mappings
@@ -118,6 +122,10 @@ class Sol6Converter:
         Determine if a mapping (list of MapElem) has been specified
         Called by run_mapping
         """
+        if tosca_path is None:
+            log.debug("Tosca path is None, skipping with no error message")
+            return
+
         # Check if there is a mapping needed
         if isinstance(map_sol6, list):
             self.run_mapping_islist(tosca_path, map_sol6)
