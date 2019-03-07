@@ -112,7 +112,7 @@ class V2Map(V2MapBase):
         vdu_vs_mapping = flatten(vdu_vs_mapping)
         vdu_sw_mapping = flatten(vdu_sw_mapping)
 
-        # VDU Profile and instantiationn levels mapping
+        # VDU Profile and instantiation levels mapping
         df_vdu_prof_map = self.generate_map(tv("df_vdu_profs"), None, cur_dict=dict_tosca)
         df_inst_levels_map = self.generate_map(tv("df_inst_levels"), None, cur_dict=dict_tosca)
 
