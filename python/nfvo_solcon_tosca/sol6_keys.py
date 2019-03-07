@@ -268,7 +268,6 @@ class V2MapBase(V2Mapping):
             self.va_t = variables["tosca"]
             self.va_s = variables["sol6"]
 
-
     def add_map(self, cur_map):
         self.mapping.append(cur_map)
 

@@ -175,6 +175,18 @@ class V2Map(V2MapBase):
         else:
             def_inst_id = None
             def_inst_desc = None
+
+        """df_inst_levels_map = self.generate_map(tv("df_inst_levels"), None, cur_dict=dict_tosca)
+
+        # Generate vdu_level map inside of instantiation_levels map
+        df_inst_vdu_level_map = []
+        for df_inst in df_inst_levels_map:
+            cur_path = MapElem.format_path(df_inst, tv("df_inst_level_vdu_levels"), use_value=False)
+            df_inst_vdu_level_map.append(self.generate_map(cur_path, None, cur_dict=dict_tosca,
+                                                           parent=df_inst))
+        df_inst_vdu_level_map = flatten(df_inst_vdu_level_map)  # Make sure it's a flat list
+        print(df_inst_vdu_level_map)
+        """
         # TODO: Handle more than the default instantiation level
 
         # Problem here is we need duplicate entries, since we have, for example, 2 VDUs each
@@ -195,12 +207,14 @@ class V2Map(V2MapBase):
                 for j in range(len(temp_vdu_map), len(item) + len(temp_vdu_map)):
                     temp_vdu_map.insert(j, vdu_inst_level_map[i].copy())
         vdu_inst_level_map = temp_vdu_map
+        MapElem.add_parent_mapping(vdu_inst_level_map, MapElem(None, 0))
 
         # Re-adjust the mapping so that it's contiguous, since duplicating values will make it not
         MapElem.ensure_map_values(vdu_inst_level_map)
         target_list = flatten(target_list)
         # Finally generate the map for setting the vdu value
         target_map = self.generate_map_from_list(target_list)
+        MapElem.add_parent_mapping(target_map, MapElem(None, 0))
 
         # ** Scaling Aspect info **
         # Get all of the scaling aspects information
@@ -235,148 +249,150 @@ class V2Map(V2MapBase):
                 dict_tosca = yaml
                 dict_sol6 = {}
         """
+        add_map(((tv("vnf_desc_id"), self.FLAG_BLANK),                 sv("vnfd_id")))
+        
+        # -- Metadata --
 
-        self.mapping = \
-            [
-                # -- Metadata --
-                ((tv("vnf_desc_id"), self.FLAG_BLANK),                 sv("vnfd_id")),
-                ((tv("vnf_provider"), self.FLAG_BLANK),                sv("vnfd_provider")),
-                ((tv("vnf_product_name"), self.FLAG_BLANK),            sv("vnfd_product")),
-                ((tv("vnf_software_ver"), self.FLAG_BLANK),            sv("vnfd_software_ver")),
-                ((tv("vnf_desc_ver"), self.FLAG_BLANK),                sv("vnfd_ver")),
-                ((tv("vnf_product_info_name"), self.FLAG_BLANK),       sv("vnfd_info_name")),
-                ((tv("desc"), self.FLAG_BLANK),                        sv("vnfd_info_desc")),
-                ((tv("vnf_vnfm_info"), self.FLAG_BLANK),               sv("vnfd_vnfm_info")),
-                # -- End Metadata --
+        add_map(((tv("vnf_provider"), self.FLAG_BLANK),                sv("vnfd_provider")))
+        add_map(((tv("vnf_product_name"), self.FLAG_BLANK),            sv("vnfd_product")))
+        add_map(((tv("vnf_software_ver"), self.FLAG_BLANK),            sv("vnfd_software_ver")))
+        add_map(((tv("vnf_desc_ver"), self.FLAG_BLANK),                sv("vnfd_ver")))
+        add_map(((tv("vnf_product_info_name"), self.FLAG_BLANK),       sv("vnfd_info_name")))
+        add_map(((tv("desc"), self.FLAG_BLANK),                        sv("vnfd_info_desc")))
+        add_map(((tv("vnf_vnfm_info"), self.FLAG_BLANK),               sv("vnfd_vnfm_info")))
+        # -- End Metadata --
 
-                # -- Set Values --
-                # This happens first because IDs need to be the first element, for now
-                # Setting specific values at specific indexes
-                # These are currently only the two virtual links and external links
-                (self.set_value(sv("KEY_VIRT_LINK_MGMT_VAL"), sv("virt_link_desc_id"), 0)),
-                (self.set_value(sv("KEY_VIRT_LINK_MGMT_PROT_VAL"), sv("virt_link_desc_protocol"), 0)),
-                (self.set_value(sv("KEY_VIRT_LINK_ORCH_VAL"), sv("virt_link_desc_id"), 1)),
-                (self.set_value(sv("KEY_VIRT_LINK_ORCH_PROT_VAL"), sv("virt_link_desc_protocol"), 1)),
+        # -- Set Values --
+        # This happens first because IDs need to be the first element, for now
+        # Setting specific values at specific indexes
+        # These are currently only the two virtual links and external links
+        add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_VAL"), sv("virt_link_desc_id"), 0)))
+        add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_PROT_VAL"),
+                                sv("virt_link_desc_protocol"), 0)))
+        add_map((self.set_value(sv("KEY_VIRT_LINK_ORCH_VAL"), sv("virt_link_desc_id"), 1)))
+        add_map((self.set_value(sv("KEY_VIRT_LINK_ORCH_PROT_VAL"),
+                                sv("virt_link_desc_protocol"), 1)))
 
-                (self.set_value(sv("KEY_EXT_CP_MGMT_VAL"), sv("ext_cpd_id"), 0)),
-                (self.set_value(sv("KEY_EXT_CP_MGMT_PROT_VAL"), sv("ext_cpd_protocol"), 0)),
-                (self.set_value(sv("KEY_VIRT_LINK_MGMT_VAL"), sv("ext_cpd_virt_link"), 0)),
-                (self.set_value(sv("KEY_EXT_CP_ORCH_VAL"), sv("ext_cpd_id"), 1)),
-                (self.set_value(sv("KEY_EXT_CP_ORCH_PROT_VAL"), sv("ext_cpd_protocol"), 1)),
-                (self.set_value(sv("KEY_VIRT_LINK_ORCH_VAL"), sv("ext_cpd_virt_link"), 1)),
-                # -- End Set Values --
+        add_map((self.set_value(sv("KEY_EXT_CP_MGMT_VAL"), sv("ext_cpd_id"), 0)))
+        add_map((self.set_value(sv("KEY_EXT_CP_MGMT_PROT_VAL"), sv("ext_cpd_protocol"), 0)))
+        add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_VAL"), sv("ext_cpd_virt_link"), 0)))
+        add_map((self.set_value(sv("KEY_EXT_CP_ORCH_VAL"), sv("ext_cpd_id"), 1)))
+        add_map((self.set_value(sv("KEY_EXT_CP_ORCH_PROT_VAL"), sv("ext_cpd_protocol"), 1)))
+        add_map((self.set_value(sv("KEY_VIRT_LINK_ORCH_VAL"), sv("ext_cpd_virt_link"), 1)))
+        # -- End Set Values --
 
-                # -- VDU --
-                ((tv("vdu"), self.FLAG_KEY_SET_VALUE),                 [sv("vdu_id"), vdu_map]),
-                ((tv("vdu_name"), self.FLAG_BLANK),                    [sv("vdu_name"), vdu_map]),
-                ((tv("vdu_desc"), self.FLAG_BLANK),                    [sv("vdu_desc"), vdu_map]),
+        # -- VDU --
+        add_map(((tv("vdu"), self.FLAG_KEY_SET_VALUE),                 [sv("vdu_id"), vdu_map]))
+        add_map(((tv("vdu_name"), self.FLAG_BLANK),                    [sv("vdu_name"), vdu_map]))
+        add_map(((tv("vdu_desc"), self.FLAG_BLANK),                    [sv("vdu_desc"), vdu_map]))
 
-                # Each value is a list, but we've created a mapping that handles that, so only
-                # set the first value of the list
-                # We want a unique int for the key here, and we have that in the mapping, but it's
-                # the sol6 mapping, so swap the tosca map to the sol6 with FLAG_USE_VALUE, then
-                # set the value to the key, and pass in '{}' so the mapping is the only thing we're
-                # setting. This gives a list of numbers from 0->len
-                (("{}", (self.FLAG_ONLY_NUMBERS, self.FLAG_LIST_FIRST, self.FLAG_USE_VALUE,
-                         self.FLAG_KEY_SET_VALUE)),             [sv("vdu_boot_key"), boot_map]),
-                ((tv("vdu_boot"), self.FLAG_LIST_FIRST),        [sv("vdu_boot_value"), boot_map]),
+        # Each value is a list, but we've created a mapping that handles that, so only
+        # set the first value of the list
+        # We want a unique int for the key here, and we have that in the mapping, but it's
+        # the sol6 mapping, so swap the tosca map to the sol6 with FLAG_USE_VALUE, then
+        # set the value to the key, and pass in '{}' so the mapping is the only thing we're
+        # setting. This gives a list of numbers from 0->len
+        add_map((("{}", (self.FLAG_ONLY_NUMBERS, self.FLAG_LIST_FIRST, self.FLAG_USE_VALUE,
+                 self.FLAG_KEY_SET_VALUE)),             [sv("vdu_boot_key"), boot_map]))
+        add_map(((tv("vdu_boot"), self.FLAG_LIST_FIRST),        [sv("vdu_boot_value"), boot_map]))
 
-                ((tv("vdu_boot"), self.FLAG_LIST_FIRST),        [sv("vdu_vs_desc"), boot_map]),
-                # -- End VDU --
+        add_map(((tv("vdu_boot"), self.FLAG_LIST_FIRST),        [sv("vdu_vs_desc"), boot_map]))
+        # -- End VDU --
 
-                # -- Virtual Compute Descriptor --
-                # The first value in the map is what we want to set, so insert that into the 'key'
-                (("{}", self.FLAG_KEY_SET_VALUE),
-                 [sv("vnfd_vcd_id"), vim_flavors_map]),
-                ((tv("vdu_vim_flavor"), self.FLAG_VAR),
-                 [sv("vnfd_vcd_flavor_name"), flavor_map]),
-                ((tv("vdu_virt_cpu_num"), self.FLAG_ONLY_NUMBERS),
-                 [sv("vnfd_vcd_cpu_num"), flavor_map]),
-                ((tv("vdu_virt_mem_size"), self.FLAG_ONLY_NUMBERS),
-                 [sv("vnfd_vcd_mem_size"), flavor_map]),
-                # -- End Virtual Compute Descriptor --
+        # -- Virtual Compute Descriptor --
+        # The first value in the map is what we want to set, so insert that into the 'key'
+        add_map((("{}", self.FLAG_KEY_SET_VALUE),
+                 [sv("vnfd_vcd_id"), vim_flavors_map]))
+        add_map(((tv("vdu_vim_flavor"), self.FLAG_VAR),
+                 [sv("vnfd_vcd_flavor_name"), flavor_map]))
+        add_map(((tv("vdu_virt_cpu_num"), self.FLAG_ONLY_NUMBERS),
+                 [sv("vnfd_vcd_cpu_num"), flavor_map]))
+        add_map(((tv("vdu_virt_mem_size"), self.FLAG_ONLY_NUMBERS),
+                 [sv("vnfd_vcd_mem_size"), flavor_map]))
+        # -- End Virtual Compute Descriptor --
 
-                # -- Internal Connction Points --
-                ((tv("int_cpd"), self.FLAG_KEY_SET_VALUE),             [sv("int_cpd_id"), cps_map]),
-                ((tv("int_cpd_layer_prot"), self.FLAG_FORMAT_IP),
-                 [sv("int_cpd_layer_prot"), cps_map]),
-                ((sv("KEY_VIRT_LINK_MGMT_VAL"), self.FLAG_KEY_SET_VALUE),
-                 [sv("int_cpd_virt_link_desc"), mgmt_cps_map]),
-                ((sv("KEY_VIRT_LINK_ORCH_VAL"), self.FLAG_KEY_SET_VALUE),
-                 [sv("int_cpd_virt_link_desc"), orch_cps_map]),
-                # -- End Internal Connection Points
+        # -- Internal Connction Points --
+        add_map(((tv("int_cpd"), self.FLAG_KEY_SET_VALUE),             [sv("int_cpd_id"), cps_map]))
+        add_map(((tv("int_cpd_layer_prot"), self.FLAG_FORMAT_IP),
+                 [sv("int_cpd_layer_prot"), cps_map]))
+        add_map(((sv("KEY_VIRT_LINK_MGMT_VAL"), self.FLAG_KEY_SET_VALUE),
+                 [sv("int_cpd_virt_link_desc"), mgmt_cps_map]))
+        add_map(((sv("KEY_VIRT_LINK_ORCH_VAL"), self.FLAG_KEY_SET_VALUE),
+                 [sv("int_cpd_virt_link_desc"), orch_cps_map]))
+        # -- End Internal Connection Points
 
-                # -- Virtual Storage Descriptor --
-                ((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),
-                 [sv("vnfd_virt_storage_id"), sw_map]),
-                ((tv("virt_size"), self.FLAG_ONLY_NUMBERS),
-                 [sv("vnfd_virt_storage_size"), sw_map]),
-                ((tv("virt_type"), self.FLAG_TYPE_ROOT_DEF),
-                 [sv("vnfd_virt_storage_type"), sw_map]),
-                ((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),
-                 [sv("vnfd_virt_storage_sw_image"), sw_map]),
-                # -- End Virtual Storage Descriptor --
+        # -- Virtual Storage Descriptor --
+        add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),
+                 [sv("vnfd_virt_storage_id"), sw_map]))
+        add_map(((tv("virt_size"), self.FLAG_ONLY_NUMBERS),
+                 [sv("vnfd_virt_storage_size"), sw_map]))
+        add_map(((tv("virt_type"), self.FLAG_TYPE_ROOT_DEF),
+                 [sv("vnfd_virt_storage_type"), sw_map]))
+        add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),
+                 [sv("vnfd_virt_storage_sw_image"), sw_map]))
+        # -- End Virtual Storage Descriptor --
 
-                # -- Software Image --
-                ((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),        [sv("sw_id"), sw_map]),
-                ((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),        [sv("sw_name"), sw_map]),
-                ((tv("sw_name"), self.FLAG_VAR),
-                 [sv("sw_image_name_var"), sw_map]),
-                ((tv("sw_version"), self.FLAG_BLANK),                  [sv("sw_version"), sw_map]),
-                ((tv("sw_checksum"), self.FLAG_BLANK),                 [sv("sw_checksum"), sw_map]),
-                ((tv("sw_container_fmt"), self.FLAG_BLANK),
-                 [sv("sw_container_format"), sw_map]),
-                ((tv("sw_disk_fmt"), self.FLAG_BLANK),
-                 [sv("sw_disk_format"), sw_map]),
-                ((tv("sw_min_disk"), self.FLAG_ONLY_NUMBERS),          [sv("sw_min_disk"), sw_map]),
-                ((tv("sw_size"), self.FLAG_ONLY_NUMBERS),              [sv("sw_size"), sw_map]),
-                ((tv("sw_image_file"), self.FLAG_BLANK),               [sv("sw_image"), sw_map]),
-                # -- End Software Image --
+        # -- Software Image --
+        add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),        [sv("sw_id"), sw_map]))
+        add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),        [sv("sw_name"), sw_map]))
+        add_map(((tv("sw_name"), self.FLAG_VAR),
+                 [sv("sw_image_name_var"), sw_map]))
+        add_map(((tv("sw_version"), self.FLAG_BLANK),                  [sv("sw_version"), sw_map]))
+        add_map(((tv("sw_checksum"), self.FLAG_BLANK),                 [sv("sw_checksum"), sw_map]))
+        add_map(((tv("sw_container_fmt"), self.FLAG_BLANK),
+                 [sv("sw_container_format"), sw_map]))
+        add_map(((tv("sw_disk_fmt"), self.FLAG_BLANK),
+                 [sv("sw_disk_format"), sw_map]))
+        add_map(((tv("sw_min_disk"), self.FLAG_ONLY_NUMBERS),          [sv("sw_min_disk"), sw_map]))
+        add_map(((tv("sw_size"), self.FLAG_ONLY_NUMBERS),              [sv("sw_size"), sw_map]))
+        add_map(((tv("sw_image_file"), self.FLAG_BLANK),               [sv("sw_image"), sw_map]))
+        # -- End Software Image --
 
-                # -- Deployment Flavor --
-                ((tv("df_id"), self.FLAG_BLANK),                       sv("df_id")),
-                # Assign the default instantiation level to the first element in the array
-                (self.set_value(def_inst_id,                sv("df_inst_level_id"), 0)),
-                (self.set_value(def_inst_desc,              sv("df_inst_level_desc"), 0)),
-                ((tv("df_desc"), self.FLAG_BLANK),                     sv("df_desc")),
-                ((tv("vdu"), self.FLAG_KEY_SET_VALUE),
-                 [sv("df_vdu_prof_id"), vdu_map]),
-                ((tv("vdu_prof_inst_min"), self.FLAG_BLANK),
-                 [sv("df_vdu_prof_inst_min"), vdu_map]),
-                ((tv("vdu_prof_inst_max"), self.FLAG_BLANK),
-                 [sv("df_vdu_prof_inst_max"), vdu_map]),
-                (("{}", self.FLAG_KEY_SET_VALUE),
-                 [sv("df_inst_level_vdu_vdu"), target_map]),
-                ((tv("inst_level_num_instances"), self.FLAG_BLANK),
-                 [sv("df_inst_level_vdu_num"), vdu_inst_level_map])
+        # -- Deployment Flavor --
+        add_map(((tv("df_id"), self.FLAG_BLANK), sv("df_id")))
+        # Assign the default instantiation level to the first element in the array
+        add_map((self.set_value(def_inst_id, sv("df_inst_level_id"), 0)))
+        add_map((self.set_value(def_inst_desc, sv("df_inst_level_desc"), 0)))
+        add_map(((tv("df_desc"), self.FLAG_BLANK), sv("df_desc")))
 
-                # -- Scaling Aspect --
-                #((tv("scaling_aspect_name"), self.FLAG_BLANK),
-                # [sv("df_inst_scaling_aspect, aspect_f_map]),
-                #((tv("scaling_aspect_level"), self.FLAG_BLANK),
-                # [sv("df_inst_scaling_level, aspect_f_map]),
+        add_map(((tv("vdu"), self.FLAG_KEY_SET_VALUE),
+                 [sv("df_vdu_prof_id"), vdu_map]))
+        add_map(((tv("vdu_prof_inst_min"), self.FLAG_BLANK),
+                 [sv("df_vdu_prof_inst_min"), vdu_map]))
+        add_map(((tv("vdu_prof_inst_max"), self.FLAG_BLANK),
+                 [sv("df_vdu_prof_inst_max"), vdu_map]))
+        add_map((("{}", self.FLAG_KEY_SET_VALUE),
+                 [sv("df_inst_level_vdu_vdu"), target_map]))
+        add_map(((tv("inst_level_num_instances"), self.FLAG_BLANK),
+                 [sv("df_inst_level_vdu_num"), vdu_inst_level_map]))
 
-                #((tv("scaling_aspect_name"), self.FLAG_BLANK),
-                # [sv("df_scale_aspect_id, aspect_f_map]),
-                #((tv("scaling_aspect_name"), self.FLAG_BLANK),
-                # [sv("df_scale_aspect_name, aspect_f_map]),
-                #((tv("scaling_aspect_level"), self.FLAG_BLANK),
-                # [sv("df_scale_aspect_max_level, aspect_f_map]),
-                #((tv("scaling_aspect_desc"), self.FLAG_BLANK),
-                # [sv("df_scale_aspect_desc, aspect_f_map]),
+        # -- Scaling Aspect --
+        #add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
+        # [sv("df_inst_scaling_aspect, aspect_f_map]),
+        #add_map(((tv("scaling_aspect_level"), self.FLAG_BLANK),
+        # [sv("df_inst_scaling_level, aspect_f_map]),
+
+        #add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
+        # [sv("df_scale_aspect_id, aspect_f_map]),
+        #add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
+        # [sv("df_scale_aspect_name, aspect_f_map]),
+        #add_map(((tv("scaling_aspect_level"), self.FLAG_BLANK),
+        # [sv("df_scale_aspect_max_level, aspect_f_map]),
+        #add_map(((tv("scaling_aspect_desc"), self.FLAG_BLANK),
+        # [sv("df_scale_aspect_desc, aspect_f_map]),
 
 
-                #((tv("scaling_aspect_deltas"), self.FLAG_REQ_DELTA),
-                #[sv("df_scale_aspect_deltas"), aspect_f_map]),
+        #add_map(((tv("scaling_aspect_deltas"), self.FLAG_REQ_DELTA),
+        #[sv("df_scale_aspect_deltas"), aspect_f_map]),
 
-                #(("{}", (self.FLAG_REQ_DELTA, self.FLAG_KEY_SET_VALUE)),
-                # [sv("df_scale_aspect_vdu_id"), deltas_mapping]),
-                #((tv("scaling_aspect_deltas_num"), self.FLAG_REQ_DELTA),
-                # [sv("df_scale_aspect_vdu_num"), deltas_mapping])
-                # -- End Scaling Aspect
+        #(("{}", (self.FLAG_REQ_DELTA, self.FLAG_KEY_SET_VALUE)),
+        # [sv("df_scale_aspect_vdu_id"), deltas_mapping]),
+        #add_map(((tv("scaling_aspect_deltas_num"), self.FLAG_REQ_DELTA),
+        # [sv("df_scale_aspect_vdu_num"), deltas_mapping])
+        # -- End Scaling Aspect
 
-                # -- End Deployment Flavor --
-            ]
+        # -- End Deployment Flavor --
+    
 
     def set_value(self, val, path, index):
         return (val, self.FLAG_KEY_SET_VALUE), [path, [MapElem(val, index)]]
