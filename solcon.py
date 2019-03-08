@@ -174,9 +174,9 @@ class SolCon:
         }
         log_level_str = dict_utils.reverse_dict(log_levels)
 
-        print("Interactive Mode Started")
+        print("--Interactive Mode Started--")
 
-        # Initiate logging
+        # ** Initiate logging **
         self.log = self.start_logging(args.log_level)
         print("Select log level")
         print("Log level set to {}.".format(log_levels[args.log_level]))
@@ -187,7 +187,7 @@ class SolCon:
             level = self.valid_input("Choose log level: {}: ".format(levels), levels)
             self.log.setLevel(log_level_str[level])
 
-        # Read the config file locations
+        # ** Read the config file locations **
         while True:
             if not args.path_config or not args.path_config_sol6:
                 print("Select config files")
@@ -207,7 +207,7 @@ class SolCon:
                 break
         self.variables = self.read_configs(tosca_config, sol6_config)
 
-        # Parse the yang specifications file into an empty dictionary
+        # ** Parse the yang specifications file into an empty dictionary **
         self.parsed_dict = {}
 
         # Read the data from the provided yaml file into variables
@@ -224,7 +224,27 @@ class SolCon:
                 break
         self.tosca_vnf, self.tosca_lines = self.read_tosca_yaml(tosca_file)
 
-        # Determine what provider to use
+        # ** Output to a file (or not) **
+        file_out = args.output
+        set_file = False
+        while True:
+            if not file_out:
+                # Only display this the first time
+                if not set_file:
+                    opt = self.valid_input("Set output file? (y/n)", yn)
+
+                if opt == "y" or set_file:
+                    print("Specify file (.json)")
+                    file_out = input("? ")
+            print("Output file: {}".format(file_out))
+            opt = self.valid_input("OK? (y/n)", yn)
+            if opt == "y":
+                break
+            set_file = True
+            file_out = None
+        self.args.output = file_out
+
+        # ** Determine what provider to **
         while True:
             if not args.provider:
                 found_prov = None
@@ -249,10 +269,10 @@ class SolCon:
                     break
         self.provider = found_prov
 
-        # Initialize the proper converter object for the given provider
+        # ** Initialize the proper converter object for the given provider **
         self.converter = self.initialize_converter(self.provider, self.supported_providers)
 
-        # Do the actual converting logic
+        # ** o the actual converting logic **
         cnfv = self.converter.convert(provider=self.provider)
 
         self.output(cnfv)
