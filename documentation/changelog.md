@@ -1,7 +1,10 @@
 # SolCon Changelog
 Current version = 0.2.0
 
-Release date = 07/03/2019
+Release date = 11/03/2019
+
+** Version 0.2.1 **
+* Added interactive mode (access with -i)
 
 ** Version 0.2.0 **
 * Added Nokia provider options
