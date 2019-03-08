@@ -28,6 +28,7 @@ Also can be run standalone:
 - -p --prune: Do not prune empty values from the dict at the end
 - -r --provider: Specifically provide the provider instead of trying to
                         read it from the file. (Supported providers here when run in program)
+- -i --interactive: Initiate the interactive mode for the program
 - -h --help: Show the help message
 
 **Wiki**  
