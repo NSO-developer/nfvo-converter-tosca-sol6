@@ -11,6 +11,7 @@ import json
 import yaml
 import logging
 import sys
+import os.path
 import dict_utils
 from sol6_converter import Sol6Converter
 from sol6_converter_nokia import SOL6ConverterNokia
@@ -71,6 +72,7 @@ class SolCon:
         if not args.file or not args.path_config or not args.path_config_sol6:
             print("error: the following arguments are required: -f/--file, -c/--path-config, "
                   "-s/--path-config-sol6")
+            return
 
         # Initiate logging
         self.log = self.start_logging(args.log_level)
@@ -85,7 +87,8 @@ class SolCon:
         self.tosca_vnf, self.tosca_lines = self.read_tosca_yaml(args.file)
 
         # Determine what provider to use
-        self.provider = self.find_provider(args.provider, self.tosca_lines).lower()
+        self.provider = self.find_provider(args.provider, self.tosca_lines,
+                                           self.supported_providers).lower()
 
         # Initialize the proper converter object for the given provider
         self.converter = self.initialize_converter(self.provider, self.supported_providers)
@@ -133,58 +136,118 @@ class SolCon:
         return parsed_yaml, file_lines
 
     def initialize_converter(self, sel_provider, valid_providers):
-        # If the provider is not a part of a valid provider, i.e. 'cisco' in ['cisco', 'nokia'],
-        # check if any of the valid providers are in the sel_provider,
-        #   i.e. 'cisco' in '&provider-cisco'
-        if sel_provider not in valid_providers:
-            found = False
-            for s_p in valid_providers:
-                if s_p in sel_provider:
-                    sel_provider = s_p
-                    self.provider = s_p
-                    found = True
-            if not found:
-                raise TypeError("Unsupported provider: '{}'".format(sel_provider))
         # We found a proper provider, so we can start doing things
         self.log.info("Starting conversion with provider '{}'".format(sel_provider))
         return valid_providers[sel_provider](self.tosca_vnf, self.parsed_dict,
                                              variables=self.variables, log=self.log)
 
     @staticmethod
-    def find_provider(arg_provider, file_lines):
+    def find_provider(arg_provider, file_lines, valid_providers):
         # Figure out what class we want to use
         # If it was specifically provided as a parameter
         if arg_provider:
             return arg_provider
         else:
             # Try to figure out what it is
-            return "-".join(Sol6Converter.find_provider(file_lines).split(" "))
+
+            sel_provider = "-".join(Sol6Converter.find_provider(file_lines).split(" "))
+
+            # If the provider is not a part of a valid provider, i.e. 'cisco' in ['cisco', 'nokia'],
+            # check if any of the valid providers are in the sel_provider,
+            #   i.e. 'cisco' in '&provider-cisco'
+            if sel_provider not in valid_providers:
+                for s_p in valid_providers:
+                    if s_p in sel_provider:
+                        return s_p
+                raise TypeError("Unsupported provider: '{}'".format(sel_provider))
 
     def interactive_mode(self):
-        print("Interactive Mode Started")
+        yn = ["y", "n"]
         args = self.args
+        log_levels = {
+            logging.NOTSET: "NOTSET",
+            logging.DEBUG: "DEBUG",
+            logging.INFO: "INFO",
+            logging.WARNING: "WARNING",
+            logging.ERROR: "ERROR",
+            logging.CRITICAL: "CRITICAL"
+        }
+        log_level_str = dict_utils.reverse_dict(log_levels)
 
-        if args.log_level:
-            # Initiate logging
-            self.log = self.start_logging(args.log_level)
+        print("Interactive Mode Started")
 
-            print("Log level set to {}. (y/n)?".format(args.log_level))
-        else:
-            print("Select log level:")
-            print(self.parser)
+        # Initiate logging
+        self.log = self.start_logging(args.log_level)
+        print("Select log level")
+        print("Log level set to {}.".format(log_levels[args.log_level]))
 
-        return
-        # Read the configs
-        self.variables = self.read_configs(args.path_config, args.path_config_sol6)
+        opt = self.valid_input("OK? (y/n)  ", yn)
+        if opt == "n":
+            levels = list(log_level_str.keys())
+            level = self.valid_input("Choose log level: {}: ".format(levels), levels)
+            self.log.setLevel(log_level_str[level])
+
+        # Read the config file locations
+        while True:
+            if not args.path_config or not args.path_config_sol6:
+                print("Select config files")
+            if not args.path_config:
+                tosca_config = self.valid_input_file("TOSCA Config file (.toml)")
+            else:
+                tosca_config = args.path_config
+            if not args.path_config_sol6:
+                sol6_config = self.valid_input_file("SOL6 Config file (.toml)")
+            else:
+                sol6_config = args.path_config_sol6
+
+            print("TOSCA Config: {}".format(tosca_config))
+            print("SOL6  Conifg: {}".format(sol6_config))
+            opt = self.valid_input("OK? (y/n)", yn)
+            if opt == "y":
+                break
+        self.variables = self.read_configs(tosca_config, sol6_config)
 
         # Parse the yang specifications file into an empty dictionary
         self.parsed_dict = {}
 
         # Read the data from the provided yaml file into variables
-        self.tosca_vnf, self.tosca_lines = self.read_tosca_yaml(args.file)
+        while True:
+            if not args.file:
+                print("Select input file")
+                tosca_file = self.valid_input_file("TOSCA input file (.yaml)")
+            else:
+                tosca_file = args.file
+
+            print("TOSCA File: {}".format(tosca_file))
+            opt = self.valid_input("OK? (y/n)", yn)
+            if opt == "y":
+                break
+        self.tosca_vnf, self.tosca_lines = self.read_tosca_yaml(tosca_file)
 
         # Determine what provider to use
-        self.provider = self.find_provider(args.provider, self.tosca_lines).lower()
+        while True:
+            if not args.provider:
+                found_prov = None
+                try:
+                    found_prov = self.find_provider(None, self.tosca_lines,
+                                                    self.supported_providers)
+                except KeyError:
+                    pass
+
+                if found_prov:
+                    print("Found provider '{}'".format(found_prov))
+                    opt = self.valid_input("OK? (y/n)", yn)
+                    if opt == "y":
+                        break
+
+                found_prov = self.valid_input("Select provider",
+                                              list(self.supported_providers.keys()))
+
+                print("Provider: '{}'".format(found_prov))
+                cont = self.valid_input("OK? (y/n)", yn)
+                if cont == "y":
+                    break
+        self.provider = found_prov
 
         # Initialize the proper converter object for the given provider
         self.converter = self.initialize_converter(self.provider, self.supported_providers)
@@ -193,6 +256,34 @@ class SolCon:
         cnfv = self.converter.convert(provider=self.provider)
 
         self.output(cnfv)
+
+    @staticmethod
+    def valid_input_file(prompt):
+        """
+        Only accept the input if the file specified exists
+        """
+        while True:
+            print(prompt)
+            choice = input("? ")
+            if os.path.isfile(choice):
+                return choice
+            else:
+                print("Error: File not found")
+
+    @staticmethod
+    def valid_input(prompt, opts):
+        """
+        Convert all input to lowercase to check validity
+        :param prompt:
+        :param opts:
+        :return: Original item that the input matches
+        """
+        opts_l = list(map(str.lower, opts))
+        while True:
+            print(prompt)
+            choice = input("? ")
+            if choice.lower() in opts_l:
+                return opts[opts_l.index(choice.lower())]
 
 
 def main():
