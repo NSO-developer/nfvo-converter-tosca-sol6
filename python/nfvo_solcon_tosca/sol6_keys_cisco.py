@@ -91,9 +91,9 @@ class V2Map(V2MapBase):
         TOSCA.get_dict_key = get_dict_key
 
         # Generate VDU map
-        vdu_map = self.generate_map(tv("node_templates"), tv("vdu_identifier"))
+        vdu_map = self.generate_map(None, tv("vdu_identifier"))
 
-        sw_map = self.generate_map(tv("node_templates"), tv("virt_storage_identifier"),
+        sw_map = self.generate_map(None, tv("virt_storage_identifier"),
                                    field_filter=TOSCA.virt_filter)
 
         # This list has the VDUs the flavors are attached to
@@ -149,11 +149,11 @@ class V2Map(V2MapBase):
 
         # *** Connection Point mappings ***
         # Map internal connection points to their VDUs
-        cps_map = self.generate_map(tv("node_templates"), tv("int_cpd_identifier"),
+        cps_map = self.generate_map(None, tv("int_cpd_identifier"),
                                     map_function=self.int_cp_mapping,
                                     map_args={"vdu_map": vdu_map})
         # Filter internal connection points that are assigned to management
-        mgmt_cps_map = self.generate_map(tv("node_templates"), tv("int_cpd_mgmt_identifier"),
+        mgmt_cps_map = self.generate_map(None, tv("int_cpd_mgmt_identifier"),
                                          field_filter=TOSCA.int_cp_mgmt,
                                          map_function=self.int_cp_mapping,
                                          map_args={"vdu_map": vdu_map})
@@ -180,22 +180,11 @@ class V2Map(V2MapBase):
             def_inst_id = None
             def_inst_desc = None
 
-        """df_inst_levels_map = self.generate_map(tv("df_inst_levels"), None, cur_dict=dict_tosca)
-
-        # Generate vdu_level map inside of instantiation_levels map
-        df_inst_vdu_level_map = []
-        for df_inst in df_inst_levels_map:
-            cur_path = MapElem.format_path(df_inst, tv("df_inst_level_vdu_levels"), use_value=False)
-            df_inst_vdu_level_map.append(self.generate_map(cur_path, None, cur_dict=dict_tosca,
-                                                           parent=df_inst))
-        df_inst_vdu_level_map = flatten(df_inst_vdu_level_map)  # Make sure it's a flat list
-        print(df_inst_vdu_level_map)
-        """
         # TODO: Handle more than the default instantiation level
 
         # Problem here is we need duplicate entries, since we have, for example, 2 VDUs each
         # information needs to be assigned to
-        vdu_inst_level_map = self.generate_map(tv("policies"), tv("inst_level_identifier"))
+        vdu_inst_level_map = self.generate_map(None, tv("inst_level_identifier"))
 
         # Get the list of targets from the mappings
         target_list = []
@@ -222,23 +211,27 @@ class V2Map(V2MapBase):
 
         # ** Scaling Aspect info **
         # Get all of the scaling aspects information
-        # Only handle 1 for now. TODO: Handle more
-        scaling_map = self.generate_map(tv("policies"), tv("scaling_aspects_identifier"))
+        aspect_f_map = []
+        scaling_map = self.generate_map(None, tv("scaling_aspects_identifier"), cur_dict=dict_tosca)
+
         if scaling_map:
-            scaling_map = scaling_map[0]
-            aspects = get_path_value(tv("scaling_aspect_item_list").format(scaling_map.name),
-                                     self.dict_tosca)
+            for cur_map in scaling_map:
+                cur_path = MapElem.format_path(cur_map, tv("scaling_aspect_item_list"),
+                                               use_value=False)
+                aspects = get_path_value(cur_path, self.dict_tosca)
 
-            aspect_f_map = self.generate_map_from_list(list(aspects.keys()))
-            MapElem.add_parent_mapping(aspect_f_map, scaling_map)
+                cur_aspect_map = self.generate_map_from_list(list(aspects.keys()))
+                MapElem.add_parent_mapping(cur_aspect_map, cur_map)
+                aspect_f_map.append(cur_aspect_map)
 
-            # This is in a separate method because it's a dumpster fire
-            deltas_mapping = self._handle_deltas(aspect_f_map)
-            # It is possible for there to be no step deltas, in that case don't run them even
-            # if the input is valid
-            if not deltas_mapping:
-                self.override_deltas = True
-                self.run_deltas = False
+                # This is in a separate method because it's a dumpster fire
+                # deltas_mapping = self._handle_deltas(aspect_f_map)
+                # It is possible for there to be no step deltas, in that case don't run them even
+                # if the input is valid
+                # if not deltas_mapping:
+                #    self.override_deltas = True
+                #    self.run_deltas = False
+        aspect_f_map = flatten(aspect_f_map)
 
         # *** End Instantiation Level mapping ***
 
@@ -371,28 +364,27 @@ class V2Map(V2MapBase):
                  [sv("df_inst_level_vdu_num"), vdu_inst_level_map]))
 
         # -- Scaling Aspect --
-        #add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
-        # [sv("df_inst_scaling_aspect, aspect_f_map]),
-        #add_map(((tv("scaling_aspect_level"), self.FLAG_BLANK),
-        # [sv("df_inst_scaling_level, aspect_f_map]),
+        add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
+                 [sv("df_inst_scaling_aspect"), aspect_f_map]))
+        add_map(((tv("scaling_aspect_level"), self.FLAG_BLANK),
+                 [sv("df_inst_scaling_level"), aspect_f_map]))
 
-        #add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
-        # [sv("df_scale_aspect_id, aspect_f_map]),
-        #add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
-        # [sv("df_scale_aspect_name, aspect_f_map]),
-        #add_map(((tv("scaling_aspect_level"), self.FLAG_BLANK),
-        # [sv("df_scale_aspect_max_level, aspect_f_map]),
-        #add_map(((tv("scaling_aspect_desc"), self.FLAG_BLANK),
-        # [sv("df_scale_aspect_desc, aspect_f_map]),
+        add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
+                 [sv("df_scale_aspect_id"), aspect_f_map]))
+        add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
+                 [sv("df_scale_aspect_name"), aspect_f_map]))
+        add_map(((tv("scaling_aspect_level"), self.FLAG_BLANK),
+                 [sv("df_scale_aspect_max_level"), aspect_f_map]))
+        add_map(((tv("scaling_aspect_desc"), self.FLAG_BLANK),
+                 [sv("df_scale_aspect_desc"), aspect_f_map]))
 
+        add_map(((tv("scaling_aspect_deltas"), self.FLAG_REQ_DELTA),
+                 [sv("df_scale_aspect_deltas"), aspect_f_map]))
 
-        #add_map(((tv("scaling_aspect_deltas"), self.FLAG_REQ_DELTA),
-        #[sv("df_scale_aspect_deltas"), aspect_f_map]),
-
-        #(("{}", (self.FLAG_REQ_DELTA, self.FLAG_KEY_SET_VALUE)),
-        # [sv("df_scale_aspect_vdu_id"), deltas_mapping]),
-        #add_map(((tv("scaling_aspect_deltas_num"), self.FLAG_REQ_DELTA),
-        # [sv("df_scale_aspect_vdu_num"), deltas_mapping])
+        # add_map((("{}", (self.FLAG_REQ_DELTA, self.FLAG_KEY_SET_VALUE)),
+        #         [sv("df_scale_aspect_vdu_id"), deltas_mapping]))
+        # add_map(((tv("scaling_aspect_deltas_num"), self.FLAG_REQ_DELTA),
+        #         [sv("df_scale_aspect_vdu_num"), deltas_mapping]))
         # -- End Scaling Aspect
 
         # -- End Deployment Flavor --

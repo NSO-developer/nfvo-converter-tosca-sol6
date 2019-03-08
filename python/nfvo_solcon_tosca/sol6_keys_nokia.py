@@ -126,7 +126,6 @@ class V2Map(V2MapBase):
                                                            parent=df_inst))
         df_inst_vdu_level_map = flatten(df_inst_vdu_level_map)  # Make sure it's a flat list
 
-        # TODO: Make handling errors here easier
         add_map(((tv("descriptor_id"), self.FLAG_BLANK),        sv("vnfd_id")))
 
         # ** Metadata **
@@ -224,8 +223,8 @@ class V2Map(V2MapBase):
         add_map(((tv("int_cpd_role"), self.FLAG_BLANK),
                  [sv("int_cpd_role"), icp_mapping]))
         # Interface id, with incrementing number, use the sol6 array index
-        add_map(((tv("int_cpd"),
-        (self.FLAG_KEY_SET_VALUE, self.FLAG_USE_VALUE, self.FLAG_ONLY_NUMBERS)),
+        add_map(((tv("int_cpd"), (self.FLAG_KEY_SET_VALUE,
+                                  self.FLAG_USE_VALUE, self.FLAG_ONLY_NUMBERS)),
                 [sv("int_cpd_interface_id"), icp_mapping]))
         # Map the virtual link descriptors, but expect that some don't have the links, so suppress
         # warning messages

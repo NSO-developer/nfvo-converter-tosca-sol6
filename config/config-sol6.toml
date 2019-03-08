@@ -60,7 +60,7 @@
     df_inst_level_vdu_vdu       = ["df_inst_level_vdu_level", "id"]
     df_inst_level_vdu_num       = ["df_inst_level_vdu_level", "number-of-instances"]
     # -- Scaling Info
-    df_inst_scaling_info        = ["df_inst_level", "scaling-aspect.{}"]
+    df_inst_scaling_info        = ["df_inst_level", "scaling-info.{}"]
     df_inst_scaling_aspect      = ["df_inst_scaling_info", "id"]
     df_inst_scaling_level       = ["df_inst_scaling_info", "scale-level"]
 
