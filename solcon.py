@@ -17,7 +17,7 @@ from sol6_converter_nokia import SOL6ConverterNokia
 from sol6_converter_cisco import SOL6ConverterCisco
 import toml
 
-desc = "NFVO SOL6 Converter (SOLCon): Convert a SOL001 (TOSCA) YAML to SOL006 JSON"
+desc = "NFVO SOL6 Converter (SolCon): Convert a SOL001 (TOSCA) YAML to SOL006 JSON"
 
 supported_providers = {
     "cisco": SOL6ConverterCisco,
