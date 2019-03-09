@@ -7,7 +7,7 @@ tosca=$root/solcon.py
 output_dir=$root/outputs/esc
 config_tosca=$root/config/config-esc.toml
 config_sol6=$root/config/config-sol6.toml
-example_root=$root/examples/
+example_root=$root/examples/esc
 
 for filename in $example_root/*.yaml; do
     file=$(basename $filename)
