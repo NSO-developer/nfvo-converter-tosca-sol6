@@ -6,7 +6,9 @@
 /outputs
 /build
 /dist
+/logs
 
+*.log
 *.spec
 *.pyc
 # Word temporary
