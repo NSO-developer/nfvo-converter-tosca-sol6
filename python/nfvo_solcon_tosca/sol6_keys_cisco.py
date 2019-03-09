@@ -364,27 +364,29 @@ class V2Map(V2MapBase):
                  [sv("df_inst_level_vdu_num"), vdu_inst_level_map]))
 
         # -- Scaling Aspect --
-        add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
-                 [sv("df_inst_scaling_aspect"), aspect_f_map]))
-        add_map(((tv("scaling_aspect_level"), self.FLAG_BLANK),
-                 [sv("df_inst_scaling_level"), aspect_f_map]))
+        do_scaling = False
+        if do_scaling:
+            add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
+                     [sv("df_inst_scaling_aspect"), aspect_f_map]))
+            add_map(((tv("scaling_aspect_level"), self.FLAG_BLANK),
+                     [sv("df_inst_scaling_level"), aspect_f_map]))
 
-        add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
-                 [sv("df_scale_aspect_id"), aspect_f_map]))
-        add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
-                 [sv("df_scale_aspect_name"), aspect_f_map]))
-        add_map(((tv("scaling_aspect_level"), self.FLAG_BLANK),
-                 [sv("df_scale_aspect_max_level"), aspect_f_map]))
-        add_map(((tv("scaling_aspect_desc"), self.FLAG_BLANK),
-                 [sv("df_scale_aspect_desc"), aspect_f_map]))
+            add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
+                     [sv("df_scale_aspect_id"), aspect_f_map]))
+            add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
+                     [sv("df_scale_aspect_name"), aspect_f_map]))
+            add_map(((tv("scaling_aspect_level"), self.FLAG_BLANK),
+                     [sv("df_scale_aspect_max_level"), aspect_f_map]))
+            add_map(((tv("scaling_aspect_desc"), self.FLAG_BLANK),
+                     [sv("df_scale_aspect_desc"), aspect_f_map]))
 
-        add_map(((tv("scaling_aspect_deltas"), self.FLAG_REQ_DELTA),
-                 [sv("df_scale_aspect_deltas"), aspect_f_map]))
+            add_map(((tv("scaling_aspect_deltas"), self.FLAG_REQ_DELTA),
+                     [sv("df_scale_aspect_deltas"), aspect_f_map]))
 
-        # add_map((("{}", (self.FLAG_REQ_DELTA, self.FLAG_KEY_SET_VALUE)),
-        #         [sv("df_scale_aspect_vdu_id"), deltas_mapping]))
-        # add_map(((tv("scaling_aspect_deltas_num"), self.FLAG_REQ_DELTA),
-        #         [sv("df_scale_aspect_vdu_num"), deltas_mapping]))
+            # add_map((("{}", (self.FLAG_REQ_DELTA, self.FLAG_KEY_SET_VALUE)),
+            #        [sv("df_scale_aspect_vdu_id"), deltas_mapping]))
+            # add_map(((tv("scaling_aspect_deltas_num"), self.FLAG_REQ_DELTA),
+            #         [sv("df_scale_aspect_vdu_num"), deltas_mapping]))
         # -- End Scaling Aspect
 
         # -- End Deployment Flavor --
