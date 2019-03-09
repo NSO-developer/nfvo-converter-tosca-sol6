@@ -46,8 +46,6 @@ class SolCon:
                             choices=['DEBUG', 'INFO', 'WARNING'], default=logging.INFO,
                             help="Set the log level for standalone logging")
         # parser.add_argument('-n', '--dry-run', action='store_true', help="Don't send VNFD to NSO")
-        parser.add_argument('-p', '--prune', action='store_false',
-                            help='Do not prune empty values from the dict')
         parser.add_argument('-c', '--path-config',
                             help='Location of the paths configuration file for TOSCA paths '
                                  '(TOML format)')
@@ -58,8 +56,11 @@ class SolCon:
                             help='Specifically provide the provider instead of trying to read '
                                  'it from the file. Supported providers: {}'
                             .format(list(self.supported_providers.keys())))
+        # Advanced arguments:
+        parser.add_argument('-p', '--prune', action='store_false',
+                            help='Do not prune empty values from the dict')
         parser.add_argument('-i', '--interactive', action='store_true',
-                            help='Initiate the interactive mode for the program')
+                            help=argparse.SUPPRESS)
 
         args = parser.parse_args()
         self.args = args
@@ -101,7 +102,10 @@ class SolCon:
     @staticmethod
     def start_logging(log_level):
             log_format = "%(levelname)s - %(message)s"
-            logging.basicConfig(level=log_level, format=log_format)
+            log_filename = "logs/solcon.log"
+            logging.basicConfig(level=log_level, filename=log_filename, format=log_format)
+            # Duplicate the output to the console as well as to a file
+            logging.getLogger().addHandler(logging.StreamHandler())
             return logging.getLogger(__name__)
 
     @staticmethod
@@ -260,8 +264,9 @@ class SolCon:
                     if opt == "y":
                         break
 
-                found_prov = self.valid_input("Select provider",
-                                              list(self.supported_providers.keys()))
+                found_prov = self.valid_input(
+                    "Select provider from list: '{}'".format(list(self.supported_providers.keys())),
+                    list(self.supported_providers.keys()))
 
                 print("Provider: '{}'".format(found_prov))
                 cont = self.valid_input("OK? (y/n)", yn)
