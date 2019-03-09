@@ -120,13 +120,13 @@
     int_cpd_role                = ["int_cpd", "role"]
     int_cpd_interface_id        = ["int_cpd", "tailf-etsi-rel3-nfvo-vnfm:interface-id"]
 
-    KEY_VIRT_LINK_MGMT_VAL      = "CP_MGMT"
+    KEY_VIRT_LINK_MGMT_VAL      = "VIM_NETWORK_MANAGEMENT-VL"
     KEY_VIRT_LINK_MGMT_PROT_VAL = "IPv4"
-    KEY_VIRT_LINK_ORCH_VAL      = "CP_ORCH"
+    KEY_VIRT_LINK_ORCH_VAL      = "VIM_NETWORK_ORCHESTRATION-VL"
     KEY_VIRT_LINK_ORCH_PROT_VAL = "IPv4"
-    KEY_EXT_CP_MGMT_VAL         = "CP_EXT_MGMT"
+    KEY_EXT_CP_MGMT_VAL         = "VIM_NETWORK_MANAGEMENT"
     KEY_EXT_CP_MGMT_PROT_VAL    = "IPv4"
-    KEY_EXT_CP_ORCH_VAL         = "CP_EXT_ORCH"
+    KEY_EXT_CP_ORCH_VAL         = "VIM_NETWORK_ORCHESTRATION"
     KEY_EXT_CP_ORCH_PROT_VAL    = "IPv4"
 
     # *******************************
