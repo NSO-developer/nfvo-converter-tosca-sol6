@@ -5,17 +5,10 @@ The program does not attempt to map variables beginning with '_'
 """
 from mapping_v2 import *
 import logging
+log = logging.getLogger(__name__)
 
 
 class PathMaping:
-    _log = None
-
-    @staticmethod
-    def get_logger():
-        if not PathMaping._log:
-            PathMaping._log = logging.getLogger(__name__)
-        return PathMaping._log
-
     @staticmethod
     def format_paths(variables):
         """
@@ -53,7 +46,6 @@ class PathMaping:
         Take the input from the config file, and set the variables that are identifiers here
         This must be run before the values are used
         """
-        log = PathMaping.get_logger()
         key_list = V2Mapping.get_object_keys(obj, exclude=exclude)
 
         for k in key_list:
@@ -71,7 +63,6 @@ class PathMaping:
 
     @staticmethod
     def get_full_path(elem, dic):
-        log = PathMaping.get_logger()
         try:
             if not isinstance(dic[elem], list):
                 return dic[elem]
@@ -260,7 +251,7 @@ class V2MapBase(V2Mapping):
     mapping = []
 
     def __init__(self, dict_tosca, dict_sol6, c_log=None, variables=None):
-        super().__init__(dict_tosca, dict_sol6, c_log)
+        super().__init__(dict_tosca, dict_sol6)
         self.va_s = None
         self.va_t = None
 

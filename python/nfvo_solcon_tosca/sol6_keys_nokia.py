@@ -39,7 +39,7 @@ class SOL6(SOL6_BASE):
 
 
 class V2Map(V2MapBase):
-    def __init__(self, dict_tosca, dict_sol6, variables=None, log=None):
+    def __init__(self, dict_tosca, dict_sol6, variables=None):
         super().__init__(dict_tosca, dict_sol6, c_log=log, variables=variables)
 
         # Make the lines shorter

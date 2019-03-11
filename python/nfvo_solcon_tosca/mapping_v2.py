@@ -1,4 +1,6 @@
 from dict_utils import *
+import logging
+log = logging.getLogger(__name__)
 
 
 class V2Mapping:
@@ -12,10 +14,9 @@ class V2Mapping:
     KEY_TOSCA = "dict_tosca"
     KEY_SOL6 = "dict_sol6"
 
-    def __init__(self, dict_tosca, dict_sol6, log=None):
+    def __init__(self, dict_tosca, dict_sol6):
         self.dict_tosca = dict_tosca
         self.dict_sol6 = dict_sol6
-        self.log = log
 
     @staticmethod
     def parent_match(map1_list, start_num=0, **kwargs):

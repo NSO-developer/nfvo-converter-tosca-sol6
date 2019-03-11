@@ -17,17 +17,19 @@ from sol6_converter import Sol6Converter
 from sol6_converter_nokia import SOL6ConverterNokia
 from sol6_converter_cisco import SOL6ConverterCisco
 import toml
+log = logging.getLogger(__name__)
 
 
 class SolCon:
     def __init__(self):
-        self.log = None
         self.variables = None
         self.tosca_lines = None
         self.tosca_vnf = None
         self.converter = None
         self.provider = None
         self.supported_providers = None
+
+        log.debug("Starting converter...")
 
         self.desc = "NFVO SOL6 Converter (SolCon): Convert a SOL001 (TOSCA) YAML to SOL006 JSON"
 
@@ -75,8 +77,8 @@ class SolCon:
                   "-s/--path-config-sol6")
             return
 
-        # Initiate logging
-        self.log = self.start_logging(args.log_level)
+        # Initialize the log and have the level set properly
+        setup_logger(args.log_level)
 
         # Read the configs
         self.variables = self.read_configs(args.path_config, args.path_config_sol6)
@@ -104,17 +106,6 @@ class SolCon:
         self.output(cnfv)
 
     @staticmethod
-    def start_logging(log_level):
-            log_format = "%(levelname)s - %(message)s"
-            log_filename = "logs/solcon.log"
-            # Ensure log folder exists
-
-            logging.basicConfig(level=log_level, filename=log_filename, format=log_format)
-            # Duplicate the output to the console as well as to a file
-            logging.getLogger().addHandler(logging.StreamHandler())
-            return logging.getLogger(__name__)
-
-    @staticmethod
     def read_configs(tosca_config, sol6_config):
         # Read the path configuration file
         variables = toml.load(tosca_config)
@@ -139,7 +130,7 @@ class SolCon:
 
     def read_tosca_yaml(self, file):
         # Read the tosca vnf into a dict from yaml format
-        self.log.info("Reading TOSCA YAML file {}".format(file))
+        log.info("Reading TOSCA YAML file {}".format(file))
         file_read = open(file, 'rb').read()
         file_lines = open(file, 'rb').readlines()
         parsed_yaml = yaml.load(file_read)
@@ -147,9 +138,9 @@ class SolCon:
 
     def initialize_converter(self, sel_provider, valid_providers):
         # We found a proper provider, so we can start doing things
-        self.log.info("Starting conversion with provider '{}'".format(sel_provider))
+        log.info("Starting conversion with provider '{}'".format(sel_provider))
         return valid_providers[sel_provider](self.tosca_vnf, self.parsed_dict,
-                                             variables=self.variables, log=self.log)
+                                             variables=self.variables)
 
     @staticmethod
     def find_provider(arg_provider, file_lines, valid_providers):
@@ -188,7 +179,8 @@ class SolCon:
         print("--Interactive Mode Started--")
 
         # ** Initiate logging **
-        self.log = self.start_logging(args.log_level)
+        setup_logger(args.log_level)
+
         print("Select log level")
         print("Log level set to {}.".format(log_levels[args.log_level]))
 
@@ -196,7 +188,7 @@ class SolCon:
         if opt == "n":
             levels = list(log_level_str.keys())
             level = self.valid_input("Choose log level: {}: ".format(levels), levels)
-            self.log.setLevel(log_level_str[level])
+            setup_logger(level)
 
         # ** Read the config file locations **
         while True:
@@ -318,9 +310,18 @@ class SolCon:
                 return opts[opts_l.index(choice.lower())]
 
 
-def main():
-    SolCon()
+def setup_logger(log_level=logging.INFO):
+    log_format = "%(levelname)s - %(message)s"
+    log_filename = "logs/solcon.log"
+    # Ensure log folder exists
+
+    logging.basicConfig(level=log_level, filename=log_filename, format=log_format)
+    # Duplicate the output to the console as well as to a file
+    console = logging.StreamHandler()
+    console.setLevel(log_level)
+    console.setFormatter(logging.Formatter(log_format))
+    logging.getLogger().addHandler(console)
 
 
 if __name__ == '__main__':
-    main()
+    SolCon()

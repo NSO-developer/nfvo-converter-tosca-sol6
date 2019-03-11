@@ -3,6 +3,9 @@
 Input a yang file and this script will output an empty dict with the fields of the yang populated.
 """
 
+import logging
+log = logging.getLogger(__name__)
+
 GROUPING = 'grouping '
 LEAF = 'leaf '
 LIST = 'list '
@@ -13,7 +16,6 @@ B_END = '}'
 class YangToDict:
 
     file = None
-    log = None
     grouping_required = True
     lines = []
     lines_used = []
@@ -22,8 +24,7 @@ class YangToDict:
     # For every open bracket we append *something* to this, and every closing bracket pops one off
     cur_elem = []
 
-    def __init__(self, file=None, log=None, g_req=True):
-        self.log = log
+    def __init__(self, file=None, g_req=True):
         self.grouping_required = g_req
         self.file = file
 
@@ -169,7 +170,7 @@ class YangToDict:
                 return i
         # If we can't find it then this probably isn't something we support
         if not self.grouping_required:
-            self.log.info("Grouping tag not required and not found ")
+            log.info("Grouping tag not required and not found ")
         else:
             raise EOFError("'grouping' not found")
 

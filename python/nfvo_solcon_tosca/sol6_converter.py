@@ -5,6 +5,8 @@ import re
 from sol6_keys import *
 from dict_utils import *
 from key_utils import KeyUtils
+import logging
+log = logging.getLogger(__name__)
 
 
 class Sol6Converter:
@@ -14,13 +16,11 @@ class Sol6Converter:
     parsed_dict = None
     vnfd = None
     template_inputs = {}
-    log = None
     keys = None
 
-    def __init__(self, tosca_vnf, parsed_dict, variables=None, log=None):
+    def __init__(self, tosca_vnf, parsed_dict, variables=None):
         self.tosca_vnf = tosca_vnf
         self.parsed_dict = parsed_dict
-        self.log = log
         self.variables = variables
 
         # Set this up for _virtual_get_flavor_names
@@ -69,8 +69,7 @@ class Sol6Converter:
         """
         mapping_list = map_sol6[1]  # List of MapElems
         sol6_path = map_sol6[0]
-        log.debug("Run mapping for tosca:{}, sol6:{}, mapping_list:{}".format(tosca_path, sol6_path,
-                                                                              mapping_list))
+
         for elem in mapping_list:
             # Skip this mapping element if it is None, but allow a none name to pass
             if not elem:
@@ -80,12 +79,12 @@ class Sol6Converter:
                     log.warning("Parent mapping is required, but {} does not have one".format(elem))
                 continue
 
-            log.debug("")
             tosca_use_value = self.tosca_use_value
             f_tosca_path = MapElem.format_path(elem, tosca_path, use_value=tosca_use_value)
             f_sol6_path = MapElem.format_path(elem, sol6_path, use_value=True)
 
-            log.debug("Formatted paths, tosca: {}, sol6: {}".format(f_tosca_path, f_sol6_path))
+            log.debug("Formatted paths:\n\ttosca: {} --> sol6: {}"
+                      .format(f_tosca_path, f_sol6_path))
 
             # Handle flags for mapped values
             value = self.handle_flags(f_sol6_path, f_tosca_path)
@@ -110,8 +109,6 @@ class Sol6Converter:
             log.debug("SOL6 path is None, skipping with no error message")
             return
 
-        log.debug("Run mapping for tosca:{}, sol6:{}".format(tosca_path, sol6_path))
-
         # Handle the various flags for no mappings
         value = self.handle_flags(sol6_path, tosca_path)
 
@@ -126,10 +123,13 @@ class Sol6Converter:
             log.debug("Tosca path is None, skipping with no error message")
             return
 
+        log.debug("Run mapping for tosca: {} --> sol6: {}"
+                  .format(tosca_path, map_sol6 if not isinstance(map_sol6, list) else map_sol6[0]))
+
         # Check if there is a mapping needed
         if isinstance(map_sol6, list):
+            log.debug("\tMapping: {}".format(map_sol6[1]))
             self.run_mapping_islist(tosca_path, map_sol6)
-
         else:  # No mapping needed
             self.run_mapping_notlist(tosca_path, map_sol6)
 
@@ -185,7 +185,8 @@ class Sol6Converter:
         # Ensure flags is iterable
         if not isinstance(flags, tuple):
             flags = [flags]
-        log.debug("Flags: {}".format(flags))
+        if flags and not flags[0] == '':
+            log.debug("Flags: {}".format(flags))
 
         for flag in flags:
             if flag == keys.FLAG_KEY_SET_VALUE:

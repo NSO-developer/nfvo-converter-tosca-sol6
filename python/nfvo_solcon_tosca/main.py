@@ -16,19 +16,19 @@ else:
 class ImportAction(Action):
     @Action.action
     def cb_action(self, uinfo, name, kp, input, output):
-        self.log.info('action input: ', input.uri)
+        log.info('action input: ', input.uri)
 
         if input.raw:
             tosca = input.raw
         else:
             tosca = self._load_uri(input.uri)
 
-        self.log.debug("TOSCA = {}".format(tosca))
+        log.debug("TOSCA = {}".format(tosca))
 
         tosca_vnf = yaml.load(tosca)
 
         vnfd = sp.tosca2cvnfd(tosca_vnf)
-        self.log.debug("VNFD = {}".format(vnfd))
+        log.debug("VNFD = {}".format(vnfd))
 
         # Wrap vnfd in /nfvo/vnfd
         vnfd = {
@@ -39,7 +39,7 @@ class ImportAction(Action):
 
         with maapi.single_write_trans(uinfo.username, "tailf-etsi-rel2-nfvo-tosca") as th:
             # vnfds = maagic.get_root(th).nfvo.vnfd
-            self.log.info("JSON: {}".format(json.dumps(vnfd)))
+            log.info("JSON: {}".format(json.dumps(vnfd)))
             th.load_config_cmds(maapi.CONFIG_JSON | maapi.CONFIG_MERGE, json.dumps(vnfd), "/nfvo/vnfd")
 
             th.apply()
