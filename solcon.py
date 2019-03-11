@@ -88,8 +88,8 @@ class SolCon:
         self.tosca_vnf, self.tosca_lines = self.read_tosca_yaml(args.file)
 
         # Determine what provider to use
-        self.provider = self.find_provider(args.provider, self.tosca_lines,
-                                           self.supported_providers).lower()
+        self.provider = self.find_provider(args.provider, self.tosca_lines, self.supported_providers)
+        self.provider = self.provider.lower()
 
         # Initialize the proper converter object for the given provider
         self.converter = self.initialize_converter(self.provider, self.supported_providers)
@@ -103,6 +103,8 @@ class SolCon:
     def start_logging(log_level):
             log_format = "%(levelname)s - %(message)s"
             log_filename = "logs/solcon.log"
+            # Ensure log folder exists
+
             logging.basicConfig(level=log_level, filename=log_filename, format=log_format)
             # Duplicate the output to the console as well as to a file
             logging.getLogger().addHandler(logging.StreamHandler())
@@ -164,6 +166,7 @@ class SolCon:
                     if s_p in sel_provider:
                         return s_p
                 raise TypeError("Unsupported provider: '{}'".format(sel_provider))
+            return sel_provider
 
     def interactive_mode(self):
         yn = ["y", "n"]
