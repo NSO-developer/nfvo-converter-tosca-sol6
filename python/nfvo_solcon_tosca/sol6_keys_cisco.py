@@ -122,9 +122,18 @@ class V2Map(V2MapBase):
         vim_flavors = [x[1] for x in vdu_vim_flavors]
         vim_flavors = self.get_input_values(vim_flavors, tv("inputs"), dict_tosca)
 
-        vim_flavors = [{vdu_vim_flavors[i][0]: get_dict_key(item)} for i, item in
-                       enumerate(vim_flavors)]
-
+        # Create a list of dicts: [{vdu: vim_flavors[i]}]
+        # If the values are not variables, then they won't be dicts, so just put their value
+        # into the list as-is
+        vim_flavors_temp = []
+        for i, item in enumerate(vim_flavors):
+            if isinstance(item, dict):
+                to_append = get_dict_key(item)
+            else:
+                to_append = item
+            vim_flavors_temp.append({vdu_vim_flavors[i][0]: to_append})
+        vim_flavors = vim_flavors_temp
+        
         # We might have duplicate values in the dictionary. Use a reverse dict and get the unique
         # elements
         # Turn the resulting dict back into a list of dicts

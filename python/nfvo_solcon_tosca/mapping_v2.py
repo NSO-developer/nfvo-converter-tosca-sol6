@@ -222,10 +222,21 @@ class V2Mapping:
 
     @staticmethod
     def get_input_values(in_list, input_path, dict_tosca):
+        """
+        :param in_list: List of { "get_input": "VAR_NAME" }, also might be a value list
+        :return: A list of the values of the inputs
+        """
         tosca_inputs = get_path_value(input_path, dict_tosca, must_exist=False)
+        res = []
         if tosca_inputs:
-            return [{item["get_input"]: V2Mapping.get_input_value(item, tosca_inputs=tosca_inputs)} for item in in_list]
-        return []
+            for item in in_list:
+                if V2Mapping.is_tosca_input(item):
+                    cur_item = {item["get_input"]:
+                                V2Mapping.get_input_value(item, tosca_inputs=tosca_inputs)}
+                else:
+                    cur_item = item
+                res.append(cur_item)
+        return res
 
     @staticmethod
     def get_input_value(item, input_path=None, dict_tosca=None, tosca_inputs=None):

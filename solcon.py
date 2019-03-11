@@ -88,7 +88,11 @@ class SolCon:
         self.tosca_vnf, self.tosca_lines = self.read_tosca_yaml(args.file)
 
         # Determine what provider to use
-        self.provider = self.find_provider(args.provider, self.tosca_lines, self.supported_providers)
+        self.provider = self.find_provider(args.provider, self.tosca_lines,
+                                           self.supported_providers)
+        if self.provider is None:
+            raise ValueError("The TOSCA provider could not be automatically found, pass it in"
+                             "manually.")
         self.provider = self.provider.lower()
 
         # Initialize the proper converter object for the given provider
