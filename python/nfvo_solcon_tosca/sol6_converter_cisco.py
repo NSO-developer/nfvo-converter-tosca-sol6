@@ -1,15 +1,13 @@
-import re
 from sol6_keys_cisco import *
 from sol6_converter import Sol6Converter
 from sol6_keys import *
 from dict_utils import *
-import copy
 
 
 class SOL6ConverterCisco(Sol6Converter):
 
-    def __init__(self, tosca_vnf, parsed_dict, variables=None, log=None):
-        super().__init__(tosca_vnf, parsed_dict, variables, log)
+    def __init__(self, tosca_vnf, parsed_dict, variables=None):
+        super().__init__(tosca_vnf, parsed_dict, variables)
 
         # Initialize the flag variables you use here, even though they'll always be defined
         # by set_flags_false, it's good practice
@@ -23,10 +21,10 @@ class SOL6ConverterCisco(Sol6Converter):
         Convert the tosca_vnf to sol6 VNFD
         Currently only handles converting a single VNF to VNFD
         """
-        self.log.info("Starting Cisco TOSCA -> SOL6 (v{}) converter.".format(self.SUPPORTED_SOL6_VERSION))
+        log.info("Starting Cisco TOSCA -> SOL6 (v{}) converter.".format(self.SUPPORTED_SOL6_VERSION))
 
         # The very first thing we want to do is set up the path variables
-        self.log.debug("Setting path variables: {}".format(self.variables))
+        log.debug("Setting path variables: {}".format(self.variables))
         formatted_vars = PathMaping.format_paths(self.variables)
 
         TOSCA.set_variables(self.variables["tosca"], TOSCA, variables=formatted_vars,
@@ -34,7 +32,7 @@ class SOL6ConverterCisco(Sol6Converter):
 
         self.vnfd = {}
 
-        keys = V2Map(self.tosca_vnf, self.vnfd, log=self.log, variables=self.variables)
+        keys = V2Map(self.tosca_vnf, self.vnfd, variables=self.variables)
         if keys.override_deltas:
             self.override_run_deltas = not keys.run_deltas
         else:
@@ -61,6 +59,8 @@ class SOL6ConverterCisco(Sol6Converter):
             tosca_use_value = self.tosca_use_value
             f_tosca_path = MapElem.format_path(elem, tosca_path, use_value=tosca_use_value)
             f_sol6_path = MapElem.format_path(elem, sol6_path, use_value=True)
+            log.debug("Formatted paths:\n\ttosca: {} --> sol6: {}"
+                      .format(f_tosca_path, f_sol6_path))
 
             # Skip this element if it requires deltas to be valid
             # This has to be outside the flag method
@@ -152,6 +152,6 @@ class SOL6ConverterCisco(Sol6Converter):
 
         # Determine if there are any duplicates
         if len(all_deltas) != len(set(all_deltas)):
-            self.log.warning("step_deltas were detected that have the same name, "
+            log.warning("step_deltas were detected that have the same name, "
                              "this is not suppported and thus deltas will not be processed.")
             self.run_deltas = False

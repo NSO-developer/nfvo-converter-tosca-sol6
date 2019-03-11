@@ -74,7 +74,7 @@ class V2Map(V2MapBase):
     # Marks this as requiring a value, and if there isn't one, make it 'root'
     FLAG_TYPE_ROOT_DEF              = "MUSTBESOMETHINGORROOT"
 
-    def __init__(self, dict_tosca, dict_sol6, variables=None, log=None):
+    def __init__(self, dict_tosca, dict_sol6, variables=None):
         super().__init__(dict_tosca, dict_sol6, c_log=log, variables=variables)
 
         # Make the lines shorter

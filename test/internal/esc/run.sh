@@ -12,6 +12,6 @@ example_root=$root/examples/esc
 for filename in $example_root/*.yaml; do
     file=$(basename $filename)
     echo Run $file
-    python3 $tosca -f $filename -o "$output_dir/${file%.yaml}.json" -c $config_tosca -s $config_sol6 -r cisco
+    python3 $tosca -f $filename -o "$output_dir/${file%.yaml}.json" -c $config_tosca -s $config_sol6 -r cisco --log-level INFO
 done
 
