@@ -122,6 +122,12 @@ class SolCon:
         json_output = json.dumps(cnfv, indent=2)
 
         if self.args.output:
+            if not os.path.exists(self.args.output):
+                dirs = self.args.output
+                # Get the path except the last
+                dirs = "/".join(dirs.split("/")[0:-1])
+                os.makedirs(dirs, exist_ok=True)
+
             with open(self.args.output, 'w') as f:
                 f.writelines(json_output)
 
@@ -312,8 +318,11 @@ class SolCon:
 
 def setup_logger(log_level=logging.INFO):
     log_format = "%(levelname)s - %(message)s"
-    log_filename = "logs/solcon.log"
+    log_folder = "logs"
+    log_filename = log_folder + "/solcon.log"
     # Ensure log folder exists
+    if not os.path.exists(log_filename):
+        os.mkdir(log_folder)
 
     logging.basicConfig(level=log_level, filename=log_filename, format=log_format)
     # Duplicate the output to the console as well as to a file
