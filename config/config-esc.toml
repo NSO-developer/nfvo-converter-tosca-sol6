@@ -8,34 +8,34 @@ version = "0.1.0"
 # All of the identifiers must be the same for all instances of that object,
 # multiple IDs for a single type are not supported
 [provider_identifiers.cisco]
-    vdu = ["type", "cisco.nodes.nfv.Vdu.Compute"]
-    int_cpd = ["type", "cisco.nodes.nfv.VduCp"]
-    int_cpd_mgmt = ["type", "cisco.nodes.nfv.VduCp"]
-    instantiation_level = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
-    scaling_aspects = ["type", "tosca.policies.nfv.ScalingAspects"]
-    virtual_storage = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage"]
+    vdu                     = ["type", "cisco.nodes.nfv.Vdu.Compute"]
+    int_cpd                 = ["type", "cisco.nodes.nfv.VduCp"]
+    int_cpd_mgmt            = ["type", "cisco.nodes.nfv.VduCp"]
+    instantiation_level     = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
+    scaling_aspects         = ["type", "tosca.policies.nfv.ScalingAspects"]
+    virtual_storage         = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage"]
 
 # Note: If there is a variable with "path_VAL", that means it will not be parsed for the path
 # heirarchy, but will instead just be set with the value
 # The structure of the TOSCA file, in paths
 [tosca]
-    topology_template = "topology_template"
-    node_templates = ["topology_template", "node_templates"]
-    policies = ["topology_template", "policies"]
-    inputs = ["topology_template", "inputs"]
-    desc = "description"
-    input_key = "get_input"
+    topology_template       = "topology_template"
+    node_templates          = ["topology_template", "node_templates"]
+    policies                = ["topology_template", "policies"]
+    inputs                  = ["topology_template", "inputs"]
+    desc                    = "description"
+    input_key               = "get_input"
 
     # ** VNF Metadata **
-    vnf      = ["node_templates", "vnf"]
-    vnf_prop = ["vnf", "properties"]
-    vnf_desc_id = ["vnf_prop", "descriptor_id"]
-    vnf_desc_ver = ["vnf_prop", "descriptor_version"]
-    vnf_provider = ["vnf_prop", "provider"]
-    vnf_product_name = ["vnf_prop", "product_name"]
-    vnf_software_ver = ["vnf_prop", "software_version"]
-    vnf_product_info_name = ["vnf_prop", "product_info_name"]
-    vnf_vnfm_info = ["vnf_prop", "vnfm_info"]
+    vnf                     = ["node_templates", "vnf"]
+    vnf_prop                = ["vnf", "properties"]
+    vnf_desc_id             = ["vnf_prop", "descriptor_id"]
+    vnf_desc_ver            = ["vnf_prop", "descriptor_version"]
+    vnf_provider            = ["vnf_prop", "provider"]
+    vnf_product_name        = ["vnf_prop", "product_name"]
+    vnf_software_ver        = ["vnf_prop", "software_version"]
+    vnf_product_info_name   = ["vnf_prop", "product_info_name"]
+    vnf_vnfm_info           = ["vnf_prop", "vnfm_info"]
 
     # ** VDU **
     vdu = ["node_templates", "{}"]

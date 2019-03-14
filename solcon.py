@@ -29,7 +29,7 @@ class SolCon:
         self.provider = None
         self.supported_providers = None
 
-        log.debug("Starting converter...")
+        print("Starting SolCon (v{})...".format(__version__))
 
         self.desc = "NFVO SOL6 Converter (SolCon): Convert a SOL001 (TOSCA) YAML to SOL006 JSON"
 
