@@ -4,14 +4,13 @@ export PYTHONPATH=$root/python/nfvo_solcon_tosca
 
 # Run all files in $example_root
 tosca=$root/solcon.py
-output_dir=/Users/aasteele/Downloads/vnfpackages/output
+output_dir=$root/outputs/nfvo-repo
 config_tosca=$root/config/config-esc.toml
 config_sol6=$root/config/config-sol6.toml
-example_root=/Users/aasteele/Downloads/vnfpackages
+example_root=$root/examples/nfvo-repo
 
 for filename in $example_root/*.yaml; do
     file=$(basename $filename)
     echo Run $file
-    python3 $tosca -f $filename -o "$output_dir/${file%.yaml}.json" -c $config_tosca -s $config_sol6 -r cisco
+    python3 $tosca -f $filename -o "$output_dir/${file%.yaml}.json" -c $config_tosca -s $config_sol6 -r cisco --log-level INFO
 done
-
