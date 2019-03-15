@@ -37,6 +37,7 @@ class Sol6Converter:
         self.format_as_ip       = False
         self.format_as_disk     = False
         self.format_as_container = False
+        self.format_invalid_none = False
         self.fail_silent        = False
         self.req_parent         = False
         self.first_list_output  = False
@@ -156,11 +157,14 @@ class Sol6Converter:
         value = self._only_number(self.only_number, value, is_float=self.only_number_float)
         value = self._append_to_list(self.append_list, f_sol6_path, value)
         value = self._format_as_valid(self.format_as_ip, f_sol6_path, value,
-                                      self.variables["sol6"]["VALID_PROTOCOLS_VAL"])
+                                      self.variables["sol6"]["VALID_PROTOCOLS_VAL"],
+                                      none_found=self.format_invalid_none)
         value = self._format_as_valid(self.format_as_disk, f_sol6_path, value,
-                                      self.variables["sol6"]["VALID_DISK_FORMATS_VAL"])
+                                      self.variables["sol6"]["VALID_DISK_FORMATS_VAL"],
+                                      none_found=self.format_invalid_none)
         value = self._format_as_valid(self.format_as_container, f_sol6_path, value,
-                                      self.variables["sol6"]["VALID_CONTAINER_FORMATS_VAL"])
+                                      self.variables["sol6"]["VALID_CONTAINER_FORMATS_VAL"],
+                                      none_found=self.format_invalid_none)
         value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
         value = self._check_for_null(value)
 
@@ -183,6 +187,7 @@ class Sol6Converter:
         self.format_as_disk     = False
         self.fail_silent        = False
         self.req_parent         = False
+        self.format_invalid_none = False
         self.unit_gb            = False
         self.unit_fractional    = False
 
@@ -219,6 +224,8 @@ class Sol6Converter:
                 self.format_as_disk = True
             if flag == keys.FLAG_FORMAT_CONT_FMT:
                 self.format_as_container = True
+            if flag == keys.FLAG_FORMAT_INVALID_NONE:
+                self.format_invalid_none = True
             if flag == keys.FLAG_UNIT_GB:
                 self.unit_gb = True
             if flag == keys.FLAG_UNIT_FRACTIONAL:
@@ -258,10 +265,11 @@ class Sol6Converter:
         return value[0]
 
     @staticmethod
-    def _format_as_valid(option, path, value, valid_formats):
+    def _format_as_valid(option, path, value, valid_formats, none_found=False):
         """
         Take the value, and a list of valid options, see if the value is any of the valid ones.
-        Return the outpust as a list (for some reason)
+        Return the output as a list (for some reason)
+        :optional none_found: Return None if a valid match is not found
         """
         if not option:
             return value
@@ -269,19 +277,21 @@ class Sol6Converter:
         if not isinstance(value, list):
             value = [value]
         for i, item in enumerate(value):
-            found, value[i] = Sol6Converter._fmt_val(item, valid_formats)
+            found, value[i] = Sol6Converter._fmt_val(item, valid_formats, none_found)
             if not found:
                 log.error("Value '{}' not found in valid formats: {}".format(item, valid_formats))
         # Any value not matching will be returned with a (INVALID) at the end
         return value
 
     @staticmethod
-    def _fmt_val(val, valid_opts):
+    def _fmt_val(val, valid_opts, return_none):
         """Format the value with the list, called from _format_as_valid"""
         for opt in valid_opts:
             # We found a valid mapping, so set the value to the actual formatted value
             if val.lower() == opt.lower():
                 return True, opt
+        if return_none:
+            return False, None
         return False, val + " (INVALID)"
 
     @staticmethod
@@ -344,4 +354,3 @@ def is_hashable(obj):
     except TypeError:
         return False
     return True
-
