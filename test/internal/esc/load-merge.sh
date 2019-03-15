@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+cd $(dirname $0)
 root=../../..
 export PYTHONPATH=$root/python/nfvo_solcon_tosca
 
