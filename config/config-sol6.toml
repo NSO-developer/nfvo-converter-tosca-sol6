@@ -1,3 +1,5 @@
+version = "0.2.0"
+
 # Sol6 Path configurations
 [sol6]
     # **********
@@ -20,7 +22,7 @@
     # ********************************
     # ** Virtual Compute Descriptor **
     # ********************************
-    vnfd_virt_compute_desc      = ["vnfd", "virtual-compute-descriptor.{}"]
+    vnfd_virt_compute_desc      = ["vnfd", "virtual-compute-desc.{}"]
     vnfd_vcd_id                 = ["vnfd_virt_compute_desc", "id"]
     vnfd_vcd_flavor_name        = ["vnfd_virt_compute_desc", "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions:flavor-name-variable"]
     vnfd_virtual_cpu            = ["vnfd_virt_compute_desc", "virtual-cpu"]
@@ -34,7 +36,7 @@
     # ********************************
     # ** Virtual Storage Descriptor **
     # ********************************
-    vnfd_virt_storage_desc      = ["vnfd", "virtual-storage-descriptor.{}"]
+    vnfd_virt_storage_desc      = ["vnfd", "virtual-storage-desc.{}"]
     vnfd_virt_storage_id        = ["vnfd_virt_storage_desc", "id"]
     vnfd_virt_storage_type      = ["vnfd_virt_storage_desc", "type-of-storage"]
     VIRT_STORAGE_DEFAULT_VAL    = "root"
