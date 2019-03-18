@@ -152,7 +152,8 @@ class V2Map(V2MapBase):
         for k, v in vim_flavors_rev.items():
             for m in flavor_map:
                 if m.name == v:
-                    vim_flavors_map.append(MapElem(k, m.cur_map))
+                    # Add parent here so the virtual compute can access the VDU to put data in
+                    vim_flavors_map.append(MapElem(k, m.cur_map, m.parent_map))
 
         # *** End VDU Flavors ***
 
@@ -362,6 +363,8 @@ class V2Map(V2MapBase):
         add_map(((tv("vdu_boot"), self.FLAG_LIST_FIRST),        [sv("vdu_boot_value"), boot_map]))
 
         add_map(((tv("vdu_boot"), self.FLAG_LIST_FIRST),        [sv("vdu_vs_desc"), boot_map]))
+        add_map((("{}", self.FLAG_KEY_SET_VALUE),
+                 [sv("vdu_vc_desc"), vim_flavors_map]))
         # -- End VDU --
 
         # -- Virtual Compute Descriptor --
