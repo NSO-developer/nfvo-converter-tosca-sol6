@@ -298,7 +298,7 @@ class MapElem:
         return MapElem(self.name, self.cur_map, par)
 
     @staticmethod
-    def ensure_map_values(mapping):
+    def ensure_map_values(mapping, start_val=None):
         """
         Given a mapping, ensure that the values are properly incrementing, if not fix them.
         Only applies to top-level mapping, does not check parent maps
@@ -306,8 +306,13 @@ class MapElem:
         # If it's valid, don't do anything
         if MapElem.validate_map_values(mapping):
             return
+
         # Take the first value and increment from there
-        cur_val = mapping[0].cur_map
+        if start_val is None:
+            cur_val = mapping[0].cur_map
+        else:
+            cur_val = start_val
+
         for c_map in mapping:
             c_map.cur_map = cur_val
             cur_val += 1

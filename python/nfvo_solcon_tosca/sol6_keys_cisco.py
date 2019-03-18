@@ -169,6 +169,8 @@ class V2Map(V2MapBase):
         int_cps = []
         mgmt_cps_map = []
         orch_cps_map = []
+        icps_create_map = []
+        icp_create_layer_prot = []
         ext_nics = get_path_value(tv("substitution_req"), self.dict_tosca, must_exist=False)
         if ext_nics:
             # Extract the names from the list
@@ -177,6 +179,25 @@ class V2Map(V2MapBase):
             ext_cps = [m for m in cps_map if any(nic == m.name for nic in ext_nics)]
             # Union: ext_nics and cps_map
             int_cps = [m for m in cps_map if not any(nic == m.name for nic in ext_nics)]
+
+            # For the non-external connection points, we need to create a virtual link for them
+            # They already have names in the YAML, under virtual-link, so create VLs with
+            # those names
+            icps_to_create = []
+            for icp in int_cps:
+                cur_path = MapElem.format_path(icp, tv("int_cpd_virt_link"), use_value=False)
+                virt_link = get_path_value(cur_path, self.dict_tosca, must_exist=False)
+
+                cur_path = MapElem.format_path(icp, tv("int_cpd_layer_prot"), use_value=False)
+                layer_protocol = get_path_value(cur_path, self.dict_tosca, must_exist=False)
+
+                if virt_link:
+                    icps_to_create.append(virt_link)
+                if layer_protocol:
+                    icp_create_layer_prot.append(icp.copy())
+
+            icps_create_map = self.generate_map_from_list(icps_to_create)
+            MapElem.ensure_map_values(icp_create_layer_prot, start_val=0)
 
             # Get the NICs that are assigned to management
             # This does not take into account if they are supposed to be mapped to an ECP
@@ -288,12 +309,17 @@ class V2Map(V2MapBase):
         # -- End Metadata --
 
         # -- Set Values --
-        # This happens first because IDs need to be the first element, for now
-        # Setting specific values at specific indexes
-        # These are currently only the two virtual links and external links
+        # Create the internal virtual links specified by the YAML
+        add_map((("{}", self.FLAG_KEY_SET_VALUE),
+                 [sv("virt_link_desc_id"), icps_create_map]))
+        add_map(((tv("int_cpd_layer_prot"), self.FLAG_FORMAT_IP),
+                 [sv("virt_link_desc_protocol"), icp_create_layer_prot]))
+
+        # There might or might not be a mgmt and/or orchestration external connection point
+        # Create the virtual links and external connection points
         create_ext_mgmt = bool(mgmt_cps_map)
         create_ext_orch = bool(orch_cps_map)
-        cur_ecp = 0
+        cur_ecp = len(icps_create_map)
         if create_ext_mgmt:
             add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_VAL"),
                                     sv("virt_link_desc_id"), cur_ecp)))
@@ -318,7 +344,6 @@ class V2Map(V2MapBase):
                                     sv("ext_cpd_protocol"), cur_ecp)))
             add_map((self.set_value(sv("KEY_VIRT_LINK_ORCH_VAL"),
                                     sv("ext_cpd_virt_link"), cur_ecp)))
-
         # -- End Set Values --
 
         # -- VDU --
