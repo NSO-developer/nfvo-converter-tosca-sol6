@@ -119,6 +119,8 @@
     int_cpd_virt_link_desc      = ["int_cpd", "int-virtual-link-desc"]
     int_cpd_role                = ["int_cpd", "role"]
     int_cpd_interface_id        = ["int_cpd", "tailf-etsi-rel3-nfvo-vnfm:interface-id"]
+    int_cpd_management          = ["int_cpd", "tailf-etsi-rel3-nfvo-vnfm:management"]
+    int_cpd_management_VAL      = "[null]"
 
     KEY_VIRT_LINK_MGMT_VAL      = "VIM_NETWORK_MANAGEMENT-VL"
     KEY_VIRT_LINK_MGMT_PROT_VAL = "IPv4"

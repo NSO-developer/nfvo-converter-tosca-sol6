@@ -158,6 +158,7 @@ class Sol6Converter:
         value = self._format_as_valid(self.format_as_container, f_sol6_path, value,
                                       self.variables["sol6"]["VALID_CONTAINER_FORMATS_VAL"])
         value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
+        value = self._check_for_null(value)
         return value
 
     def set_flags_false(self):
@@ -271,6 +272,12 @@ class Sol6Converter:
             if val.lower() == opt.lower():
                 return True, opt
         return False, val + " (INVALID)"
+
+    @staticmethod
+    def _check_for_null(value):
+        if value == "[null]":
+            return [None]
+        return value
     # ---------------------
 
     @staticmethod

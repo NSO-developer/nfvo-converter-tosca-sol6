@@ -236,7 +236,6 @@ class V2Map(V2MapBase):
         # information needs to be assigned to
         vdu_inst_level_map = self.generate_map(None, tv("inst_level_identifier"))
 
-
         # Get the list of targets from the mappings
         target_list = []
         for elem in vdu_inst_level_map:
@@ -390,8 +389,13 @@ class V2Map(V2MapBase):
                  [sv("int_cpd_layer_prot"), cps_map]))
         add_map(((sv("KEY_VIRT_LINK_MGMT_VAL"), self.FLAG_KEY_SET_VALUE),
                  [sv("int_cpd_virt_link_desc"), mgmt_cps_map]))
+        add_map(((sv("int_cpd_management_VAL"), self.FLAG_KEY_SET_VALUE),
+                 [sv("int_cpd_management"), mgmt_cps_map]))
+
         add_map(((sv("KEY_VIRT_LINK_ORCH_VAL"), self.FLAG_KEY_SET_VALUE),
                  [sv("int_cpd_virt_link_desc"), orch_cps_map]))
+
+        print(mgmt_cps_map)
         # -- End Internal Connection Points
 
         # -- Virtual Storage Descriptor --
