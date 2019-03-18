@@ -21,6 +21,8 @@ version = "0.1.0"
 [tosca]
     topology_template       = "topology_template"
     node_templates          = ["topology_template", "node_templates"]
+    substitution_map        = ["topology_template", "substitution_mappings"]
+    substitution_req        = ["substitution_map", "requirements"]
     policies                = ["topology_template", "policies"]
     inputs                  = ["topology_template", "inputs"]
     desc                    = "description"
