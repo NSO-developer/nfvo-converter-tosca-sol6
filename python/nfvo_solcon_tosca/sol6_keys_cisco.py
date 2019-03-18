@@ -236,6 +236,7 @@ class V2Map(V2MapBase):
         # information needs to be assigned to
         vdu_inst_level_map = self.generate_map(None, tv("inst_level_identifier"))
 
+
         # Get the list of targets from the mappings
         target_list = []
         for elem in vdu_inst_level_map:
@@ -437,6 +438,9 @@ class V2Map(V2MapBase):
                  [sv("df_inst_level_vdu_vdu"), target_map]))
         add_map(((tv("inst_level_num_instances"), self.FLAG_BLANK),
                  [sv("df_inst_level_vdu_num"), vdu_inst_level_map]))
+
+        # Set the default instantiation level
+        add_map((self.set_value(def_inst_id, sv("df_inst_level_default"), 0)))
 
         # -- Scaling Aspect --
         do_scaling = False
