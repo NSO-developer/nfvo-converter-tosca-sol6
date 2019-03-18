@@ -304,7 +304,7 @@ class MapElem:
         Only applies to top-level mapping, does not check parent maps
         """
         # If it's valid, don't do anything
-        if MapElem.validate_map_values(mapping):
+        if MapElem.validate_map_values(mapping) and start_val is None:
             return
 
         # Take the first value and increment from there
