@@ -321,6 +321,7 @@ class V2Map(V2MapBase):
         create_ext_mgmt = bool(mgmt_cps_map)
         create_ext_orch = bool(orch_cps_map)
         cur_ecp = len(icps_create_map)
+
         if create_ext_mgmt:
             add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_VAL"),
                                     sv("virt_link_desc_id"), cur_ecp)))
@@ -375,7 +376,7 @@ class V2Map(V2MapBase):
                  [sv("vnfd_vcd_flavor_name"), flavor_map]))
         add_map(((tv("vdu_virt_cpu_num"), self.FLAG_ONLY_NUMBERS),
                  [sv("vnfd_vcd_cpu_num"), flavor_map]))
-        add_map(((tv("vdu_virt_mem_size"), self.FLAG_ONLY_NUMBERS),
+        add_map(((tv("vdu_virt_mem_size"), (self.FLAG_UNIT_GB, self.FLAG_UNIT_FRACTIONAL)),
                  [sv("vnfd_vcd_mem_size"), flavor_map]))
         # -- End Virtual Compute Descriptor --
 
@@ -395,13 +396,12 @@ class V2Map(V2MapBase):
         add_map(((sv("KEY_VIRT_LINK_ORCH_VAL"), self.FLAG_KEY_SET_VALUE),
                  [sv("int_cpd_virt_link_desc"), orch_cps_map]))
 
-        print(mgmt_cps_map)
         # -- End Internal Connection Points
 
         # -- Virtual Storage Descriptor --
         add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),
                  [sv("vnfd_virt_storage_id"), sw_map]))
-        add_map(((tv("virt_size"), self.FLAG_ONLY_NUMBERS),
+        add_map(((tv("virt_size"), self.FLAG_UNIT_GB),
                  [sv("vnfd_virt_storage_size"), sw_map]))
         add_map(((tv("virt_type"), self.FLAG_TYPE_ROOT_DEF),
                  [sv("vnfd_virt_storage_type"), sw_map]))
@@ -410,19 +410,19 @@ class V2Map(V2MapBase):
         # -- End Virtual Storage Descriptor --
 
         # -- Software Image --
-        add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),        [sv("sw_id"), sw_map]))
-        add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),        [sv("sw_name"), sw_map]))
+        add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),   [sv("sw_id"), sw_map]))
+        add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),   [sv("sw_name"), sw_map]))
         add_map(((tv("sw_name"), self.FLAG_VAR),
                  [sv("sw_image_name_var"), sw_map]))
-        add_map(((tv("sw_version"), self.FLAG_BLANK),                  [sv("sw_version"), sw_map]))
-        add_map(((tv("sw_checksum"), self.FLAG_BLANK),                 [sv("sw_checksum"), sw_map]))
+        add_map(((tv("sw_version"), self.FLAG_BLANK),             [sv("sw_version"), sw_map]))
+        add_map(((tv("sw_checksum"), self.FLAG_BLANK),            [sv("sw_checksum"), sw_map]))
         add_map(((tv("sw_container_fmt"), self.FLAG_BLANK),
                  [sv("sw_container_format"), sw_map]))
         add_map(((tv("sw_disk_fmt"), self.FLAG_BLANK),
                  [sv("sw_disk_format"), sw_map]))
-        add_map(((tv("sw_min_disk"), self.FLAG_ONLY_NUMBERS),          [sv("sw_min_disk"), sw_map]))
-        add_map(((tv("sw_size"), self.FLAG_ONLY_NUMBERS),              [sv("sw_size"), sw_map]))
-        add_map(((tv("sw_image_file"), self.FLAG_BLANK),               [sv("sw_image"), sw_map]))
+        add_map(((tv("sw_min_disk"), self.FLAG_UNIT_GB),          [sv("sw_min_disk"), sw_map]))
+        add_map(((tv("sw_size"), self.FLAG_UNIT_GB),              [sv("sw_size"), sw_map]))
+        add_map(((tv("sw_image_file"), self.FLAG_BLANK),          [sv("sw_image"), sw_map]))
         # -- End Software Image --
 
         # -- Deployment Flavor --
