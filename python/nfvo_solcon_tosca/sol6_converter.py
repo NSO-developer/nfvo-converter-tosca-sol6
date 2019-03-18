@@ -42,6 +42,8 @@ class Sol6Converter:
         self.fail_silent        = False
         self.req_parent         = False
         self.first_list_output  = False
+        self.unit_gb            = False
+        self.unit_fractional    = False
 
     def convert(self, provider=None):
         """
@@ -150,6 +152,7 @@ class Sol6Converter:
         Returns the value after being formatted by the flags
         """
         value = self._key_as_value(self.key_as_value, f_tosca_path)
+        value = self._convert_units(self.unit_gb, "GB", value, is_float=self.unit_fractional)
         value = self._only_number(self.only_number, value, is_float=self.only_number_float)
         value = self._append_to_list(self.append_list, f_sol6_path, value)
         value = self._format_as_valid(self.format_as_ip, f_sol6_path, value,
@@ -162,6 +165,7 @@ class Sol6Converter:
                                       self.variables["sol6"]["VALID_CONTAINER_FORMATS_VAL"],
                                       none_found=self.format_invalid_none)
         value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
+        value = self._check_for_null(value)
         return value
 
     def set_flags_false(self):
@@ -182,6 +186,8 @@ class Sol6Converter:
         self.fail_silent        = False
         self.req_parent         = False
         self.format_invalid_none = False
+        self.unit_gb            = False
+        self.unit_fractional    = False
 
     def set_flags_loop(self, flags, keys):
         """
@@ -218,6 +224,10 @@ class Sol6Converter:
                 self.format_as_container = True
             if flag == keys.FLAG_FORMAT_INVALID_NONE:
                 self.format_invalid_none = True
+            if flag == keys.FLAG_UNIT_GB:
+                self.unit_gb = True
+            if flag == keys.FLAG_UNIT_FRACTIONAL:
+                self.unit_fractional = True
 
     # ---------------------
     # ** Specific flag methods **
@@ -281,6 +291,34 @@ class Sol6Converter:
         if return_none:
             return False, None
         return False, val + " (INVALID)"
+
+    @staticmethod
+    def _check_for_null(value):
+        if value == "[null]":
+            return [None]
+        return value
+
+    @staticmethod
+    def _convert_units(opt, unit, value, decimal_places=1, is_float=False):
+        """
+        Attempt to figure out what the unit is, and convert to the given one
+        """
+        if not opt:
+            return value
+
+        valid_units = ["GB"]  # Make sure these are in all caps
+        if unit.upper() not in valid_units:
+            raise KeyError("Unknown unit, valid units: {}".format(valid_units))
+
+        # If the result can't be fractional, don't round to decimal values
+        if not is_float:
+            decimal_places = 0
+
+        value_num = Sol6Converter._only_number(True, value, is_float=is_float)
+        if "mb" in value.lower():
+            value_num = round(value_num / 1024, decimal_places)
+
+        return value_num
     # ---------------------
 
     @staticmethod

@@ -292,6 +292,8 @@ def remove_empty_from_dict(d):
         return dict((k, remove_empty_from_dict(v)) for k, v in d.items() if _handle_zero(v)
                     and _handle_zero(remove_empty_from_dict(v)))
     elif type(d) is list:
+        if d == [None]:  # Handle this stupid case, where we want to actually output this
+            return d
         return [remove_empty_from_dict(v) for v in d if _handle_zero(v) and
                 _handle_zero(remove_empty_from_dict(v))]
     else:

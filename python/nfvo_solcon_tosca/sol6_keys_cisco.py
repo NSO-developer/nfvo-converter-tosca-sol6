@@ -152,29 +152,70 @@ class V2Map(V2MapBase):
         for k, v in vim_flavors_rev.items():
             for m in flavor_map:
                 if m.name == v:
-                    vim_flavors_map.append(MapElem(k, m.cur_map))
+                    # Add parent here so the virtual compute can access the VDU to put data in
+                    vim_flavors_map.append(MapElem(k, m.cur_map, m.parent_map))
 
         # *** End VDU Flavors ***
 
         # *** Connection Point mappings ***
         # Map internal connection points to their VDUs
+        # Get all int connection points
         cps_map = self.generate_map(None, tv("int_cpd_identifier"),
                                     map_function=self.int_cp_mapping,
                                     map_args={"vdu_map": vdu_map})
-        # Filter internal connection points that are assigned to management
-        mgmt_cps_map = self.generate_map(None, tv("int_cpd_mgmt_identifier"),
-                                         field_filter=TOSCA.int_cp_mgmt,
-                                         map_function=self.int_cp_mapping,
-                                         map_args={"vdu_map": vdu_map})
 
-        # These are not going to be correctly mapped, so get the mapping from cps_map where
-        # the names are the same
-        # Every int-cpd will have a virtual-link-desc field, just if it's MGMT or ORCH is the
-        # difference
-        mgmt_cps_map = [x for x in cps_map if any(x.name == i.name for i in mgmt_cps_map)]
-        # Get the opposite set for the orch cps. Note: this can be sped up by putting both of these
-        # in a single loop
-        orch_cps_map = [x for x in cps_map if not any(x.name == i.name for i in mgmt_cps_map)]
+        # Each 'virtual_link' entry is a connection to an external connection point
+        # For now we are going to assume that the only relevant data is the nic name
+        # TODO: Fix this, because I doubt it's correct
+        int_cps = []
+        mgmt_cps_map = []
+        orch_cps_map = []
+        icps_create_map = []
+        icp_create_layer_prot = []
+        ext_nics = get_path_value(tv("substitution_req"), self.dict_tosca, must_exist=False)
+        if ext_nics:
+            # Extract the names from the list
+            ext_nics = [e[get_dict_key(e)][0] for e in ext_nics]
+            # Intersection: ext_nics and cps_map
+            ext_cps = [m for m in cps_map if any(nic == m.name for nic in ext_nics)]
+            # Union: ext_nics and cps_map
+            int_cps = [m for m in cps_map if not any(nic == m.name for nic in ext_nics)]
+
+            # For the non-external connection points, we need to create a virtual link for them
+            # They already have names in the YAML, under virtual-link, so create VLs with
+            # those names
+            icps_to_create = []
+            for icp in int_cps:
+                cur_path = MapElem.format_path(icp, tv("int_cpd_virt_link"), use_value=False)
+                virt_link = get_path_value(cur_path, self.dict_tosca, must_exist=False)
+
+                cur_path = MapElem.format_path(icp, tv("int_cpd_layer_prot"), use_value=False)
+                layer_protocol = get_path_value(cur_path, self.dict_tosca, must_exist=False)
+
+                if virt_link:
+                    icps_to_create.append(virt_link)
+                if layer_protocol:
+                    icp_create_layer_prot.append(icp.copy())
+
+            icps_create_map = self.generate_map_from_list(icps_to_create)
+            MapElem.ensure_map_values(icp_create_layer_prot, start_val=0)
+
+            # Get the NICs that are assigned to management
+            # This does not take into account if they are supposed to be mapped to an ECP
+            mgmt_cps_map = self.generate_map(None, tv("int_cpd_mgmt_identifier"),
+                                             field_filter=TOSCA.int_cp_mgmt,
+                                             map_function=self.int_cp_mapping,
+                                             map_args={"vdu_map": vdu_map})
+
+            # Intersection: ext_cps and mgmt_cps_map
+            # This is the NICs that are management and should have an
+            # external connection point created
+            mgmt_cps_map = [m for m in ext_cps if any(x.name == m.name for x in mgmt_cps_map)]
+            # Union: ext_cps and mgmt_cps_map
+            # Get the non-management NICs that have external connection points
+            orch_cps_map = [m for m in ext_cps if not any(x.name == m.name for x in mgmt_cps_map)]
+            # Note: this can be sped up by putting both of these
+            # in a single loop
 
         # *** End Connection Point mapping ***
 
@@ -269,22 +310,42 @@ class V2Map(V2MapBase):
         # -- End Metadata --
 
         # -- Set Values --
-        # This happens first because IDs need to be the first element, for now
-        # Setting specific values at specific indexes
-        # These are currently only the two virtual links and external links
-        add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_VAL"), sv("virt_link_desc_id"), 0)))
-        add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_PROT_VAL"),
-                                sv("virt_link_desc_protocol"), 0)))
-        add_map((self.set_value(sv("KEY_VIRT_LINK_ORCH_VAL"), sv("virt_link_desc_id"), 1)))
-        add_map((self.set_value(sv("KEY_VIRT_LINK_ORCH_PROT_VAL"),
-                                sv("virt_link_desc_protocol"), 1)))
+        # Create the internal virtual links specified by the YAML
+        add_map((("{}", self.FLAG_KEY_SET_VALUE),
+                 [sv("virt_link_desc_id"), icps_create_map]))
+        add_map(((tv("int_cpd_layer_prot"), self.FLAG_FORMAT_IP),
+                 [sv("virt_link_desc_protocol"), icp_create_layer_prot]))
 
-        add_map((self.set_value(sv("KEY_EXT_CP_MGMT_VAL"), sv("ext_cpd_id"), 0)))
-        add_map((self.set_value(sv("KEY_EXT_CP_MGMT_PROT_VAL"), sv("ext_cpd_protocol"), 0)))
-        add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_VAL"), sv("ext_cpd_virt_link"), 0)))
-        add_map((self.set_value(sv("KEY_EXT_CP_ORCH_VAL"), sv("ext_cpd_id"), 1)))
-        add_map((self.set_value(sv("KEY_EXT_CP_ORCH_PROT_VAL"), sv("ext_cpd_protocol"), 1)))
-        add_map((self.set_value(sv("KEY_VIRT_LINK_ORCH_VAL"), sv("ext_cpd_virt_link"), 1)))
+        # There might or might not be a mgmt and/or orchestration external connection point
+        # Create the virtual links and external connection points
+        create_ext_mgmt = bool(mgmt_cps_map)
+        create_ext_orch = bool(orch_cps_map)
+        cur_ecp = len(icps_create_map)
+
+        if create_ext_mgmt:
+            add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_VAL"),
+                                    sv("virt_link_desc_id"), cur_ecp)))
+            add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_PROT_VAL"),
+                                    sv("virt_link_desc_protocol"), cur_ecp)))
+
+            add_map((self.set_value(sv("KEY_EXT_CP_MGMT_VAL"), sv("ext_cpd_id"), cur_ecp)))
+            add_map((self.set_value(sv("KEY_EXT_CP_MGMT_PROT_VAL"),
+                                    sv("ext_cpd_protocol"), cur_ecp)))
+            add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_VAL"),
+                                    sv("ext_cpd_virt_link"), cur_ecp)))
+            cur_ecp += 1
+
+        if create_ext_orch:
+            add_map((self.set_value(sv("KEY_VIRT_LINK_ORCH_VAL"),
+                                    sv("virt_link_desc_id"), cur_ecp)))
+            add_map((self.set_value(sv("KEY_VIRT_LINK_ORCH_PROT_VAL"),
+                                    sv("virt_link_desc_protocol"), cur_ecp)))
+
+            add_map((self.set_value(sv("KEY_EXT_CP_ORCH_VAL"), sv("ext_cpd_id"), cur_ecp)))
+            add_map((self.set_value(sv("KEY_EXT_CP_ORCH_PROT_VAL"),
+                                    sv("ext_cpd_protocol"), cur_ecp)))
+            add_map((self.set_value(sv("KEY_VIRT_LINK_ORCH_VAL"),
+                                    sv("ext_cpd_virt_link"), cur_ecp)))
         # -- End Set Values --
 
         # -- VDU --
@@ -303,6 +364,8 @@ class V2Map(V2MapBase):
         add_map(((tv("vdu_boot"), self.FLAG_LIST_FIRST),        [sv("vdu_boot_value"), boot_map]))
 
         add_map(((tv("vdu_boot"), self.FLAG_LIST_FIRST),        [sv("vdu_vs_desc"), boot_map]))
+        add_map((("{}", self.FLAG_KEY_SET_VALUE),
+                 [sv("vdu_vc_desc"), vim_flavors_map]))
         # -- End VDU --
 
         # -- Virtual Compute Descriptor --
@@ -313,24 +376,32 @@ class V2Map(V2MapBase):
                  [sv("vnfd_vcd_flavor_name"), flavor_map]))
         add_map(((tv("vdu_virt_cpu_num"), self.FLAG_ONLY_NUMBERS),
                  [sv("vnfd_vcd_cpu_num"), flavor_map]))
-        add_map(((tv("vdu_virt_mem_size"), self.FLAG_ONLY_NUMBERS),
+        add_map(((tv("vdu_virt_mem_size"), (self.FLAG_UNIT_GB, self.FLAG_UNIT_FRACTIONAL)),
                  [sv("vnfd_vcd_mem_size"), flavor_map]))
         # -- End Virtual Compute Descriptor --
 
         # -- Internal Connction Points --
-        add_map(((tv("int_cpd"), self.FLAG_KEY_SET_VALUE),             [sv("int_cpd_id"), cps_map]))
+        add_map(((tv("int_cpd"), self.FLAG_KEY_SET_VALUE),
+                [sv("int_cpd_id"), cps_map]))
+        add_map(((tv("int_cpd_virt_link"), self.FLAG_BLANK),
+                 [sv("int_cpd_virt_link_desc"), int_cps]))
+
         add_map(((tv("int_cpd_layer_prot"), self.FLAG_FORMAT_IP),
                  [sv("int_cpd_layer_prot"), cps_map]))
         add_map(((sv("KEY_VIRT_LINK_MGMT_VAL"), self.FLAG_KEY_SET_VALUE),
                  [sv("int_cpd_virt_link_desc"), mgmt_cps_map]))
+        add_map(((sv("int_cpd_management_VAL"), self.FLAG_KEY_SET_VALUE),
+                 [sv("int_cpd_management"), mgmt_cps_map]))
+
         add_map(((sv("KEY_VIRT_LINK_ORCH_VAL"), self.FLAG_KEY_SET_VALUE),
                  [sv("int_cpd_virt_link_desc"), orch_cps_map]))
+
         # -- End Internal Connection Points
 
         # -- Virtual Storage Descriptor --
         add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),
                  [sv("vnfd_virt_storage_id"), sw_map]))
-        add_map(((tv("virt_size"), self.FLAG_ONLY_NUMBERS),
+        add_map(((tv("virt_size"), self.FLAG_UNIT_GB),
                  [sv("vnfd_virt_storage_size"), sw_map]))
         add_map(((tv("virt_type"), self.FLAG_TYPE_ROOT_DEF),
                  [sv("vnfd_virt_storage_type"), sw_map]))
@@ -339,19 +410,19 @@ class V2Map(V2MapBase):
         # -- End Virtual Storage Descriptor --
 
         # -- Software Image --
-        add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),        [sv("sw_id"), sw_map]))
-        add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),        [sv("sw_name"), sw_map]))
+        add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),   [sv("sw_id"), sw_map]))
+        add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),   [sv("sw_name"), sw_map]))
         add_map(((tv("sw_name"), self.FLAG_VAR),
                  [sv("sw_image_name_var"), sw_map]))
-        add_map(((tv("sw_version"), self.FLAG_BLANK),                  [sv("sw_version"), sw_map]))
-        add_map(((tv("sw_checksum"), self.FLAG_BLANK),                 [sv("sw_checksum"), sw_map]))
+        add_map(((tv("sw_version"), self.FLAG_BLANK),             [sv("sw_version"), sw_map]))
+        add_map(((tv("sw_checksum"), self.FLAG_BLANK),            [sv("sw_checksum"), sw_map]))
         add_map(((tv("sw_container_fmt"), self.FLAG_BLANK),
                  [sv("sw_container_format"), sw_map]))
         add_map(((tv("sw_disk_fmt"), self.FLAG_BLANK),
                  [sv("sw_disk_format"), sw_map]))
-        add_map(((tv("sw_min_disk"), self.FLAG_ONLY_NUMBERS),          [sv("sw_min_disk"), sw_map]))
-        add_map(((tv("sw_size"), self.FLAG_ONLY_NUMBERS),              [sv("sw_size"), sw_map]))
-        add_map(((tv("sw_image_file"), self.FLAG_BLANK),               [sv("sw_image"), sw_map]))
+        add_map(((tv("sw_min_disk"), self.FLAG_UNIT_GB),          [sv("sw_min_disk"), sw_map]))
+        add_map(((tv("sw_size"), self.FLAG_UNIT_GB),              [sv("sw_size"), sw_map]))
+        add_map(((tv("sw_image_file"), self.FLAG_BLANK),          [sv("sw_image"), sw_map]))
         # -- End Software Image --
 
         # -- Deployment Flavor --
@@ -371,6 +442,9 @@ class V2Map(V2MapBase):
                  [sv("df_inst_level_vdu_vdu"), target_map]))
         add_map(((tv("inst_level_num_instances"), self.FLAG_BLANK),
                  [sv("df_inst_level_vdu_num"), vdu_inst_level_map]))
+
+        # Set the default instantiation level
+        add_map((self.set_value(def_inst_id, sv("df_inst_level_default"), 0)))
 
         # -- Scaling Aspect --
         do_scaling = False

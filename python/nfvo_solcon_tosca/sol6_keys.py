@@ -249,6 +249,10 @@ class V2MapBase(V2Mapping):
     FLAG_FAIL_SILENT                = "FAILSIILENT"
     # Throw an error/warning if this mapping element doesn't have a parent
     FLAG_REQ_PARENT                 = "REQPARENT"
+    # Specify if the output unit is in GBs, will attempt to convert to MBs
+    # This flag implies FLAG_ONLY_NUMBERS_FLOAT
+    FLAG_UNIT_GB                    = "UNITISGB"
+    FLAG_UNIT_FRACTIONAL            = "UNITISFRACTIONAL"
 
     mapping = []
 
