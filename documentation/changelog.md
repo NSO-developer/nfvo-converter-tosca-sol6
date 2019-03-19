@@ -6,10 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project (tries to) adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Virtual compute desc to VDUs
+- Default instantiation level to df
+- Management field to internal connection points that are assigned as management
+- Basic unit conversion (MB to GB only currently)
+
 ### Fixed
 - Logging not getting logs from all modules
 - Bug where program expected all vim_flavors to be inputs
-
+- Virtual link mapping to external connection points only when specified
 
 ## [0.2.1]
 ### Added
