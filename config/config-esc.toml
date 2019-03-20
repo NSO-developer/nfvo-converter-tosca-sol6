@@ -106,3 +106,6 @@ version = "0.1.0"
     scaling_aspect_deltas = ["scaling_aspect_item", "step_deltas"]
     # Note: this is not a valid TOSCA path, it's for internal use
     scaling_aspect_deltas_num = ["scaling_aspect_item","deltas.{}.number_of_instances"]
+
+[tosca.input_values]
+    VIM_FLAVOR = "test vim flavor"

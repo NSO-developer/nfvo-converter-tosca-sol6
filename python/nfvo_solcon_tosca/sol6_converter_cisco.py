@@ -121,15 +121,16 @@ class SOL6ConverterCisco(Sol6Converter):
             return SOL6.VIRT_STORAGE_DEFAULT
         return value
 
-    @staticmethod
-    def _handle_input(option, path, value):
+    def _handle_input(self, option, path, value):
         if not option:
             return value
-        # See if this is actually an input, if can not be
+        # See if this is actually an input
         is_input = V2MapBase.is_tosca_input(value)
+
         # If this isn't actually an input, then don't assign it
         if not is_input:
             return None
+
         return V2MapBase.tosca_get_input_key(value)
 
     # ----------------------------------------------------------------------------------------------
