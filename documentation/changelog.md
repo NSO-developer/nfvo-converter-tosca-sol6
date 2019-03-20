@@ -11,6 +11,8 @@ and this project (tries to) adhere to [Semantic Versioning](https://semver.org/s
 - Default instantiation level to df
 - Management field to internal connection points that are assigned as management
 - Basic unit conversion (MB to GB only currently)
+- Specifying a vim_flavor variable value in the Tosca config file will cause the value to be read and used instead of 
+the variable name
 
 ### Fixed
 - Logging not getting logs from all modules
