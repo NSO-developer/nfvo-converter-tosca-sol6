@@ -120,7 +120,27 @@ class V2Map(V2MapBase):
         # *** VDU Flavors ***
         # vim_flavors = [VDU, {"get_input": FLAVOR_NAME}], so get the dicts
         vim_flavors = [x[1] for x in vdu_vim_flavors]
-        vim_flavors = self.get_input_values(vim_flavors, tv("inputs"), dict_tosca)
+        # Read all the relevant flavor variables from the config file
+        vim_flavors_config = [(x, V2MapBase.handle_inputs(x, variables)) for x in vim_flavors
+                              if V2MapBase.handle_inputs(x, variables)]
+        vim_flavors_read = [x[0][get_dict_key(x[0])] for x in vim_flavors_config]
+
+        # Given: [({'get_input': 'VIM_FLAVOR'}, 'test vim flavor')]
+        # We need to reformat this to the following:
+        # [{'test vim flavor': {'description': 'flavour name'}} ]
+        vim_flavors_format = []
+        for v in vim_flavors_config:
+            vim_flavors_format.append({v[1]: {'description': 'flavour name'}})
+
+        # Get all the inputs from the file
+        tosca_inputs = get_path_value(tv("inputs"), dict_tosca, must_exist=False)
+        # Only do this for the values that weren't read from the config
+        vim_flavors_filt = [x for x in vim_flavors if x[get_dict_key(x)] not in vim_flavors_read]
+        # Get the values of the inputs from the file (i.e. their names)
+        vim_flavors = self.get_input_values(vim_flavors_filt, tosca_inputs, dict_tosca)
+
+        # Concat the two lists
+        vim_flavors = vim_flavors_format + vim_flavors
 
         # Create a list of dicts: [{vdu: vim_flavors[i]}]
         # If the values are not variables, then they won't be dicts, so just put their value

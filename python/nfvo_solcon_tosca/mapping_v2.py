@@ -222,12 +222,11 @@ class V2Mapping:
         return res
 
     @staticmethod
-    def get_input_values(in_list, input_path, dict_tosca):
+    def get_input_values(in_list, tosca_inputs, dict_tosca):
         """
         :param in_list: List of { "get_input": "VAR_NAME" }, also might be a value list
         :return: A list of the values of the inputs
         """
-        tosca_inputs = get_path_value(input_path, dict_tosca, must_exist=False)
         res = []
         if tosca_inputs:
             for item in in_list:
@@ -245,6 +244,9 @@ class V2Mapping:
             tosca_inputs = get_path_value(input_path, dict_tosca)
 
         if V2Mapping.is_tosca_input(item):
+            # Check to see if there is a value from the config that can be used
+
+            # Return the value inside of the get_input key
             return tosca_inputs[item["get_input"]]
 
     @staticmethod
@@ -260,28 +262,24 @@ class V2Mapping:
             return False
 
     @staticmethod
-    def tosca_get_input(input_name, tosca_inputs, dict_tosca):
-        """
-        Attempt to locate and return the value of the given input from the tosca vnf file
-        :param tosca_inputs:
-        :param dict_tosca:
-        :param input_name: { 'get_input': 'VAR_NAME' }
-        :returns: (var_name, data) or (None, None)
-        """
-        if not V2Mapping.is_tosca_input(input_name):
-            return None, None
-
-        template_inputs = get_path_value(tosca_inputs, dict_tosca)
-        data = template_inputs[input_name["get_input"]]
-        name = input_name["get_input"]
-
-        return name, data
-
-    @staticmethod
     def get_object_keys(obj, exclude=None):
         return [attr for attr in dir(obj) if not callable(getattr(obj, attr)) and
                 not (attr.startswith("__") or attr.startswith("_") or
                      (exclude and exclude in attr))]
+
+    @staticmethod
+    def handle_inputs(value, variables):
+        """
+        Determine if the given value is an input, if so try to read it from the config file
+        """
+        if V2Mapping.is_tosca_input(value):
+            result = V2Mapping.tosca_get_input_key(value)
+            input_values = variables["tosca"]["input_values"]
+            if result in input_values:
+                value = input_values[result]
+            else:
+                return False
+        return value
 
 
 class MapElem:
