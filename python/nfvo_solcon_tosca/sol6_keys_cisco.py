@@ -95,6 +95,13 @@ class V2Map(V2MapBase):
 
         sw_map = self.generate_map(None, tv("virt_storage_identifier"),
                                    field_filter=TOSCA.virt_filter)
+        vdu_sw_map = []
+        if sw_map:
+            for vdu in vdu_map:
+                cur_vdu = vdu.copy()
+                cur_sw = sw_map[0].copy()
+                MapElem.add_parent_mapping(cur_sw, cur_vdu, fail_silent=True)
+                vdu_sw_map.append(cur_sw)
 
         # This list has the VDUs the flavors are attached to
         vdu_vim_flavors = self.get_items_from_map(tv("vdu_vim_flavor"), vdu_map, dict_tosca,
@@ -386,6 +393,8 @@ class V2Map(V2MapBase):
         add_map(((tv("vdu_boot"), self.FLAG_LIST_FIRST),        [sv("vdu_vs_desc"), boot_map]))
         add_map((("{}", self.FLAG_KEY_SET_VALUE),
                  [sv("vdu_vc_desc"), vim_flavors_map]))
+        add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),
+                 [sv("vdu_sw_image_desc"), vdu_sw_map]))
         # -- End VDU --
 
         # -- Virtual Compute Descriptor --
@@ -427,6 +436,7 @@ class V2Map(V2MapBase):
                  [sv("vnfd_virt_storage_type"), sw_map]))
         add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),
                  [sv("vnfd_virt_storage_sw_image"), sw_map]))
+
         # -- End Virtual Storage Descriptor --
 
         # -- Software Image --
