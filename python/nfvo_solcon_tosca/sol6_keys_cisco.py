@@ -95,6 +95,8 @@ class V2Map(V2MapBase):
 
         sw_map = self.generate_map(None, tv("virt_storage_identifier"),
                                    field_filter=TOSCA.virt_filter)
+
+        # Adding the first sw-image-desc name to all the VDUs
         vdu_sw_map = []
         if sw_map:
             for vdu in vdu_map:
@@ -421,9 +423,13 @@ class V2Map(V2MapBase):
                  [sv("int_cpd_virt_link_desc"), mgmt_cps_map]))
         add_map(((sv("int_cpd_management_VAL"), self.FLAG_KEY_SET_VALUE),
                  [sv("int_cpd_management"), mgmt_cps_map]))
-
         add_map(((sv("KEY_VIRT_LINK_ORCH_VAL"), self.FLAG_KEY_SET_VALUE),
                  [sv("int_cpd_virt_link_desc"), orch_cps_map]))
+
+        # Interface id, with incrementing number, use the sol6 array index
+        add_map(((tv("int_cpd"), (self.FLAG_KEY_SET_VALUE,
+                                  self.FLAG_USE_VALUE, self.FLAG_ONLY_NUMBERS)),
+                 [sv("int_cpd_interface_id"), cps_map]))
 
         # -- End Internal Connection Points
 
