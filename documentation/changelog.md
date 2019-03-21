@@ -11,8 +11,11 @@ and this project (tries to) adhere to [Semantic Versioning](https://semver.org/s
 - Default instantiation level to df
 - Management field to internal connection points that are assigned as management
 - Basic unit conversion (MB to GB only currently)
-- Specifying a vim_flavor variable value in the Tosca config file will cause the value to be read and used instead of 
+- Specifying a vim_flavor variable value in the TOSCA config file will cause the value to be read and used instead of 
 the variable name
+- Updated version of Sol6 models are now supported
+- Cisco internal connection points now have interface IDs
+- Prerequisite install script added in tools/setup-script.sh
 
 ### Fixed
 - Logging not getting logs from all modules
