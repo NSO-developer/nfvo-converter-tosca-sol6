@@ -161,7 +161,8 @@ class V2Map(V2MapBase):
         add_map(((tv("sw_image_r"), self.FLAG_KEY_SET_VALUE),  [sv("sw_id"), sw_image_mapping]))
         add_map(((tv("sw_image_name"), self.FLAG_BLANK),
                  [sv("sw_name"), sw_image_mapping]))
-        add_map(((tv("sw_image_container_fmt"), (self.FLAG_FORMAT_CONT_FMT, self.FLAG_LIST_FIRST)),
+        add_map(((tv("sw_image_container_fmt"), (self.FLAG_FORMAT_CONT_FMT, self.FLAG_LIST_FIRST,
+                                                 self.FLAG_FORMAT_INVALID_NONE)),
                 [sv("sw_container_format"), sw_image_mapping]))
         add_map(((tv("sw_image_version"), self.FLAG_BLANK),
                  [sv("sw_version"), sw_image_mapping]))
@@ -173,7 +174,8 @@ class V2Map(V2MapBase):
                  [sv("sw_min_ram"), sw_image_mapping]))
         add_map(((tv("sw_image_size"), self.FLAG_ONLY_NUMBERS),
                  [sv("sw_size"), sw_image_mapping]))
-        add_map(((tv("sw_image_disk_fmt"), (self.FLAG_FORMAT_DISK_FMT, self.FLAG_LIST_FIRST)),
+        add_map(((tv("sw_image_disk_fmt"), (self.FLAG_FORMAT_DISK_FMT, self.FLAG_LIST_FIRST,
+                                            self.FLAG_FORMAT_INVALID_NONE)),
                 [sv("sw_disk_format"), sw_image_mapping]))
         add_map(((tv("sw_image_sw_image"), self.FLAG_BLANK),
                  [sv("sw_image_name_var"), sw_image_mapping]))
@@ -237,10 +239,11 @@ class V2Map(V2MapBase):
         add_map(((tv("ext_cpd_protocol"), self.FLAG_FORMAT_IP),
                  [sv("ext_cpd_protocol"), ecp_mapping]))
         add_map(((tv("ext_cpd_icps"), self.FLAG_BLANK),
-                 [sv("ext_cpd_icp_cpd"), ecp_mapping]))
+                 [sv("ext_cpd_int_cpd_id"), ecp_mapping]))
         # Outputting the VDU the ICP is a part of
         add_map(((tv("ext_cpd"), (self.FLAG_KEY_SET_VALUE, self.FLAG_REQ_PARENT)),
-                [sv("ext_cpd_icp_vdu"), ecp_icp_vdus]))
+                [sv("ext_cpd_vdu_id"), ecp_icp_vdus]))
+
         add_map(((tv("ext_cpd_role"), self.FLAG_BLANK),
                  [sv("ext_cpd_role"), ecp_mapping]))
 
