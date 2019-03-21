@@ -6,11 +6,6 @@ def get_path_value(path, cur_dict, must_exist=True, ensure_dict=False, no_msg=Fa
     """
     topology_template.node_templates.vnf.properties.descriptor_id
     Pass in a path and a dict the path applies to and get the value of the key
-
-    This is experimental, and disabled for now.
-    If map_inputs is set, the method will check to see if the final result
-    is an input from TOSCA, and if so it will try to return that instead of the
-    raw value.
     """
     values = path.split(".")
     cur_context = cur_dict
@@ -292,7 +287,7 @@ def remove_empty_from_dict(d):
         return dict((k, remove_empty_from_dict(v)) for k, v in d.items() if _handle_zero(v)
                     and _handle_zero(remove_empty_from_dict(v)))
     elif type(d) is list:
-        if d == [None]:  # Handle this stupid case, where we want to actually output this
+        if d is [None]:  # Handle this stupid case, where we want to actually output this
             return d
         return [remove_empty_from_dict(v) for v in d if _handle_zero(v) and
                 _handle_zero(remove_empty_from_dict(v))]

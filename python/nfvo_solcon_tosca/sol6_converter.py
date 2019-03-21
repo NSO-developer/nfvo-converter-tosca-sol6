@@ -15,7 +15,6 @@ class Sol6Converter:
     tosca_vnf = None
     parsed_dict = None
     vnfd = None
-    template_inputs = {}
     keys = None
 
     def __init__(self, tosca_vnf, parsed_dict, variables=None):
@@ -151,7 +150,9 @@ class Sol6Converter:
         """
         Returns the value after being formatted by the flags
         """
+
         value = self._key_as_value(self.key_as_value, f_tosca_path)
+        value = self.handle_inputs(value)
         value = self._convert_units(self.unit_gb, "GB", value, is_float=self.unit_fractional)
         value = self._only_number(self.only_number, value, is_float=self.only_number_float)
         value = self._append_to_list(self.append_list, f_sol6_path, value)
@@ -166,6 +167,7 @@ class Sol6Converter:
                                       none_found=self.format_invalid_none)
         value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
         value = self._check_for_null(value)
+
         return value
 
     def set_flags_false(self):
@@ -319,6 +321,13 @@ class Sol6Converter:
             value_num = round(value_num / 1024, decimal_places)
 
         return value_num
+
+    def handle_inputs(self, value):
+        res = V2MapBase.handle_inputs(value, self.variables)
+        if not res:
+            return value
+        return res
+
     # ---------------------
 
     @staticmethod

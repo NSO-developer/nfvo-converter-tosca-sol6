@@ -6,7 +6,7 @@ Can be run as a package in NSO, eventually:
 Also can be run standalone:
 ```
     PYTHONPATH=python/nfvo_solcon_tosca
-    python3 tosca.py -f examples/standalone_vpc_vnfd_esc_4_4.yaml -o output.json -c config-esc.toml -s config-sol6.coml
+    python3 solcon.py -f examples/standalone_vpc_vnfd_esc_4_4.yaml -o output.json -c config-esc.toml -s config-sol6.coml
 ```
 ### TOSCA VNFD Relationships
 
