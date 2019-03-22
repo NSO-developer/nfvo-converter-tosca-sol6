@@ -267,20 +267,6 @@ class V2Mapping:
                 not (attr.startswith("__") or attr.startswith("_") or
                      (exclude and exclude in attr))]
 
-    @staticmethod
-    def handle_inputs(value, variables):
-        """
-        Determine if the given value is an input, if so try to read it from the config file
-        """
-        if V2Mapping.is_tosca_input(value):
-            result = V2Mapping.tosca_get_input_key(value)
-            input_values = variables["tosca"]["input_values"]
-            if result in input_values:
-                value = input_values[result]
-            else:
-                return False
-        return value
-
 
 class MapElem:
     """

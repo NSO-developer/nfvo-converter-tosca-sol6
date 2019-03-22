@@ -13,7 +13,7 @@ class SOL6ConverterNokia(Sol6Converter):
         Currently only handles converting a single VNF to VNFD
         """
         log.info("Starting Nokia TOSCA -> SOL6 converter.")
-        
+
         self.vnfd = {}
         formatted_vars = PathMaping.format_paths(self.variables)
         TOSCA.set_variables(self.variables["tosca"], TOSCA, "identifiers", variables=formatted_vars,
