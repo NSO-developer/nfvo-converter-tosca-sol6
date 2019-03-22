@@ -21,7 +21,7 @@ class SOL6ConverterCisco(Sol6Converter):
         Convert the tosca_vnf to sol6 VNFD
         Currently only handles converting a single VNF to VNFD
         """
-        log.info("Starting Cisco TOSCA -> SOL6 (v{}) converter.".format(self.SUPPORTED_SOL6_VERSION))
+        log.info("Starting Cisco TOSCA -> SOL6 converter.")
 
         # The very first thing we want to do is set up the path variables
         log.debug("Setting path variables: {}".format(self.variables))

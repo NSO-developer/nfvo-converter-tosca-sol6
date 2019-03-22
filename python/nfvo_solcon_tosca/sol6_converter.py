@@ -10,8 +10,6 @@ log = logging.getLogger(__name__)
 
 
 class Sol6Converter:
-    SUPPORTED_SOL6_VERSION = "1.1"
-
     tosca_vnf = None
     parsed_dict = None
     vnfd = None
