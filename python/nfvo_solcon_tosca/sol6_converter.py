@@ -50,6 +50,43 @@ class Sol6Converter:
         """
         return None
 
+    def convert_variables(self):
+        """
+        Find the 'get_input' values in the YAML.
+        If there is a definition in the TOSCA config file for that given variable name,
+        then replace the instances of that variable with the value in the config
+        """
+        # Also skip the section if the whole section isn't defined
+        if "input_values" not in self.variables["tosca"]:
+            return
+
+        defined_vars = self.variables["tosca"]["input_values"]
+        # If there are no variables defined in the config file, don't bother doing anything
+        if not defined_vars:
+            return
+
+        inputs = get_roots_from_filter(self.tosca_vnf, child_value="get_input")
+        for i in inputs:
+            # Strip the outer key, we don't need it
+            cur = i[get_dict_key(i)]
+            # Now there *should* be at least one {'get_input': ...} under one of the keys in here
+            # Try to find that value
+            for k in cur.keys():
+                # We need the dict so we can modify it via 'reference'
+                v = cur[k]
+                # We know we're looking for a dict, so skip if it isn't one
+                if not isinstance(v, dict):
+                    continue
+
+                if 'get_input' in v:
+                    var_name = v['get_input']
+
+                    # Skip if the given variable isn't one that's defined
+                    if var_name not in defined_vars:
+                        continue
+                    # Overwrite the get_input dict with just the value from the config
+                    cur[k] = defined_vars[var_name]
+
     # *************************
     # ** Run Mapping Methods **
     # *************************
@@ -150,7 +187,6 @@ class Sol6Converter:
         """
 
         value = self._key_as_value(self.key_as_value, f_tosca_path)
-        value = self.handle_inputs(value)
         value = self._convert_units(self.unit_gb, "GB", value, is_float=self.unit_fractional)
         value = self._only_number(self.only_number, value, is_float=self.only_number_float)
         value = self._append_to_list(self.append_list, f_sol6_path, value)
@@ -319,12 +355,6 @@ class Sol6Converter:
             value_num = round(value_num / 1024, decimal_places)
 
         return value_num
-
-    def handle_inputs(self, value):
-        res = V2MapBase.handle_inputs(value, self.variables)
-        if not res:
-            return value
-        return res
 
     # ---------------------
 

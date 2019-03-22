@@ -108,4 +108,4 @@ version = "0.1.0"
     scaling_aspect_deltas_num = ["scaling_aspect_item","deltas.{}.number_of_instances"]
 
 [tosca.input_values]
-    # VIM_FLAVOR = "VIM_FLAVOR_INPUT"
+    VIM_FLAVOR = "VIM_FLAVOR_INPUT"

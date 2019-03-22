@@ -100,6 +100,9 @@ class SolCon:
         # Initialize the proper converter object for the given provider
         self.converter = self.initialize_converter(self.provider, self.supported_providers)
 
+        # Try to convert variables to their actual values
+        self.converter.convert_variables()
+
         # Do the actual converting logic
         cnfv = self.converter.convert(provider=self.provider)
 

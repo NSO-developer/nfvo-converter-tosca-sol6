@@ -127,24 +127,33 @@ class V2Map(V2MapBase):
         boot_map = flatten(boot_map)
 
         # *** VDU Flavors ***
-        # vim_flavors = [VDU, {"get_input": FLAVOR_NAME}], so get the dicts
+        # vim_flavors = [VDU, {"get_input": FLAVOR_NAME}], so get the second param
+        # The second parameter can be either a dict with an input, or a straight value
         vim_flavors = [x[1] for x in vdu_vim_flavors]
-        # Read all the relevant flavor variables from the config file
-        vim_flavors_config = [(x, V2MapBase.handle_inputs(x, variables)) for x in vim_flavors
-                              if V2MapBase.handle_inputs(x, variables)]
-        vim_flavors_read = [x[0][get_dict_key(x[0])] for x in vim_flavors_config]
+
+        # If the entry is a dict, get the value inside of it, else just use the value
+        vim_flavors_read = [x[get_dict_key(x)] if isinstance(x, dict)
+                            else x for x in vim_flavors]
 
         # Given: [({'get_input': 'VIM_FLAVOR'}, 'test vim flavor')]
+        # Given [(VIM_FLAV_NAME OR {'get_input': 'VIM_FLAVOR'}, 'test vim flavor')]
         # We need to reformat this to the following:
         # [{'test vim flavor': {'description': 'flavour name'}} ]
         vim_flavors_format = []
-        for v in vim_flavors_config:
-            vim_flavors_format.append({v[1]: {'description': 'flavour name'}})
+        for v in vim_flavors_read:
+            content = {'description': 'flavour name'}
+            if isinstance(v, dict):
+                vim_flavors_format.append({v[1]: content})
+            else:
+                vim_flavors_format.append({v: content})
 
         # Get all the inputs from the file
         tosca_inputs = get_path_value(tv("inputs"), dict_tosca, must_exist=False)
         # Only do this for the values that weren't read from the config
-        vim_flavors_filt = [x for x in vim_flavors if x[get_dict_key(x)] not in vim_flavors_read]
+        # Also only check for filters if it's a dict
+        vim_flavors_filt = [x for x in vim_flavors if isinstance(x, dict) and
+                            x[get_dict_key(x)] not in vim_flavors_read]
+
         # Get the values of the inputs from the file (i.e. their names)
         vim_flavors = self.get_input_values(vim_flavors_filt, tosca_inputs, dict_tosca)
 
