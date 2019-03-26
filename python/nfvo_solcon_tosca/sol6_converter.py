@@ -66,26 +66,36 @@ class Sol6Converter:
             return
 
         inputs = get_roots_from_filter(self.tosca_vnf, child_value="get_input")
+
         for i in inputs:
             # Strip the outer key, we don't need it
             cur = i[get_dict_key(i)]
+
             # Now there *should* be at least one {'get_input': ...} under one of the keys in here
             # Try to find that value
             for k in cur.keys():
                 # We need the dict so we can modify it via 'reference'
-                v = cur[k]
+                if k != 'get_input':
+                    v = cur[k]
+                else:
+                    v = cur
                 # We know we're looking for a dict, so skip if it isn't one
                 if not isinstance(v, dict):
                     continue
 
                 if 'get_input' in v:
                     var_name = v['get_input']
-
                     # Skip if the given variable isn't one that's defined
                     if var_name not in defined_vars:
                         continue
+
                     # Overwrite the get_input dict with just the value from the config
-                    cur[k] = defined_vars[var_name]
+                    if k == 'get_input':
+                        # We need to overwrite the value of one level above
+                        i[get_dict_key(i)] = defined_vars[var_name]
+                    else:
+                        cur[k] = defined_vars[var_name]
+
 
     # *************************
     # ** Run Mapping Methods **

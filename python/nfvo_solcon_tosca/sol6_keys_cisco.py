@@ -55,6 +55,7 @@ class TOSCA(TOSCA_BASE):
         variables["tosca"]["int_cpd_mgmt_identifier"] = provider_identifiers["int_cpd_mgmt"]
         variables["tosca"]["scaling_aspects_identifier"] = provider_identifiers["scaling_aspects"]
         variables["tosca"]["inst_level_identifier"] = provider_identifiers["instantiation_level"]
+        variables["tosca"]["security_group_identifier"] = provider_identifiers["security_group"]
 
 
 class SOL6(SOL6_BASE):
@@ -255,6 +256,33 @@ class V2Map(V2MapBase):
             # Note: this can be sped up by putting both of these
             # in a single loop
 
+        # Security group map
+        # The result isn't an array, so set the top-level values to None
+        security_group_map_temp = self.generate_map(None, tv("security_group_identifier"),
+                                                    map_args={"none_value": True})
+        security_group_map = []
+
+        if security_group_map_temp:
+            for grp in security_group_map_temp:
+                cur_targets = MapElem.format_path(grp, tv("security_group_targets"),
+                                                  use_value=False)
+
+                # There can be multiple targets, so duplicate the mapping to handle that
+                targets = get_path_value(cur_targets, self.dict_tosca, must_exist=False)
+                if not targets:
+                    break
+
+                # We're going to handle these by having different parent maps
+                # Duplicate the cur map as many times as we have targets
+                for i, t in enumerate(targets):
+                    # t is the current target
+                    cur_sec_group = grp.copy()
+
+                    # Get the mapping from cps_map for t
+                    cur_cp_map = MapElem.get_mapping_name(cps_map, t)
+                    cur_sec_group.parent_map = cur_cp_map
+                    security_group_map.append(cur_sec_group)
+
         # *** End Connection Point mapping ***
 
         # *** Instantiation Level mapping ***
@@ -439,6 +467,12 @@ class V2Map(V2MapBase):
         add_map(((tv("int_cpd"), (self.FLAG_KEY_SET_VALUE,
                                   self.FLAG_USE_VALUE, self.FLAG_ONLY_NUMBERS)),
                  [sv("int_cpd_interface_id"), cps_map]))
+
+        add_map(((tv("int_cpd_ip_address"), self.FLAG_VAR),
+                [sv("int_cpd_allowed_addr"), cps_map]))
+
+        add_map(((tv("security_group_name"), self.FLAG_VAR),
+                 [sv("int_cpd_security"), security_group_map]))
 
         # -- End Internal Connection Points
 
