@@ -64,7 +64,9 @@ version = "0.1.0"
     int_cpd_virt_binding    = ["int_cpd_req", "virtual_binding"]
     int_cpd_virt_link       = ["int_cpd_req", "virtual_link"]
     int_cpd_layer_prot      = ["int_cpd_props", "layer_protocols"]
-    int_cpd_ip_address    = ["int_cpd_props", "allowed_address_pairs.ip_address"]
+    int_cpd_ip_allowed_addr = ["int_cpd_props", "allowed_address_pairs.ip_address"]
+    int_cpd_ip_addr = ["int_cpd_props", "ip_address"]
+
 
     virt_storage            = ["node_templates", "{}"]
 
@@ -116,4 +118,3 @@ version = "0.1.0"
 
 [tosca.input_values]
     VIM_FLAVOR = "VIM_FLAVOR_INPUT"
-

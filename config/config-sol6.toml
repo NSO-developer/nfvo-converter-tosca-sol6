@@ -128,6 +128,7 @@
     int_cpd_management_VAL      = "[null]"
     int_cpd_additional_params   = ["int_cpd", "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions:additional-sol1-parameters"]
     int_cpd_allowed_addr        = ["int_cpd_additional_params", "allowed-address-variable"]
+    int_cpd_ip_addr             = ["int_cpd_additional_params", "ip-address-variable"]
     int_cpd_security            = ["int_cpd_additional_params", "security-group-variable"]
 
     KEY_VIRT_LINK_MGMT_VAL      = "VIM_NETWORK_MANAGEMENT-VL"
