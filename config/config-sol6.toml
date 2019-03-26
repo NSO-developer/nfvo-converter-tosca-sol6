@@ -1,5 +1,3 @@
-version = "0.2.0"
-
 # Sol6 Path configurations
 [sol6]
     # **********
@@ -128,6 +126,9 @@ version = "0.2.0"
     int_cpd_interface_id        = ["int_cpd", "tailf-etsi-rel3-nfvo-vnfm:interface-id"]
     int_cpd_management          = ["int_cpd", "tailf-etsi-rel3-nfvo-vnfm:management"]
     int_cpd_management_VAL      = "[null]"
+    int_cpd_additional_params   = ["int_cpd", "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions:additional-sol1-parameters"]
+    int_cpd_allowed_addr        = ["int_cpd_additional_params", "allowed-address-variable"]
+    int_cpd_security            = ["int_cpd_additional_params", "security-group-variable"]
 
     KEY_VIRT_LINK_MGMT_VAL      = "VIM_NETWORK_MANAGEMENT-VL"
     KEY_VIRT_LINK_MGMT_PROT_VAL = "IPv4"
