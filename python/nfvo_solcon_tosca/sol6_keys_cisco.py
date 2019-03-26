@@ -468,10 +468,13 @@ class V2Map(V2MapBase):
                                   self.FLAG_USE_VALUE, self.FLAG_ONLY_NUMBERS)),
                  [sv("int_cpd_interface_id"), cps_map]))
 
-        add_map(((tv("int_cpd_ip_address"), self.FLAG_VAR),
+        add_map(((tv("int_cpd_ip_allowed_addr"), (self.FLAG_VAR, self.FLAG_FAIL_SILENT)),
                 [sv("int_cpd_allowed_addr"), cps_map]))
 
-        add_map(((tv("security_group_name"), self.FLAG_VAR),
+        add_map(((tv("int_cpd_ip_addr"), (self.FLAG_VAR, self.FLAG_FAIL_SILENT)),
+                 [sv("int_cpd_ip_addr"), cps_map]))
+
+        add_map(((tv("security_group_name"), (self.FLAG_VAR, self.FLAG_FAIL_SILENT)),
                  [sv("int_cpd_security"), security_group_map]))
 
         # -- End Internal Connection Points
