@@ -351,7 +351,7 @@ class V2Map(V2MapBase):
 
         # *** LCM Operations Configuration Mapping ***
         heal_map = self.generate_map(tv("vnf_lcm_heal"), None)
-        
+
         # *** End LCM Operations Configuration Mapping ***
 
         # *** End Instantiation Level mapping ***
