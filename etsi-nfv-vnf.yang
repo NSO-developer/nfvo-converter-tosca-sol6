@@ -83,7 +83,7 @@ submodule etsi-nfv-vnf {
 
       leaf niclo-requirements {
         type leafref {
-          path "/nfv/vnfd/virtual-compute-descriptor/id";
+          path "/nfv/vnfd/virtual-compute-desc/id";
         }
         description
           "This references (couples) the CPD with any logical node
@@ -441,13 +441,13 @@ submodule etsi-nfv-vnf {
         }
         leaf virtual-compute-desc {
           type leafref {
-            path "../../nfv:virtual-compute-descriptor/" +
-                 "nfv:id";
+            path "../../nfv:virtual-compute-desc/" +
+              "nfv:id";
           }
-          must "../../nfv:virtual-compute-descriptor[id=current()]/" +
-               "nfv:virtual-memory/size >=" +
-               "../../nfv:sw-image-desc[id=current()/" +
-               "../sw-image-desc]/min-ram" {
+          must "../../nfv:virtual-compute-desc[id=current()]/" +
+            "nfv:virtual-memory/size >=" +
+            "../../nfv:sw-image-desc[id=current()/" +
+            "../sw-image-desc]/min-ram" {
           }
           description
             "Describes CPU, Memory and acceleration requirements of
@@ -460,8 +460,8 @@ submodule etsi-nfv-vnf {
 
         leaf-list virtual-storage-desc {
           type leafref {
-            path "../../nfv:virtual-storage-descriptor/" +
-                 "nfv:id";
+            path "../../nfv:virtual-storage-desc/" +
+              "nfv:id";
           }
           description
             "Describes storage requirements for a VirtualStorage
@@ -565,7 +565,7 @@ submodule etsi-nfv-vnf {
         }
       }
 
-      list virtual-compute-descriptor {
+      list virtual-compute-desc {
         key "id";
         description
           "Defines descriptors of virtual compute resources to be
@@ -845,7 +845,7 @@ submodule etsi-nfv-vnf {
         }
       }
 
-      list virtual-storage-descriptor {
+      list virtual-storage-desc {
         key "id";
         description
           "Storage requirements for a Virtual Storage instance
@@ -862,11 +862,12 @@ submodule etsi-nfv-vnf {
 
         leaf type-of-storage {
           // Needed to be able to onboard images
-          type enumeration {
-            enum "root";
-            enum "swap";
-            enum "ephemeral";
-          }
+          type string;
+          // type enumeration {
+          //   enum "root";
+          //   enum "swap";
+          //   enum "ephemeral";
+          // }
           default root;
           description
             "Type of virtualised storage resource (e.g. volume,
@@ -1240,8 +1241,8 @@ submodule etsi-nfv-vnf {
             type string;
             description
               "Unique identifier of the monitoring parameter.";
-          reference
-            "GS NFV IFA011: Section 7.1.11.3, MonitoringParameter
+            reference
+              "GS NFV IFA011: Section 7.1.11.3, MonitoringParameter
              information element.";
           }
           uses monitoring-parameter;
@@ -1269,17 +1270,17 @@ submodule etsi-nfv-vnf {
               path "../../nfv:int-virtual-link-desc/nfv:id";
             }
           }
-          container int-cpd {
+          container vdu {
             presence "Direct pointer to an intCpd";
-            leaf vdu {
+            leaf vdu-id {
               type leafref {
                 path "../../../nfv:vdu/nfv:id";
               }
               mandatory true;
             }
-            leaf cpd {
+            leaf int-cpd-id {
               type leafref {
-                path "deref(../vdu)/../nfv:int-cpd/nfv:id";
+                path "deref(../vdu-id)/../nfv:int-cpd/nfv:id";
               }
               mandatory true;
             }
@@ -1292,7 +1293,7 @@ submodule etsi-nfv-vnf {
 
       list df {
         must "nfv:default-instantiation-level or " +
-             "count(nfv:instantiation-level) = 1";
+          "count(nfv:instantiation-level) = 1";
         key "id";
         min-elements 1;
         description
@@ -1363,33 +1364,12 @@ submodule etsi-nfv-vnf {
             leaf id {
               type leafref {
                 path "../../../" +
-                     "nfv:affinity-or-anti-affinity-group/" +
-                     "nfv:id";
+                  "nfv:affinity-or-anti-affinity-group/" +
+                  "nfv:id";
               }
               description
                 "Identifies an affinity or anti-affinity group to
                   which the affinity or anti-affinity rule applies.";
-              reference
-                "GS NFV IFA011: Section 7.1.8.12, AffinityOrAntiAffinity
-                 information element.";
-            }
-            leaf type {
-              type enumeration {
-                enum affinity;
-                enum anti-affinity;
-              }
-              description
-                "Specifies whether the rule is an affinity rule or an
-                 anti-affinity rule.";
-              reference
-                "GS NFV IFA011: Section 7.1.8.12, AffinityOrAntiAffinity
-                 information element.";
-            }
-            leaf scope {
-              type affinity-scope;
-              description
-                "Specifies the scope of the rule, possible values are
-                 'NFVI-PoP', 'Zone', 'ZoneGroup', 'NFVI-node'";
               reference
                 "GS NFV IFA011: Section 7.1.8.12, AffinityOrAntiAffinity
                  information element.";
@@ -1418,7 +1398,7 @@ submodule etsi-nfv-vnf {
           leaf flavor {
             type leafref {
               path "deref(../../../ext-cpd/int-virtual-link-desc)" +
-                   "/../desc-flavor/id";
+                "/../desc-flavor/id";
             }
             description
               "Identifies a flavour within the VnfVirtualLinkDesc.";
@@ -1432,8 +1412,8 @@ submodule etsi-nfv-vnf {
             leaf id {
               type leafref {
                 path "../../../" +
-                     "nfv:affinity-or-anti-affinity-group/" +
-                     "nfv:id";
+                  "nfv:affinity-or-anti-affinity-group/" +
+                  "nfv:id";
               }
             }
             description
@@ -1501,11 +1481,11 @@ submodule etsi-nfv-vnf {
             leaf number-of-instances {
               type uint16;
               must ". <= ../../../../nfv:df/" +
-                   "nfv:vdu-profile[id=current()/../nfv:id]/" +
-                   "nfv:max-number-of-instances";
+                "nfv:vdu-profile[id=current()/../nfv:id]/" +
+                "nfv:max-number-of-instances";
               must ". >= ../../../../nfv:df/" +
-                   "nfv:vdu-profile[id=current()/../nfv:id]/" +
-                   "nfv:min-number-of-instances";
+                "nfv:vdu-profile[id=current()/../nfv:id]/" +
+                "nfv:min-number-of-instances";
               default 1;
               description
                 "Number of instances of VNFC based on this VDU to
@@ -1667,16 +1647,23 @@ submodule etsi-nfv-vnf {
               "GS NFV IFA011: Section 7.1.5.2
                VnfLcmOperationsConfiguration information element";
 
-            leaf parameter {
-              type string;
+            list parameter {
+              key "key";
+              leaf key {
+                type string;
+              }
+              leaf value {
+                type string;
+              }
               description
-                "VNF-specific parameter to be passed when invoking
+                "VNF-specific key/value parameter to be passed when invoking
                  the HealVnf operation.";
               reference
-                "GS NFV IFA011: Section 7.1.5.6 HealVnfOpConfig
-                 information element";
+                "GS NFV IFA011: Section 7.1.5.6
+                 HealVnfOpConfig information element";
             }
-            leaf cause {
+
+            leaf-list cause {
               type string;
               description
                 "Supported 'cause' parameter values.";
