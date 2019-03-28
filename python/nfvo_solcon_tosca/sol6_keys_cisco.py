@@ -349,6 +349,11 @@ class V2Map(V2MapBase):
                 #    self.run_deltas = False
         aspect_f_map = flatten(aspect_f_map)
 
+        # *** LCM Operations Configuration Mapping ***
+        heal_map = self.generate_map(tv("vnf_lcm_heal"), None)
+        
+        # *** End LCM Operations Configuration Mapping ***
+
         # *** End Instantiation Level mapping ***
 
         # If there is a mapping function needed, the second parameter is a list with the mapping
@@ -524,6 +529,11 @@ class V2Map(V2MapBase):
                  [sv("df_inst_level_vdu_vdu"), target_map]))
         add_map(((tv("inst_level_num_instances"), self.FLAG_BLANK),
                  [sv("df_inst_level_vdu_num"), vdu_inst_level_map]))
+
+        add_map(((tv("vnf_lcm_heal_item"), self.FLAG_KEY_SET_VALUE),
+                 [sv("df_heal_param_key"), heal_map]))
+        add_map(((tv("vnf_lcm_heal_item"), self.FLAG_BLANK),
+                [sv("df_heal_param_value"), heal_map]))
 
         # Set the default instantiation level
         add_map((self.set_value(def_inst_id, sv("df_inst_level_default"), 0)))
