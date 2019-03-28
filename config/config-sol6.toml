@@ -75,6 +75,12 @@
     df_scale_aspect_vdu_id      = ["df_scale_aspect_vdu_delta", "id"]
     df_scale_aspect_vdu_num     = ["df_scale_aspect_vdu_delta", "number-of-instances"]
 
+    df_lcm_config               = ["deployment_flavor", "lcm-operations-configuration"]
+    df_lcm_heal_config          = ["df_lcm_config", "heal-vnf-op-config"]
+    df_heal_param               = ["df_lcm_heal_config", "parameter.{}"]
+    df_heal_param_key           = ["df_heal_param", "key"]
+    df_heal_param_value         = ["df_heal_param", "value"]
+
     # ****************************
     # ** Virtual/External Links **
     # ****************************
