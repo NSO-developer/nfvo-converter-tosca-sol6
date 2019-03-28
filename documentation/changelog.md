@@ -16,6 +16,7 @@ the variable name
 - Updated version of Sol6 models are now supported
 - Cisco internal connection points now have interface IDs
 - Prerequisite install script added in tools/setup-script.sh
+- Healing LCM settings
 
 ### Fixed
 - Logging not getting logs from all modules
