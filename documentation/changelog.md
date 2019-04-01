@@ -17,6 +17,8 @@ the variable name
 - Cisco internal connection points now have interface IDs
 - Prerequisite install script added in tools/setup-script.sh
 - Healing LCM settings
+- Autoheal and autoscale values in configurable-properties
+- cidr-variable and dhcp-enabled-variable to additional-sol1-parameters in virtual links
 
 ### Fixed
 - Logging not getting logs from all modules

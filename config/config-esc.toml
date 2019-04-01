@@ -72,6 +72,11 @@ version = "0.1.0"
     int_cpd_layer_prot      = ["int_cpd_props", "layer_protocols"]
     int_cpd_ip_allowed_addr = ["int_cpd_props", "allowed_address_pairs.ip_address"]
     int_cpd_ip_addr         = ["int_cpd_props", "ip_address"]
+    int_cpd_virt_prot_data  = ["int_cpd_props", "vl_profile.virtual_link_protocol_data"]
+    int_cpd_l3_data         = ["int_cpd_virt_prot_data", "l3_protocol_data"]
+    int_cpd_cidr            = ["int_cpd_l3_data", "cidr"]
+    int_cpd_dhcp            = ["int_cpd_l3_data", "dhcp_enabled"]
+
 
 
     virt_storage            = ["node_templates", "{}"]

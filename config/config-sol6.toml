@@ -95,6 +95,9 @@
     virt_link_desc_conn         = ["virt_link_desc", "connectivity-type"]
     virt_link_desc_protocol     = ["virt_link_desc_conn", "layer-protocol"]
     virt_link_desc_flow         = ["virt_link_desc_conn", "flow-pattern"]
+    virt_link_desc_add_params   = ["virt_link_desc", "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions:additional-sol1-parameters"]
+    virt_link_desc_cidr         = ["virt_link_desc_add_params", "cidr-variable"]
+    virt_link_desc_dhcp         = ["virt_link_desc_add_params", "dhcp-enabled-variable"]
 
     ext_cpd                     = ["vnfd", "ext-cpd.{}"]
     ext_cpd_id                  = ["ext_cpd", "id"]
