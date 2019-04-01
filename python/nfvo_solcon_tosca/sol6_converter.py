@@ -151,7 +151,6 @@ class Sol6Converter:
         Called from run_mapping_map_needed
         """
         sol6_path = map_sol6
-
         if sol6_path is None:
             log.debug("SOL6 path is None, skipping with no error message")
             return
