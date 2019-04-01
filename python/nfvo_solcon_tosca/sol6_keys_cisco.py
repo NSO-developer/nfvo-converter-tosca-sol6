@@ -390,6 +390,11 @@ class V2Map(V2MapBase):
         add_map(((tv("int_cpd_layer_prot"), self.FLAG_FORMAT_IP),
                  [sv("virt_link_desc_protocol"), icp_create_layer_prot]))
 
+        add_map(((tv("int_cpd_cidr"), (self.FLAG_VAR, self.FLAG_FAIL_SILENT)),
+                 [sv("virt_link_desc_cidr"), icps_create_map]))
+        add_map(((tv("int_cpd_dhcp"), (self.FLAG_VAR, self.FLAG_FAIL_SILENT)),
+                 [sv("virt_link_desc_dhcp"), icps_create_map]))
+
         # There might or might not be a mgmt and/or orchestration external connection point
         # Create the virtual links and external connection points
         create_ext_mgmt = bool(mgmt_cps_map)
