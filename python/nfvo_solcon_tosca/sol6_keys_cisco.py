@@ -381,6 +381,9 @@ class V2Map(V2MapBase):
         # -- End Metadata --
 
         # -- Set Values --
+        add_map(((tv("vnf_conf_autoheal"), self.FLAG_BLANK),           sv("vnfd_config_autoheal")))
+        add_map(((tv("vnf_conf_autoscale"), self.FLAG_BLANK),          sv("vnfd_config_autoscale")))
+
         # Create the internal virtual links specified by the YAML
         add_map((("{}", self.FLAG_KEY_SET_VALUE),
                  [sv("virt_link_desc_id"), icps_create_map]))

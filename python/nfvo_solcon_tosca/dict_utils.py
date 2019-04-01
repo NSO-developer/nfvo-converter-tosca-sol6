@@ -278,8 +278,10 @@ def remove_empty_from_dict(d):
     def _handle_zero(val):
         """
         Python treats 0s as False. So return True if we want to keep it
+        We also want to be able to write false values
+        I'm starting to think this method isn't really worth it
         """
-        if val is 0:
+        if val is 0 or val is False:
             return True
         return val
 

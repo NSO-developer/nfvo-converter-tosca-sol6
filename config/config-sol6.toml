@@ -13,6 +13,11 @@
     vnfd_info_desc              = ["vnfd", "product-info-description"]
     vnfd_vnfm_info              = ["vnfd", "vnfm-info"]
 
+    vnfd_config_props           = ["vnfd", "configurable-properties"]
+    vnfd_config_autoheal        = ["vnfd_config_props", "auto-healable"]
+    vnfd_config_autoscale       = ["vnfd_config_props", "auto-scalable"]
+
+
     VALID_PROTOCOLS_VAL         = ["Ethernet", "IPv4", "IPv6", "MPLS", "ODU2", "Pseudo-Wire"]
     VALID_DISK_FORMATS_VAL      = ["qcow2", "raw", "vmdk"]
     VALID_CONTAINER_FORMATS_VAL = ["aki", "ami", "ari", "bare", "docker", "ova", "ovf"]
