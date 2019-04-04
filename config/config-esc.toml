@@ -122,8 +122,6 @@ version = "0.1.0"
     scaling_aspect_desc     = ["scaling_aspect_item", "description"]
     scaling_aspect_level    = ["scaling_aspect_item", "max_scale_level"]
     scaling_aspect_deltas   = ["scaling_aspect_item", "step_deltas"]
-    # Note: this is not a valid TOSCA path, it's for internal use
-    scaling_aspect_deltas_num = ["scaling_aspect_item","deltas.{}.number_of_instances"]
 
     # ** Security Groups **
     security_group          = ["policies", "{}"]

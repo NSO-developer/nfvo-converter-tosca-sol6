@@ -41,6 +41,7 @@ class Sol6Converter:
         self.first_list_output  = False
         self.unit_gb            = False
         self.unit_fractional    = False
+        self.min_1              = False
 
     def convert(self, provider=None):
         """
@@ -95,7 +96,6 @@ class Sol6Converter:
                         i[get_dict_key(i)] = defined_vars[var_name]
                     else:
                         cur[k] = defined_vars[var_name]
-
 
     # *************************
     # ** Run Mapping Methods **
@@ -198,6 +198,7 @@ class Sol6Converter:
         value = self._key_as_value(self.key_as_value, f_tosca_path)
         value = self._convert_units(self.unit_gb, "GB", value, is_float=self.unit_fractional)
         value = self._only_number(self.only_number, value, is_float=self.only_number_float)
+        value = self._min_1(self.min_1, value)
         value = self._append_to_list(self.append_list, f_sol6_path, value)
         value = self._format_as_valid(self.format_as_ip, f_sol6_path, value,
                                       self.variables["sol6"]["VALID_PROTOCOLS_VAL"],
@@ -233,6 +234,7 @@ class Sol6Converter:
         self.format_invalid_none = False
         self.unit_gb            = False
         self.unit_fractional    = False
+        self.min_1              = False
 
     def set_flags_loop(self, flags, keys):
         """
@@ -273,6 +275,8 @@ class Sol6Converter:
                 self.unit_gb = True
             if flag == keys.FLAG_UNIT_FRACTIONAL:
                 self.unit_fractional = True
+            if flag == keys.FLAG_MIN_1:
+                self.min_1 = True
 
     # ---------------------
     # ** Specific flag methods **
@@ -283,7 +287,7 @@ class Sol6Converter:
         if cur_list:
             if not isinstance(cur_list, list):
                 raise TypeError("{} is not a list".format(cur_list))
-            cur_list.append(value)
+            return list(cur_list).append(value)
 
     def _key_as_value(self, option, path):
         if option:
@@ -300,6 +304,12 @@ class Sol6Converter:
         if not isinstance(value, str):
             return value
         return cur_type(re.sub('[^0-9]', '', str(value)))
+
+    @staticmethod
+    def _min_1(option, value):
+        if not option:
+            return value
+        return value if value > 1 else 1
 
     @staticmethod
     def _first_list_elem(option, path, value):
