@@ -268,6 +268,8 @@ def merge_list_of_dicts(lst):
         hold = lst[-1]
 
     for count, item in enumerate(lst):
+        if not isinstance(item, dict):
+            return lst
         final = merge_two_dicts(final, item)
     if hold:
         final = merge_two_dicts(final, hold)
