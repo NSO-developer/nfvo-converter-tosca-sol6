@@ -15,6 +15,9 @@ version = "0.1.0"
     scaling_aspects         = ["type", "tosca.policies.nfv.ScalingAspects"]
     virtual_storage         = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage"]
     security_group          = ["type", "cisco.policies.nfv.SecurityGroupRule"]
+    anti_affinity_rule      = ["type", "tosca.policies.nfv.AntiAffinityRule"]
+    affinity_rule           = ["type", "tosca.policies.nfv.AffinityRule"]
+    placement_group         = ["type", "tosca.groups.nfv.PlacementGroup"]
 
 # Note: If there is a variable with "path_VAL", that means it will not be parsed for the path
 # heirarchy, but will instead just be set with the value

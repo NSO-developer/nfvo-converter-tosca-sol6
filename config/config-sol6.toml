@@ -80,6 +80,12 @@
     df_scale_aspect_vdu_id      = ["df_scale_aspect_vdu_delta", "id"]
     df_scale_aspect_vdu_num     = ["df_scale_aspect_vdu_delta", "number-of-instances"]
 
+    df_affinity_group           = ["deployment_flavor", "affinity-or-anti-affinity-group.{}"]
+    df_affinity_id              = ["df_affinity_group", "id"]
+    df_affinity_type            = ["df_affinity_group", "type"]
+    df_affinity_scope           = ["df_affinity_group", "scope"]
+
+
     df_lcm_config               = ["deployment_flavor", "lcm-operations-configuration"]
     df_lcm_heal_config          = ["df_lcm_config", "heal-vnf-op-config"]
     df_heal_param               = ["df_lcm_heal_config", "parameter.{}"]

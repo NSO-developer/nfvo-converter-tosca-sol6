@@ -56,6 +56,9 @@ class TOSCA(TOSCA_BASE):
         variables["tosca"]["scaling_aspects_identifier"] = provider_identifiers["scaling_aspects"]
         variables["tosca"]["inst_level_identifier"] = provider_identifiers["instantiation_level"]
         variables["tosca"]["security_group_identifier"] = provider_identifiers["security_group"]
+        variables["tosca"]["anti_affinity_identifier"] = provider_identifiers["anti_affinity_rule"]
+        variables["tosca"]["affinity_identifier"] = provider_identifiers["affinity_rule"]
+        variables["tosca"]["placement_group_identifier"] = provider_identifiers["placement_group"]
 
 
 class SOL6(SOL6_BASE):
@@ -353,6 +356,16 @@ class V2Map(V2MapBase):
         heal_map = self.generate_map(tv("vnf_lcm_heal"), None)
 
         # *** End LCM Operations Configuration Mapping ***
+
+        # Affinity/Anti-Affinity Mapping
+        anti_aff_map = self.generate_map(None, tv("anti_affinity_identifier"))
+        aff_map = self.generate_map(None, tv("affinity_identifier"))
+        placement_groups = self.generate_map(None, tv("placement_group_identifier"))
+
+        # Get the targets
+        cur_aff_map = anti_aff_map
+        print(anti_aff_map)
+        print(placement_groups)
 
         # *** End Instantiation Level mapping ***
 
