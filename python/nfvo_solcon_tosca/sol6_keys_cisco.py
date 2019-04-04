@@ -8,6 +8,7 @@ from key_utils import KeyUtils
 from mapping_v2 import MapElem
 from dict_utils import *
 from list_utils import *
+from key_utils import *
 
 
 class TOSCA(TOSCA_BASE):
@@ -331,12 +332,14 @@ class V2Map(V2MapBase):
         # Support multiple definitions of the scaling_aspect
         scaling_aspects_map = []
         scaling_deltas_map = []
+        scaling_deltas_targets_map = []
+        scaling_deltas_name_map = []
         scaling_aspects_map_temp = self.generate_map(None, tv("scaling_aspects_identifier"))
         for scaling_aspect_top in scaling_aspects_map_temp:
             cur_path = MapElem.format_path(scaling_aspect_top, tv("scaling_aspect_item_list"),
                                            use_value=False)
-            # These are the scaling aspects for the VDUs
-            cur_aspect_list = get_path_value(cur_path, dict_tosca)
+
+            aspect_names = list(get_path_value(cur_path, dict_tosca).keys())
 
             # Generate the map for the <scaling-aspect> tags
             scaling_aspects_map.append(self.generate_map(cur_path, None, parent=scaling_aspect_top))
@@ -352,19 +355,34 @@ class V2Map(V2MapBase):
                     set_path_to(cur_path, dict_tosca, sv("df_scale_aspect_no_delta_VAL"),
                                 create_missing=True)
 
+                # Setup the mapping
                 scaling_deltas_map.append(self.generate_map(cur_path, None, parent=cur_vdu_aspect,
                                                             map_args={"none_key": True}))
+            # Get deltas information
+            # We need to know the paths of the aspects so we can generate maps for them
+            to_map = []
+            for name in aspect_names:
+                filter_path = get_path_from_filter(dict_tosca, "aspect", name)
+                if filter_path:
+                    to_map.append(KeyUtils.get_path_index(
+                        filter_path, KeyUtils.get_path_level(tv("scaling_aspects"))))
 
-                #cur_step_delta = get_path_value()
+                    props = KeyUtils.remove_path_last(filter_path)
+                    targets = KeyUtils.remove_path_last(props) + ".targets"
+                    # vnfd.df.scaling-aspect.{}.vdu-delta.{0}.id =
+                    # = topology_template.policies.{sf_scaling_aspect_deltas}.targets.{0}
 
-                # These are the names of the VDUScaling aspects, so we can use the keys to
-                # find the definitions of the deltas (if they exist)
-                #defined_deltas = get_roots_from_filter(dict_tosca, "aspect", cur_vdu_aspect)
+                    scaling_deltas_targets_map.append(
+                        self.generate_map_from_list(get_path_value(targets, dict_tosca)))
 
+            scaling_deltas_name_map.append(self.generate_map_from_list(to_map))
 
         scaling_aspects_map = flatten(scaling_aspects_map)
         scaling_deltas_map = flatten(scaling_deltas_map)
+        scaling_deltas_name_map = flatten(scaling_deltas_name_map)
 
+        print(scaling_deltas_name_map)
+        print(scaling_aspects_map)
         # *** LCM Operations Configuration Mapping ***
         heal_map = self.generate_map(tv("vnf_lcm_heal"), None)
 
@@ -583,6 +601,9 @@ class V2Map(V2MapBase):
                  [sv("df_scale_aspect_max_level"), scaling_aspects_map]))
         add_map(((tv("scaling_aspect_deltas"), self.FLAG_LIST_FIRST),
                  [sv("df_scale_aspect_deltas_id"), scaling_deltas_map]))
+
+        # For the delta information
+
 
         # -- End Scaling Aspect
 
