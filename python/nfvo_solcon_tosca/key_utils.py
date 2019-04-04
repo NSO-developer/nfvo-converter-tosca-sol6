@@ -14,11 +14,26 @@ class KeyUtils:
         raise KeyError("Path {} is an invalid path to use in this method.".format(path))
 
     @staticmethod
+    def get_path_index(path, index):
+        paths = path.split(".")
+        if len(paths) >= index:
+            return paths[index]
+        raise KeyError("Path {} is an invalid path to use in this method.".format(path))
+
+    @staticmethod
     def remove_path_first(path, n=1):
         """ Get the string without the first n elements of the path """
         paths = path.split(".")
         if len(paths) > 0:
             return ".".join(paths[n:len(paths)])
+        raise KeyError("Path {} is an invalid path to use in this method.".format(path))
+
+    @staticmethod
+    def remove_path_last(path, n=1):
+        """ Get the string without the last n elements of the path """
+        paths = path.split(".")
+        if len(paths) > 0:
+            return ".".join(paths[:len(paths)-n])
         raise KeyError("Path {} is an invalid path to use in this method.".format(path))
 
     @staticmethod

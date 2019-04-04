@@ -120,6 +120,10 @@ version = "0.1.0"
     scaling_aspect_level    = ["scaling_aspect_item", "max_scale_level"]
     scaling_aspect_deltas   = ["scaling_aspect_item", "step_deltas"]
 
+    # For use in the deltas definition block
+    scaling_aspect_delt_num = ["scaling_props", "deltas.number_of_instances"]
+    scaling_aspect_delt_targets = ["scaling_aspects", "targets.{}"]
+
     # ** Security Groups **
     security_group          = ["policies", "{}"]
     security_group_name     = ["security_group", "group_name"]
