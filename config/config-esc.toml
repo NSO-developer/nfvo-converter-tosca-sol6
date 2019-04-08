@@ -13,6 +13,7 @@ version = "0.1.0"
     int_cpd_mgmt            = ["type", "cisco.nodes.nfv.VduCp"]
     instantiation_level     = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
     scaling_aspects         = ["type", "tosca.policies.nfv.ScalingAspects"]
+    scaling_aspect_deltas   = ["type", "tosca.policies.nfv.VduScalingAspectDeltas"]
     virtual_storage         = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage"]
     security_group          = ["type", "cisco.policies.nfv.SecurityGroupRule"]
     anti_affinity_rule      = ["type", "tosca.policies.nfv.AntiAffinityRule"]
