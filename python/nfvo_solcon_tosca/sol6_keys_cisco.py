@@ -28,8 +28,7 @@ class TOSCA(TOSCA_BASE):
         return key_exists(item, "properties.sw_image_data")
 
     @staticmethod
-    def set_variables(cur_dict, obj, exclude="", variables=None, dict_tosca=None,
-                      cur_provider=None):
+    def set_variables(cur_dict, obj, exclude="", variables=None, dict_tosca=None, cur_provider=None):
         """
         Take the input from the config file, and set the variables that are identifiers here
         This must be run before the values are used
@@ -42,8 +41,7 @@ class TOSCA(TOSCA_BASE):
 
         # We must have a provider mapping
         if cur_provider not in possible_providers:
-            raise KeyError("Provider {} not found in possible providers {}"
-                           .format(cur_provider, possible_providers))
+            raise KeyError("Provider {} not found in possible providers {}".format(cur_provider, possible_providers))
 
         # Get the values for the given provider
         provider_identifiers = variables["provider_identifiers"][cur_provider]
@@ -55,6 +53,7 @@ class TOSCA(TOSCA_BASE):
         variables["tosca"]["int_cpd_identifier"] = provider_identifiers["int_cpd"]
         variables["tosca"]["int_cpd_mgmt_identifier"] = provider_identifiers["int_cpd_mgmt"]
         variables["tosca"]["scaling_aspects_identifier"] = provider_identifiers["scaling_aspects"]
+        variables["tosca"]["scaling_deltas_identifier"] = provider_identifiers["scaling_aspects_deltas"]
         variables["tosca"]["inst_level_identifier"] = provider_identifiers["instantiation_level"]
         variables["tosca"]["security_group_identifier"] = provider_identifiers["security_group"]
 
@@ -106,8 +105,7 @@ class V2Map(V2MapBase):
                 vdu_sw_map.append(cur_sw)
 
         # This list has the VDUs the flavors are attached to
-        vdu_vim_flavors = self.get_items_from_map(tv("vdu_vim_flavor"), vdu_map, dict_tosca,
-                                                  link_list=True)
+        vdu_vim_flavors = self.get_items_from_map(tv("vdu_vim_flavor"), vdu_map, dict_tosca, link_list=True)
 
         # Set up the boot order mapping
         # [vnfd1-deployment-control-function-1-cf-boot -> 0, parent=(None),
@@ -180,8 +178,7 @@ class V2Map(V2MapBase):
         vim_flavors = listify(vim_flavors)
 
         flavor_map = self.generate_map_from_list(vim_flavors,
-                                                 map_args={"value_map": MapElem.basic_map_list(
-                                                     len(vim_flavors))})
+                                                 map_args={"value_map": MapElem.basic_map_list(len(vim_flavors))})
 
         # From the mapping      [c1 -> 0, parent=(0 -> 0, parent=(None))]
         # and the value_dict    {'VIM_FLAVOR_CF': 'c1'}
@@ -198,8 +195,7 @@ class V2Map(V2MapBase):
         # *** Connection Point mappings ***
         # Map internal connection points to their VDUs
         # Get all int connection points
-        cps_map = self.generate_map(None, tv("int_cpd_identifier"),
-                                    map_function=self.int_cp_mapping,
+        cps_map = self.generate_map(None, tv("int_cpd_identifier"), map_function=self.int_cp_mapping,
                                     map_args={"vdu_map": vdu_map})
 
         # Each 'virtual_link' entry is a connection to an external connection point
