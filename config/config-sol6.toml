@@ -77,7 +77,7 @@
     df_scale_aspect_delta_det   = ["df_scale_aspect", "aspect-delta-details"]
     df_scale_aspect_deltas      = ["df_scale_aspect_delta_det", "deltas.{}"]
     df_scale_aspect_deltas_id   = ["df_scale_aspect_deltas", "id"]
-    df_scale_aspect_vdu_delta   = ["df_scale_aspect", "vdu-delta.{}"]
+    df_scale_aspect_vdu_delta   = ["df_scale_aspect_deltas", "vdu-delta.{}"]
     df_scale_aspect_vdu_id      = ["df_scale_aspect_vdu_delta", "id"]
     df_scale_aspect_vdu_num     = ["df_scale_aspect_vdu_delta", "number-of-instances"]
     df_scale_aspect_no_delta_VAL = "unknown"
