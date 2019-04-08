@@ -28,6 +28,11 @@ class TOSCA(TOSCA_BASE):
         return key_exists(item, "properties.sw_image_data")
 
     @staticmethod
+    def delta_filter(item):
+        print(item)
+        return True
+
+    @staticmethod
     def set_variables(cur_dict, obj, exclude="", variables=None, dict_tosca=None, cur_provider=None):
         """
         Take the input from the config file, and set the variables that are identifiers here
@@ -328,57 +333,53 @@ class V2Map(V2MapBase):
         # Support multiple definitions of the scaling_aspect
         scaling_aspects_map = []
         scaling_deltas_map = []
-        scaling_deltas_targets_map = []
-        scaling_deltas_name_map = []
         scaling_aspects_map_temp = self.generate_map(None, tv("scaling_aspects_identifier"))
-        for scaling_aspect_top in scaling_aspects_map_temp:
-            cur_path = MapElem.format_path(scaling_aspect_top, tv("scaling_aspect_item_list"),
-                                           use_value=False)
+        scaling_aspects_deltas_map = self.generate_map(None, tv("scaling_deltas_identifier"))
 
-            aspect_names = list(get_path_value(cur_path, dict_tosca).keys())
+        for scaling_aspect_top in scaling_aspects_map_temp:
+            cur_path = MapElem.format_path(scaling_aspect_top, tv("scaling_aspect_item_list"), use_value=False)
 
             # Generate the map for the <scaling-aspect> tags
             scaling_aspects_map.append(self.generate_map(cur_path, None, parent=scaling_aspect_top))
 
             # Note: every scaling_aspect requires a delta, even if the id is "unknown"
             for cur_vdu_aspect in scaling_aspects_map[-1]:
-                cur_path = MapElem.format_path(cur_vdu_aspect, tv("scaling_aspect_deltas"),
-                                               use_value=False)
-                aspect_deltas = get_path_value(cur_path, dict_tosca, must_exist=False)
+                cur_path = MapElem.format_path(cur_vdu_aspect, tv("scaling_aspect_deltas"), use_value=False)
+                aspect_deltas = get_path_value(cur_path, dict_tosca, must_exist=False, no_msg=True)
                 # Figure out if we have a delta defined
                 if not aspect_deltas:
                     # If we don't then set the value to 'unknown'
-                    set_path_to(cur_path, dict_tosca, sv("df_scale_aspect_no_delta_VAL"),
-                                create_missing=True)
+                    set_path_to(cur_path, dict_tosca, sv("df_scale_aspect_no_delta_VAL"), create_missing=True)
 
-                # Setup the mapping
                 scaling_deltas_map.append(self.generate_map(cur_path, None, parent=cur_vdu_aspect,
                                                             map_args={"none_key": True}))
-            # Get deltas information
-            # We need to know the paths of the aspects so we can generate maps for them
-            to_map = []
-            for name in aspect_names:
-                filter_path = get_path_from_filter(dict_tosca, "aspect", name)
-                if filter_path:
-                    to_map.append(KeyUtils.get_path_index(
-                        filter_path, KeyUtils.get_path_level(tv("scaling_aspects"))))
-
-                    props = KeyUtils.remove_path_last(filter_path)
-                    targets = KeyUtils.remove_path_last(props) + ".targets"
-                    # vnfd.df.scaling-aspect.{}.vdu-delta.{0}.id =
-                    # = topology_template.policies.{sf_scaling_aspect_deltas}.targets.{0}
-
-                    scaling_deltas_targets_map.append(
-                        self.generate_map_from_list(get_path_value(targets, dict_tosca)))
-
-            scaling_deltas_name_map.append(self.generate_map_from_list(to_map))
 
         scaling_aspects_map = flatten(scaling_aspects_map)
         scaling_deltas_map = flatten(scaling_deltas_map)
-        scaling_deltas_name_map = flatten(scaling_deltas_name_map)
 
-        print(scaling_deltas_name_map)
-        print(scaling_aspects_map)
+        # Get all the delta instantiation information
+        deltas_inst_map = []
+        print(scaling_aspects_deltas_map)
+        for cur_delta in scaling_aspects_deltas_map:
+            cur_path = MapElem.format_path(cur_delta, tv("deltas_aspects"), use_value=False)
+            aspects = get_path_from_filter(self.dict_tosca, "aspect", "session-function")
+            print(aspects)
+
+            deltas_inst_map.append(self.generate_map(cur_path, ("aspect", "session-function"), parent=cur_delta))
+        deltas_inst_map = flatten(deltas_inst_map)
+
+        # Now we need to filter the delta information based on the aspect field, as we don't want to set the number
+        # of instances for a function that doesn't have the proper delta set
+        # Right now scaling_deltas_map looks like this
+        #   [None -> 0, parent=(session-function -> 0, parent=(scaling_aspects -> 0, parent=(None))),
+        #    None -> 0, parent=(control-function -> 1, parent=(scaling_aspects -> 0, parent=(None)))]
+        # So we need to set the None values for the topmost mapping to the name of the deltas block that contains
+        # 'the aspect: function-name' of the given function
+        # None -> 0,
+
+        # vnfd.df.scaling-aspect.0.aspect-delta-details.vdu-delta.0.number_of_instances
+        #print(deltas_inst_map)
+        #print(scaling_deltas_map)
         # *** LCM Operations Configuration Mapping ***
         heal_map = self.generate_map(tv("vnf_lcm_heal"), None)
 
@@ -597,12 +598,12 @@ class V2Map(V2MapBase):
                  [sv("df_scale_aspect_max_level"), scaling_aspects_map]))
         add_map(((tv("scaling_aspect_deltas"), self.FLAG_LIST_FIRST),
                  [sv("df_scale_aspect_deltas_id"), scaling_deltas_map]))
-
+        add_map(((tv("deltas_elem"), self.FLAG_BLANK),
+                 [sv("df_scale_aspect_vdu_num"), deltas_inst_map]))
         # For the delta information
 
 
         # -- End Scaling Aspect
-
         # -- End Deployment Flavor --
 
     def set_value(self, val, path, index):

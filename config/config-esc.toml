@@ -13,7 +13,7 @@ version = "0.1.0"
     int_cpd_mgmt            = ["type", "cisco.nodes.nfv.VduCp"]
     instantiation_level     = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
     scaling_aspects         = ["type", "tosca.policies.nfv.ScalingAspects"]
-    scaling_aspect_deltas   = ["type", "tosca.policies.nfv.VduScalingAspectDeltas"]
+    scaling_aspects_deltas   = ["type", "tosca.policies.nfv.VduScalingAspectDeltas"]
     virtual_storage         = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage"]
     security_group          = ["type", "cisco.policies.nfv.SecurityGroupRule"]
     anti_affinity_rule      = ["type", "tosca.policies.nfv.AntiAffinityRule"]
@@ -125,8 +125,12 @@ version = "0.1.0"
     scaling_aspect_deltas   = ["scaling_aspect_item", "step_deltas"]
 
     # For use in the deltas definition block
-    scaling_aspect_delt_num = ["scaling_props", "deltas.number_of_instances"]
-    scaling_aspect_delt_targets = ["scaling_aspects", "targets.{}"]
+    deltas_aspects          = ["policies", "{}"]
+    deltas_props            = ["deltas_aspects", "properties"]
+    deltas_list             = ["deltas_props", "deltas"]
+    deltas_elem             = ["deltas_list", "{}"]
+    deltas_num_instances    = ["deltas_elem", "number_of_instances"]
+    deltas_targets          = ["deltas_aspects", "targets.{}"]
 
     # ** Security Groups **
     security_group          = ["policies", "{}"]
