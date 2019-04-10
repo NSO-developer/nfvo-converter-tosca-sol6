@@ -1,19 +1,15 @@
 # SolCon: TOSCA (SOL001) to SOL006 VNFD Converter
-Can be run as a package in NSO, eventually: 
-```
-    NSO command to be put here
-```
-Also can be run standalone:
-```
-    PYTHONPATH=python/nfvo_solcon_tosca
-    python3 solcon.py -f examples/standalone_vpc_vnfd_esc_4_4.yaml -o output.json -c config-esc.toml -s config-sol6.coml
-```
 ### TOSCA VNFD Relationships
 
 ![TOSCA VNFD Relationships](TOSCA-vnfd-relations.png)
 
 ### USAGE
 **Standalone**  
+Console command:
+```
+    PYTHONPATH=python/nfvo_solcon_tosca
+    python3 solcon.py -f examples/standalone_vpc_vnfd_esc_4_4.yaml -o output.json -c config-esc.toml -s config-sol6.coml
+```
 `solcon.py` is the entry point for the standalone version of the converter.  
 `config-esc.toml` has the default and configurable paths and values for TOSCA ESC.
 `config-sol6.toml` has the default and configurable paths and values for SOL6.
@@ -36,5 +32,4 @@ See https://confluence-eng-sjc1.cisco.com/conf/display/NSOUS/TOSCA+to+SOL006+Con
 
 
 ### Current Limitations
-* Scaling aspects are not converted at this time
 * Only the default instantiation level is supported in ESC VNFDs

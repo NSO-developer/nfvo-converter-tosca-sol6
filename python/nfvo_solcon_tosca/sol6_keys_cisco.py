@@ -8,6 +8,7 @@ from key_utils import KeyUtils
 from mapping_v2 import MapElem
 from dict_utils import *
 from list_utils import *
+from key_utils import *
 
 
 class TOSCA(TOSCA_BASE):
@@ -27,8 +28,12 @@ class TOSCA(TOSCA_BASE):
         return key_exists(item, "properties.sw_image_data")
 
     @staticmethod
-    def set_variables(cur_dict, obj, exclude="", variables=None, dict_tosca=None,
-                      cur_provider=None):
+    def delta_filter(item):
+        print(item)
+        return True
+
+    @staticmethod
+    def set_variables(cur_dict, obj, exclude="", variables=None, dict_tosca=None, cur_provider=None):
         """
         Take the input from the config file, and set the variables that are identifiers here
         This must be run before the values are used
@@ -41,8 +46,7 @@ class TOSCA(TOSCA_BASE):
 
         # We must have a provider mapping
         if cur_provider not in possible_providers:
-            raise KeyError("Provider {} not found in possible providers {}"
-                           .format(cur_provider, possible_providers))
+            raise KeyError("Provider {} not found in possible providers {}".format(cur_provider, possible_providers))
 
         # Get the values for the given provider
         provider_identifiers = variables["provider_identifiers"][cur_provider]
@@ -54,6 +58,7 @@ class TOSCA(TOSCA_BASE):
         variables["tosca"]["int_cpd_identifier"] = provider_identifiers["int_cpd"]
         variables["tosca"]["int_cpd_mgmt_identifier"] = provider_identifiers["int_cpd_mgmt"]
         variables["tosca"]["scaling_aspects_identifier"] = provider_identifiers["scaling_aspects"]
+        variables["tosca"]["scaling_deltas_identifier"] = provider_identifiers["scaling_aspects_deltas"]
         variables["tosca"]["inst_level_identifier"] = provider_identifiers["instantiation_level"]
         variables["tosca"]["security_group_identifier"] = provider_identifiers["security_group"]
 
@@ -85,8 +90,6 @@ class V2Map(V2MapBase):
         tv = self.tv
         sv = self.sv
 
-        self.override_deltas = False
-        self.run_deltas = False
         TOSCA.get_path_value = get_path_value
         TOSCA.key_exists = key_exists
         TOSCA.get_dict_key = get_dict_key
@@ -107,8 +110,7 @@ class V2Map(V2MapBase):
                 vdu_sw_map.append(cur_sw)
 
         # This list has the VDUs the flavors are attached to
-        vdu_vim_flavors = self.get_items_from_map(tv("vdu_vim_flavor"), vdu_map, dict_tosca,
-                                                  link_list=True)
+        vdu_vim_flavors = self.get_items_from_map(tv("vdu_vim_flavor"), vdu_map, dict_tosca, link_list=True)
 
         # Set up the boot order mapping
         # [vnfd1-deployment-control-function-1-cf-boot -> 0, parent=(None),
@@ -181,8 +183,7 @@ class V2Map(V2MapBase):
         vim_flavors = listify(vim_flavors)
 
         flavor_map = self.generate_map_from_list(vim_flavors,
-                                                 map_args={"value_map": MapElem.basic_map_list(
-                                                     len(vim_flavors))})
+                                                 map_args={"value_map": MapElem.basic_map_list(len(vim_flavors))})
 
         # From the mapping      [c1 -> 0, parent=(0 -> 0, parent=(None))]
         # and the value_dict    {'VIM_FLAVOR_CF': 'c1'}
@@ -199,8 +200,7 @@ class V2Map(V2MapBase):
         # *** Connection Point mappings ***
         # Map internal connection points to their VDUs
         # Get all int connection points
-        cps_map = self.generate_map(None, tv("int_cpd_identifier"),
-                                    map_function=self.int_cp_mapping,
+        cps_map = self.generate_map(None, tv("int_cpd_identifier"), map_function=self.int_cp_mapping,
                                     map_args={"vdu_map": vdu_map})
 
         # Each 'virtual_link' entry is a connection to an external connection point
@@ -327,27 +327,89 @@ class V2Map(V2MapBase):
 
         # ** Scaling Aspect info **
         # Get all of the scaling aspects information
-        aspect_f_map = []
-        scaling_map = self.generate_map(None, tv("scaling_aspects_identifier"), cur_dict=dict_tosca)
+        # Support multiple definitions of the scaling_aspect
+        scaling_aspects_map = []
+        scaling_deltas_map = []
+        scaling_aspects_id_map = self.generate_map(None, tv("scaling_aspects_identifier"))
 
-        if scaling_map:
-            for cur_map in scaling_map:
-                cur_path = MapElem.format_path(cur_map, tv("scaling_aspect_item_list"),
-                                               use_value=False)
-                aspects = get_path_value(cur_path, self.dict_tosca)
+        for scaling_aspect_top in scaling_aspects_id_map:
+            cur_path = MapElem.format_path(scaling_aspect_top, tv("scaling_aspect_item_list"), use_value=False)
 
-                cur_aspect_map = self.generate_map_from_list(list(aspects.keys()))
-                MapElem.add_parent_mapping(cur_aspect_map, cur_map)
-                aspect_f_map.append(cur_aspect_map)
+            # Generate the map for the <scaling-aspect> tags
+            scaling_aspects_map.append(self.generate_map(cur_path, None, parent=scaling_aspect_top))
 
-                # This is in a separate method because it's a dumpster fire
-                # deltas_mapping = self._handle_deltas(aspect_f_map)
-                # It is possible for there to be no step deltas, in that case don't run them even
-                # if the input is valid
-                # if not deltas_mapping:
-                #    self.override_deltas = True
-                #    self.run_deltas = False
-        aspect_f_map = flatten(aspect_f_map)
+            # Note: every scaling_aspect requires a delta, even if the id is "unknown"
+            for cur_vdu_aspect in scaling_aspects_map[-1]:
+                cur_path = MapElem.format_path(cur_vdu_aspect, tv("scaling_aspect_deltas"), use_value=False)
+                aspect_deltas = get_path_value(cur_path, dict_tosca, must_exist=False, no_msg=True)
+                # Figure out if we have a delta defined
+                if not aspect_deltas:
+                    # If we don't then set the value to 'unknown'
+                    set_path_to(cur_path, dict_tosca, sv("df_scale_aspect_no_delta_VAL"), create_missing=True)
+
+                scaling_deltas_map.append(self.generate_map(cur_path, None, parent=cur_vdu_aspect,
+                                                            map_args={"none_key": True}))
+
+        scaling_aspects_map = flatten(scaling_aspects_map)
+        scaling_deltas_map = flatten(scaling_deltas_map)
+
+        # **** Scaling Aspect Deltas ****
+        # We are going to do the scaling aspect delta information separately for now to reduce confusion
+        # So the scaling aspects bit is fine, I think it's normal and, like, not stupid.
+        # This, on the other hand, is real stupid. It's a very complicated relationship between elements
+        # that are at different levels of the yaml and need multiple copies of each other to deal with the
+        # list of targets, because sol6 needs individual elements for each element in said list.
+        #
+        # Be warned when reading this, it's not simple
+        scaling_aspects_deltas_map = self.generate_map(None, tv("scaling_deltas_identifier"))
+        # Generate n maps, where n is len(scaling_aspects_map)
+        # Dict index is scaling aspect name, then list, then each elem of list is dict with delta name and information
+        deltas_dict_map = {}
+        for aspect in scaling_aspects_map:
+            # Each map is going to be for an individual scaling aspect
+            deltas_dict_map[aspect.name] = []
+        # Find the list of deltas that are part of this aspect name, and assign them to the dict index
+
+        for aspect in deltas_dict_map.keys():
+            c = get_roots_from_filter(dict_tosca, "aspect", aspect)
+            for root in c:
+                root = root[get_dict_key(root)]
+                deltas_dict_map[aspect].append(root[KeyUtils.get_path_last(tv("deltas_list"))])
+
+        deltas_map = []
+        for i, ddm in enumerate(deltas_dict_map.keys()):
+            delta_map = self.generate_map_from_list(deltas_dict_map[ddm])
+            for dm in delta_map:
+                # We know that for every individual mapping dm, the parent scaling-function is named ddm
+                # Find that mapping in scaling_aspect_map
+                cur_scaling_func = MapElem.get_mapping_name(scaling_aspects_map, ddm)
+                cur_scaling_func = cur_scaling_func.copy()
+                # The YAML doesn't have this third parameter, so skip it there
+                cur_scaling_func.name = None
+                cur_scaling_func.parent_map = scaling_aspects_deltas_map[i]
+                dm.parent_map = cur_scaling_func
+
+                # Add the scaling_aspect parent to the delta
+                deltas_map.append(dm)
+
+        # Make as many entries of each element in deltas_map as there are targets
+        deltas_targets_map = []
+        deltas_map_temp = []
+        for dm in deltas_map:
+            cur_path = MapElem.format_path(dm.parent_map, tv("deltas_targets"), use_value=False)
+            cur_val = get_path_value(cur_path, dict_tosca)
+            if not isinstance(cur_val, list):
+                log.error("{} is expected to be a list, scaling deltas will probably not work.".format(cur_val))
+                break
+
+            for i in range(len(cur_val)):
+                # Get the invididual target list elements here
+                deltas_targets_map.append(MapElem(i, i, dm.parent_map))
+                cdm = dm.copy()
+                cdm.cur_map = i
+                deltas_map_temp.append(cdm)
+        deltas_map = deltas_map_temp
+        # **** End Scaling Aspect Deltas ****
 
         # *** LCM Operations Configuration Mapping ***
         heal_map = self.generate_map(tv("vnf_lcm_heal"), None)
@@ -547,95 +609,30 @@ class V2Map(V2MapBase):
         add_map((self.set_value(def_inst_id, sv("df_inst_level_default"), 0)))
 
         # -- Scaling Aspect --
-        do_scaling = False
-        if do_scaling:
-            add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
-                     [sv("df_inst_scaling_aspect"), aspect_f_map]))
-            add_map(((tv("scaling_aspect_level"), self.FLAG_BLANK),
-                     [sv("df_inst_scaling_level"), aspect_f_map]))
+        add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
+                 [sv("df_scale_aspect_id"), scaling_aspects_map]))
+        add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
+                 [sv("df_scale_aspect_name"), scaling_aspects_map]))
+        add_map(((tv("scaling_aspect_desc"), self.FLAG_BLANK),
+                 [sv("df_scale_aspect_desc"), scaling_aspects_map]))
+        add_map(((tv("scaling_aspect_level"), (self.FLAG_ONLY_NUMBERS, self.FLAG_MIN_1)),
+                 [sv("df_scale_aspect_max_level"), scaling_aspects_map]))
+        add_map(((tv("scaling_aspect_deltas"), self.FLAG_LIST_FIRST),
+                 [sv("df_scale_aspect_deltas_id"), scaling_deltas_map]))
+        #add_map(((tv("deltas_elem"), self.FLAG_BLANK),
+        #         [sv("df_scale_aspect_vdu_num"), deltas_inst_map]))
+        # For the delta information
+        add_map(((tv("deltas_num_instances"), self.FLAG_BLANK),
+                 [sv("df_scale_aspect_vdu_num"), deltas_map]))
+        add_map(((tv("deltas_target"), self.FLAG_BLANK),
+                 [sv("df_scale_aspect_vdu_id"), deltas_targets_map]))
 
-            add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
-                     [sv("df_scale_aspect_id"), aspect_f_map]))
-            add_map(((tv("scaling_aspect_name"), self.FLAG_BLANK),
-                     [sv("df_scale_aspect_name"), aspect_f_map]))
-            add_map(((tv("scaling_aspect_level"), self.FLAG_BLANK),
-                     [sv("df_scale_aspect_max_level"), aspect_f_map]))
-            add_map(((tv("scaling_aspect_desc"), self.FLAG_BLANK),
-                     [sv("df_scale_aspect_desc"), aspect_f_map]))
-
-            add_map(((tv("scaling_aspect_deltas"), self.FLAG_REQ_DELTA),
-                     [sv("df_scale_aspect_deltas"), aspect_f_map]))
-
-            # add_map((("{}", (self.FLAG_REQ_DELTA, self.FLAG_KEY_SET_VALUE)),
-            #        [sv("df_scale_aspect_vdu_id"), deltas_mapping]))
-            # add_map(((tv("scaling_aspect_deltas_num"), self.FLAG_REQ_DELTA),
-            #         [sv("df_scale_aspect_vdu_num"), deltas_mapping]))
+        print(tv("deltas_targets"))
         # -- End Scaling Aspect
-
         # -- End Deployment Flavor --
 
     def set_value(self, val, path, index):
         return (val, self.FLAG_KEY_SET_VALUE), [path, [MapElem(val, index)]]
-
-    def _handle_deltas(self, aspect_f_map):
-        """
-        ** WARNING: Here be dragons **
-
-        This whole block of code gets the delta values from tosca (if they exist, they might not)
-        then, it figures out what the deltas parent functions are, and it maps the delta values to
-        ints for assignability in an array
-        After that, it goes and figures out what the delta's parent map is and assigns the proper
-        parent map to that (from aspect_f_map).
-        THEN, FINALLY, we have the finished mapping:
-
-        topology_template.policies.{scaling_aspects}.properties.aspects.{session-function}
-                                                                   .step_deltas ==> ['delta_1']
-        step_deltas_map = [data_1 -> 0, parent=(session-function -> 0)]
-        vnfd.df.scaling-aspect.{session-function->0}.vdu-delta.{delta_1->0}.id = {}
-                   topology_template.policies.{scaling_aspects}.properties.deltas.{delta_1}
-
-        Then (we're not done yet), we have the num_instances value, but not it's full location.
-        So, just stick the value into a location that we know and can access easily.
-        """
-
-        deltas_name = KeyUtils.get_path_last(self.get_tosca_value("scaling_aspect_deltas"))
-        deltas_num = KeyUtils.get_path_last(self.get_tosca_value("scaling_aspect_deltas_num"))
-        # Get all the elements that have step_deltas
-        deltas = get_roots_from_filter(self.dict_tosca, child_key=deltas_name)
-
-        deltas_mapping = None
-        if deltas:
-            # Get the values of all the step_deltas, and turn them into a flat list
-            all_deltas = []
-            delta_links = {}
-            for delta in deltas:
-                func_name = get_dict_key(delta)
-                all_deltas.append(delta[func_name][deltas_name])
-                for item in all_deltas[-1]:
-                    delta_links[item] = func_name
-            all_deltas = flatten(all_deltas)
-
-            # Get all the delta values that are children of elements in all_deltas
-            delta_values = get_roots_from_filter(self.dict_tosca, child_key="deltas")
-
-            # Map the keys to ints
-            deltas_mapping = self.generate_map_from_list([get_dict_key(d) for d in delta_values])
-            delta_values = merge_list_of_dicts(delta_values)
-            for d_m in deltas_mapping:
-                # Find parent mapping and assign it to the current delta mapping
-                for a_m in aspect_f_map:
-                    if d_m.name not in delta_links:
-                        continue
-                    if a_m.name == delta_links[d_m.name]:
-                        MapElem.add_parent_mapping(d_m, a_m)
-                        # Now place the value in delta_values into the path we have mapped
-                        cur_path = MapElem.format_path(d_m, self.get_tosca_value("scaling_aspect_deltas_num"),
-                                                       use_value=False)
-                        # Remove the last element in the path (num-instances)
-                        cur_path = KeyUtils.remove_path_elem(cur_path, -1)
-                        set_path_to(cur_path, self.dict_tosca, delta_values[d_m.name],
-                                    create_missing=True)
-        return deltas_mapping
 
     def int_cp_mapping(self, names, map_start, **kwargs):
         if "filtered" not in kwargs or "vdu_map" not in kwargs:

@@ -231,25 +231,36 @@ def get_roots_from_filter(cur_dict, child_key=None, child_value=None, parent_key
         return agg
 
 
+def get_path_from_filter(cur_item, child_key, child_value):
+    """
+    Find the first key:value pair that matches and return the path
+    """
+    # Recursively search through the dict since it's a large nested dict of other dicts
+    # and lists and values
+
+    # We need to handle looping over dicts or lists
+    if isinstance(cur_item, dict):
+        item_iterator = cur_item.items()
+    elif isinstance(cur_item, list):
+        item_iterator = enumerate(cur_item)
+    else:
+        return None
+
+    for k, v in item_iterator:
+        if k == child_key:
+            if v == child_value:
+                return k
+
+        recurse = get_path_from_filter(v, child_key, child_value)
+        if recurse:
+            return "{}.{}".format(k, recurse)
+
+
 def get_dict_key(dic, n=0):
     """
     Return the first (or nth) key name from a dict
     """
     return list(dic.keys())[n]
-
-
-def gen_dict_extract(key, var):
-    if hasattr(var, 'iteritems'):
-        for k, v in var.iteritems():
-            if k == key:
-                yield v
-            if isinstance(v, dict):
-                for result in gen_dict_extract(key, v):
-                    yield result
-            elif isinstance(v, list):
-                for d in v:
-                    for result in gen_dict_extract(key, d):
-                        yield result
 
 
 def merge_two_dicts(x, y):
@@ -268,6 +279,8 @@ def merge_list_of_dicts(lst):
         hold = lst[-1]
 
     for count, item in enumerate(lst):
+        if not isinstance(item, dict):
+            return lst
         final = merge_two_dicts(final, item)
     if hold:
         final = merge_two_dicts(final, hold)
