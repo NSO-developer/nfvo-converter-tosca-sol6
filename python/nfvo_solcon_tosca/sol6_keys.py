@@ -224,6 +224,7 @@ class V2MapBase(V2Mapping):
     # Will remove all non-numeric characters
     FLAG_ONLY_NUMBERS               = "NUMBERS"
     FLAG_ONLY_NUMBERS_FLOAT         = "NUMBERSFLOAT"
+    FLAG_MIN_1                      = "MINVAL1"
     # Make the tosca MapElem format use the value of the mapping instead of the key
     FLAG_USE_VALUE                  = "USESOLMAPFORTOSCA"
     # Append the items to a list, create the list if it doesn't exist

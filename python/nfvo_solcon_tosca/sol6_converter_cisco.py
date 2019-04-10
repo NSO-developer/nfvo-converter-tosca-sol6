@@ -33,10 +33,6 @@ class SOL6ConverterCisco(Sol6Converter):
         self.vnfd = {}
 
         keys = V2Map(self.tosca_vnf, self.vnfd, variables=self.variables)
-        if keys.override_deltas:
-            self.override_run_deltas = not keys.run_deltas
-        else:
-            self.check_deltas_valid(keys.get_tosca_value("scaling_aspect_deltas"))
 
         self.run_mapping(keys)
 
@@ -45,11 +41,6 @@ class SOL6ConverterCisco(Sol6Converter):
     def run_mapping_islist(self, tosca_path, map_sol6):
         mapping_list = map_sol6[1]  # List of MapElems
         sol6_path = map_sol6[0]
-
-        if self.override_run_deltas:
-            # Skip this iteration if needed
-            if self.req_delta_valid and not mapping_list:
-                return
 
         for elem in mapping_list:
             # Skip this mapping element if it is None, but allow a none name to pass
@@ -133,25 +124,3 @@ class SOL6ConverterCisco(Sol6Converter):
         return V2MapBase.tosca_get_input_key(value)
 
     # ----------------------------------------------------------------------------------------------
-
-    def check_deltas_valid(self, scaling_aspect):
-        """
-        We are only supporting step_deltas that have unique names across the entire yaml file
-        I don't care that YAML supports more.
-        """
-        step_deltas_name = KeyUtils.get_path_last(scaling_aspect)
-        # Get all the elements that have step_deltas
-        deltas = get_roots_from_filter(self.tosca_vnf, child_key=step_deltas_name)
-        # Get all the values of 'step_deltas' and stick them in a list
-        try:
-            all_deltas = [delta[get_dict_key(delta)][step_deltas_name] for delta in deltas]
-            all_deltas = flatten(all_deltas)
-        except KeyError:
-            # We're going to assume that if we can't do the check to just try to run deltas
-            return
-
-        # Determine if there are any duplicates
-        if len(all_deltas) != len(set(all_deltas)):
-            log.warning("step_deltas were detected that have the same name, "
-                             "this is not suppported and thus deltas will not be processed.")
-            self.run_deltas = False
