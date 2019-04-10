@@ -127,7 +127,8 @@ version = "0.1.0"
     deltas_list             = ["deltas_props", "deltas"]
     deltas_elem             = ["deltas_list", "{}"]
     deltas_num_instances    = ["deltas_elem", "number_of_instances"]
-    deltas_targets          = ["deltas_aspects", "targets.{}"]
+    deltas_targets          = ["deltas_aspects", "targets"]
+    deltas_target           = ["deltas_targets", "{}"]
 
     # ** Security Groups **
     security_group          = ["policies", "{}"]
