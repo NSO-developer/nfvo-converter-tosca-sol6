@@ -86,7 +86,8 @@
     df_affinity_id              = ["df_affinity_group", "id"]
     df_affinity_type            = ["df_affinity_group", "type"]
     df_affinity_scope           = ["df_affinity_group", "scope"]
-
+    affinity_VAL                = "affinity"
+    anti_affinity_VAL           = "anti-affinity"
 
     df_lcm_config               = ["deployment_flavor", "lcm-operations-configuration"]
     df_lcm_heal_config          = ["df_lcm_config", "heal-vnf-op-config"]

@@ -138,5 +138,10 @@ version = "0.1.0"
     security_group_name     = ["security_group", "group_name"]
     security_group_targets  = ["security_group", "targets"]
 
+    # ** Affinity/Anti Groups **
+    affinity_group          = ["policies", "{}"]
+    affinity_group_scope    = ["affinity_group", "properties.scope"]
+    affinity_group_targets  = ["affinity_group", "targets"]
+
 [tosca.input_values]
     VIM_FLAVOR = "VIM_FLAVOR_INPUT"
