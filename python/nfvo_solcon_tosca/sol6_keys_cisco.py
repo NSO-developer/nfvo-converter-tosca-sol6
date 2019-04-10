@@ -420,14 +420,25 @@ class V2Map(V2MapBase):
         # *** End LCM Operations Configuration Mapping ***
 
         # Affinity/Anti-Affinity Mapping
+        # These are references to the placement groups, labeling them as affinity or anti-affinity
         anti_aff_map = self.generate_map(None, tv("anti_affinity_identifier"))
-        aff_map = self.generate_map(None, tv("affinity_identifier"))
+        anti_aff_end_map = 0
+        if anti_aff_map:
+            anti_aff_end_map = anti_aff_map[-1].cur_map + 1
+        # Start the new map at the end of the last one so we can combine smoothly
+        aff_map = self.generate_map(None, tv("affinity_identifier"), map_start=anti_aff_end_map)
+
+        # Combine them for ease of access
+        anti_aff_comb_map = anti_aff_map + aff_map
+        # Reorder the values so they make sense
+
+        # These have the VDUs
         placement_groups = self.generate_map(None, tv("placement_group_identifier"))
 
         # Get the targets
         cur_aff_map = anti_aff_map
-        print(anti_aff_map)
-        print(placement_groups)
+        #print(anti_aff_map)
+        #print(placement_groups)
 
         # *** End Instantiation Level mapping ***
 
@@ -632,16 +643,26 @@ class V2Map(V2MapBase):
                  [sv("df_scale_aspect_max_level"), scaling_aspects_map]))
         add_map(((tv("scaling_aspect_deltas"), self.FLAG_LIST_FIRST),
                  [sv("df_scale_aspect_deltas_id"), scaling_deltas_map]))
-        #add_map(((tv("deltas_elem"), self.FLAG_BLANK),
-        #         [sv("df_scale_aspect_vdu_num"), deltas_inst_map]))
         # For the delta information
         add_map(((tv("deltas_num_instances"), self.FLAG_BLANK),
                  [sv("df_scale_aspect_vdu_num"), deltas_map]))
         add_map(((tv("deltas_target"), self.FLAG_BLANK),
                  [sv("df_scale_aspect_vdu_id"), deltas_targets_map]))
 
-        print(tv("deltas_targets"))
         # -- End Scaling Aspect
+
+        # -- Affinity or Antiaffinity Groups --
+        add_map(((tv("affinity_group"), self.FLAG_KEY_SET_VALUE),
+                 [sv("df_affinity_id"), anti_aff_comb_map]))
+        add_map(((tv("affinity_group_scope"), self.FLAG_BLANK),
+                 [sv("df_affinity_scope"), anti_aff_comb_map]))
+        # Set the type based on what list they're in
+        for antiaff in anti_aff_map:
+            add_map((self.set_value(sv("anti_affinity_VAL"), sv("df_affinity_type"), antiaff.cur_map)))
+        for aff in aff_map:
+            add_map((self.set_value(sv("affinity_VAL"), sv("df_affinity_type"), aff.cur_map)))
+
+        # -- End Affinity or Antiaffinity Groups --
         # -- End Deployment Flavor --
 
     def set_value(self, val, path, index):
