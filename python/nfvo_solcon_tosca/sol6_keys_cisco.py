@@ -356,9 +356,14 @@ class V2Map(V2MapBase):
         scaling_aspects_map = flatten(scaling_aspects_map)
         scaling_deltas_map = flatten(scaling_deltas_map)
 
+        # **** Scaling Aspect Deltas ****
         # We are going to do the scaling aspect delta information separately for now to reduce confusion
-        # We are going to need a dynamic creation of maps later, so this will likely look different
-        # than all the other mappings
+        # So the scaling aspects bit is fine, I think it's normal and, like, not stupid.
+        # This, on the other hand, is real stupid. It's a very complicated relationship between elements
+        # that are at different levels of the yaml and need multiple copies of each other to deal with the
+        # list of targets, because sol6 needs individual elements for each element in said list.
+        #
+        # Be warned when reading this, it's not simple
         scaling_aspects_deltas_map = self.generate_map(None, tv("scaling_deltas_identifier"))
         # Generate n maps, where n is len(scaling_aspects_map)
         # Dict index is scaling aspect name, then list, then each elem of list is dict with delta name and information
@@ -374,24 +379,40 @@ class V2Map(V2MapBase):
                 root = root[get_dict_key(root)]
                 deltas_dict_map[aspect].append(root[KeyUtils.get_path_last(tv("deltas_list"))])
 
-        print(deltas_dict_map)
-        print(scaling_aspects_map)
-        for delta in scaling_aspects_deltas_map:
-            cur_path = MapElem.format_path(delta, tv("deltas_aspects"), use_value=False)
-            print(get_path_value(cur_path, dict_tosca))
-            # Find the elements that have the same aspect name as the deltas_dict_map
-        #print(scaling_aspects_deltas_map)
+        deltas_map = []
+        for i, ddm in enumerate(deltas_dict_map.keys()):
+            delta_map = self.generate_map_from_list(deltas_dict_map[ddm])
+            for dm in delta_map:
+                # We know that for every individual mapping dm, the parent scaling-function is named ddm
+                # Find that mapping in scaling_aspect_map
+                cur_scaling_func = MapElem.get_mapping_name(scaling_aspects_map, ddm)
+                cur_scaling_func = cur_scaling_func.copy()
+                # The YAML doesn't have this third parameter, so skip it there
+                cur_scaling_func.name = None
+                cur_scaling_func.parent_map = scaling_aspects_deltas_map[i]
+                dm.parent_map = cur_scaling_func
 
-        # Now we need to filter the delta information based on the aspect field, as we don't want to set the number
-        # of instances for a function that doesn't have the proper delta set
-        # Right now scaling_deltas_map looks like this
-        #   [None -> 0, parent=(session-function -> 0, parent=(scaling_aspects -> 0, parent=(None))),
-        #    None -> 0, parent=(control-function -> 1, parent=(scaling_aspects -> 0, parent=(None)))]
-        # So we need to set the None values for the topmost mapping to the name of the deltas block that contains
-        # 'the aspect: function-name' of the given function
+                # Add the scaling_aspect parent to the delta
+                deltas_map.append(dm)
 
-        # vnfd.df.scaling-aspect.{0}.aspect-delta-details.vdu-delta.{0}.number_of_instances
-        # topology_template.policies.{sf_scaling_aspect_deltas}.properties.deltas.{delta_1}
+        # Make as many entries of each element in deltas_map as there are targets
+        deltas_targets_map = []
+        deltas_map_temp = []
+        for dm in deltas_map:
+            cur_path = MapElem.format_path(dm.parent_map, tv("deltas_targets"), use_value=False)
+            cur_val = get_path_value(cur_path, dict_tosca)
+            if not isinstance(cur_val, list):
+                log.error("{} is expected to be a list, scaling deltas will probably not work.".format(cur_val))
+                break
+
+            for i in range(len(cur_val)):
+                # Get the invididual target list elements here
+                deltas_targets_map.append(MapElem(i, i, dm.parent_map))
+                cdm = dm.copy()
+                cdm.cur_map = i
+                deltas_map_temp.append(cdm)
+        deltas_map = deltas_map_temp
+        # **** End Scaling Aspect Deltas ****
 
         # *** LCM Operations Configuration Mapping ***
         heal_map = self.generate_map(tv("vnf_lcm_heal"), None)
@@ -614,8 +635,12 @@ class V2Map(V2MapBase):
         #add_map(((tv("deltas_elem"), self.FLAG_BLANK),
         #         [sv("df_scale_aspect_vdu_num"), deltas_inst_map]))
         # For the delta information
+        add_map(((tv("deltas_num_instances"), self.FLAG_BLANK),
+                 [sv("df_scale_aspect_vdu_num"), deltas_map]))
+        add_map(((tv("deltas_target"), self.FLAG_BLANK),
+                 [sv("df_scale_aspect_vdu_id"), deltas_targets_map]))
 
-
+        print(tv("deltas_targets"))
         # -- End Scaling Aspect
         # -- End Deployment Flavor --
 
