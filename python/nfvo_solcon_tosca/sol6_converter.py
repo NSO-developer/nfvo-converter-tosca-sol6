@@ -35,6 +35,7 @@ class Sol6Converter:
         self.format_as_ip       = False
         self.format_as_disk     = False
         self.format_as_container = False
+        self.format_as_aff_scope = False
         self.format_invalid_none = False
         self.fail_silent        = False
         self.req_parent         = False
@@ -209,6 +210,9 @@ class Sol6Converter:
         value = self._format_as_valid(self.format_as_container, f_sol6_path, value,
                                       self.variables["sol6"]["VALID_CONTAINER_FORMATS_VAL"],
                                       none_found=self.format_invalid_none)
+        value = self._format_as_valid(self.format_as_aff_scope, f_sol6_path, value,
+                                      self.variables["sol6"]["VALID_AFF_SCOPES_VAL"],
+                                      none_found=self.format_invalid_none)
         value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
         value = self._check_for_null(value)
 
@@ -229,6 +233,7 @@ class Sol6Converter:
         self.format_as_ip       = False
         self.format_as_container = False
         self.format_as_disk     = False
+        self.format_as_aff_scope = False
         self.fail_silent        = False
         self.req_parent         = False
         self.format_invalid_none = False
@@ -269,6 +274,8 @@ class Sol6Converter:
                 self.format_as_disk = True
             if flag == keys.FLAG_FORMAT_CONT_FMT:
                 self.format_as_container = True
+            if flag == keys.FLAG_FORMAT_AFF_SCOPE:
+                self.format_as_aff_scope = True
             if flag == keys.FLAG_FORMAT_INVALID_NONE:
                 self.format_invalid_none = True
             if flag == keys.FLAG_UNIT_GB:
@@ -339,10 +346,15 @@ class Sol6Converter:
     @staticmethod
     def _fmt_val(val, valid_opts, return_none):
         """Format the value with the list, called from _format_as_valid"""
+        tmp_val = val.lower()
+
         for opt in valid_opts:
+            tmp_opt = opt.lower()
+            tmp_val = tmp_val.replace("_", "-")
             # We found a valid mapping, so set the value to the actual formatted value
-            if val.lower() == opt.lower():
+            if tmp_val == tmp_opt:
                 return True, opt
+
         if return_none:
             return False, None
         return False, val + " (INVALID)"

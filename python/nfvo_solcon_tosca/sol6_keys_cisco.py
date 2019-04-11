@@ -435,17 +435,43 @@ class V2Map(V2MapBase):
         # These have the VDUs
         placement_groups = self.generate_map(None, tv("placement_group_identifier"))
 
-        # Get the targets
-        cur_aff_map = anti_aff_map
-        #print(anti_aff_map)
-        #print(placement_groups)
+        # Each placement group has a parent affinity rule, find that mapping
+        for rule in anti_aff_comb_map:
+            # Find the target and then the mapping in placement_groups
+            cur_path = MapElem.format_path(rule, tv("affinity_group_targets"), use_value=False)
+            rule_target_list = get_path_value(cur_path, dict_tosca)
+
+            if not rule_target_list or not isinstance(rule_target_list, list):
+                continue
+            for cur_target in rule_target_list:
+                cur_place_map = MapElem.get_mapping_name(placement_groups, cur_target)
+                cur_place_map.parent_map = rule
+
+        # Get the members
+        aff_vdu_map = []
+        for p in placement_groups:
+            cur_path = MapElem.format_path(p, tv("placement_members"), use_value=False)
+            # Create duplicate mappings for each entry
+            # Each member list has a vdu, and we need one entry per item in the lists
+            placement_targets = get_path_value(cur_path, dict_tosca)
+            if not placement_targets or not isinstance(placement_targets, list):
+                continue
+            # Remove the current elem's value so we skip it on mapping
+
+            for ct in placement_targets:
+                cv = MapElem.get_mapping_name(vdu_map, ct)
+                c = p.copy()
+                # We need the name of the policy but the mapping of the group, so
+                # just replace the name because who cares
+                c.name = c.parent_map.name
+                c.parent_map = cv.copy()
+                aff_vdu_map.append(c)
 
         # *** End Instantiation Level mapping ***
 
         # If there is a mapping function needed, the second parameter is a list with the mapping
         # as the second parameter
         # The first parameter is always a tuple
-        # This now supports the same value mapped to different locations
         """
                 TOSCA.vnf_desc_id -> SOL6.vnfd_id
                 vnfd.id = "topology_template.node_templates.vnf.properties.descriptor_id"
@@ -654,7 +680,7 @@ class V2Map(V2MapBase):
         # -- Affinity or Antiaffinity Groups --
         add_map(((tv("affinity_group"), self.FLAG_KEY_SET_VALUE),
                  [sv("df_affinity_id"), anti_aff_comb_map]))
-        add_map(((tv("affinity_group_scope"), self.FLAG_BLANK),
+        add_map(((tv("affinity_group_scope"), self.FLAG_FORMAT_AFF_SCOPE),
                  [sv("df_affinity_scope"), anti_aff_comb_map]))
         # Set the type based on what list they're in
         for antiaff in anti_aff_map:
@@ -662,6 +688,8 @@ class V2Map(V2MapBase):
         for aff in aff_map:
             add_map((self.set_value(sv("affinity_VAL"), sv("df_affinity_type"), aff.cur_map)))
 
+        add_map(((tv("placement_group"), self.FLAG_KEY_SET_VALUE),
+                 [sv("df_vdu_prof_aff_group_id"), aff_vdu_map]))
         # -- End Affinity or Antiaffinity Groups --
         # -- End Deployment Flavor --
 
