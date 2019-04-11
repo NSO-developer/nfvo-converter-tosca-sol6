@@ -16,6 +16,9 @@ version = "0.1.0"
     scaling_aspects_deltas   = ["type", "tosca.policies.nfv.VduScalingAspectDeltas"]
     virtual_storage         = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage"]
     security_group          = ["type", "cisco.policies.nfv.SecurityGroupRule"]
+    anti_affinity_rule      = ["type", "tosca.policies.nfv.AntiAffinityRule"]
+    affinity_rule           = ["type", "tosca.policies.nfv.AffinityRule"]
+    placement_group         = ["type", "tosca.groups.nfv.PlacementGroup"]
 
 # Note: If there is a variable with "path_VAL", that means it will not be parsed for the path
 # heirarchy, but will instead just be set with the value
@@ -26,6 +29,7 @@ version = "0.1.0"
     substitution_map        = ["topology_template", "substitution_mappings"]
     substitution_req        = ["substitution_map", "requirements"]
     policies                = ["topology_template", "policies"]
+    groups                  = ["topology_template", "groups"]
     inputs                  = ["topology_template", "inputs"]
     desc                    = "description"
     input_key               = "get_input"
@@ -134,6 +138,14 @@ version = "0.1.0"
     security_group          = ["policies", "{}"]
     security_group_name     = ["security_group", "group_name"]
     security_group_targets  = ["security_group", "targets"]
+
+    # ** Affinity/Anti Groups **
+    affinity_group          = ["policies", "{}"]
+    affinity_group_scope    = ["affinity_group", "properties.scope"]
+    affinity_group_targets  = ["affinity_group", "targets"]
+
+    placement_group         = ["groups", "{}"]
+    placement_members       = ["placement_group", "members"]
 
 [tosca.input_values]
     VIM_FLAVOR = "VIM_FLAVOR_INPUT"

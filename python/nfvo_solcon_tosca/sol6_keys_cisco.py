@@ -61,6 +61,9 @@ class TOSCA(TOSCA_BASE):
         variables["tosca"]["scaling_deltas_identifier"] = provider_identifiers["scaling_aspects_deltas"]
         variables["tosca"]["inst_level_identifier"] = provider_identifiers["instantiation_level"]
         variables["tosca"]["security_group_identifier"] = provider_identifiers["security_group"]
+        variables["tosca"]["anti_affinity_identifier"] = provider_identifiers["anti_affinity_rule"]
+        variables["tosca"]["affinity_identifier"] = provider_identifiers["affinity_rule"]
+        variables["tosca"]["placement_group_identifier"] = provider_identifiers["placement_group"]
 
 
 class SOL6(SOL6_BASE):
@@ -416,12 +419,59 @@ class V2Map(V2MapBase):
 
         # *** End LCM Operations Configuration Mapping ***
 
+        # Affinity/Anti-Affinity Mapping
+        # These are references to the placement groups, labeling them as affinity or anti-affinity
+        anti_aff_map = self.generate_map(None, tv("anti_affinity_identifier"))
+        anti_aff_end_map = 0
+        if anti_aff_map:
+            anti_aff_end_map = anti_aff_map[-1].cur_map + 1
+        # Start the new map at the end of the last one so we can combine smoothly
+        aff_map = self.generate_map(None, tv("affinity_identifier"), map_start=anti_aff_end_map)
+
+        # Combine them for ease of access
+        anti_aff_comb_map = anti_aff_map + aff_map
+        # Reorder the values so they make sense
+
+        # These have the VDUs
+        placement_groups = self.generate_map(None, tv("placement_group_identifier"))
+
+        # Each placement group has a parent affinity rule, find that mapping
+        for rule in anti_aff_comb_map:
+            # Find the target and then the mapping in placement_groups
+            cur_path = MapElem.format_path(rule, tv("affinity_group_targets"), use_value=False)
+            rule_target_list = get_path_value(cur_path, dict_tosca)
+
+            if not rule_target_list or not isinstance(rule_target_list, list):
+                continue
+            for cur_target in rule_target_list:
+                cur_place_map = MapElem.get_mapping_name(placement_groups, cur_target)
+                cur_place_map.parent_map = rule
+
+        # Get the members
+        aff_vdu_map = []
+        for p in placement_groups:
+            cur_path = MapElem.format_path(p, tv("placement_members"), use_value=False)
+            # Create duplicate mappings for each entry
+            # Each member list has a vdu, and we need one entry per item in the lists
+            placement_targets = get_path_value(cur_path, dict_tosca)
+            if not placement_targets or not isinstance(placement_targets, list):
+                continue
+            # Remove the current elem's value so we skip it on mapping
+
+            for ct in placement_targets:
+                cv = MapElem.get_mapping_name(vdu_map, ct)
+                c = p.copy()
+                # We need the name of the policy but the mapping of the group, so
+                # just replace the name because who cares
+                c.name = c.parent_map.name
+                c.parent_map = cv.copy()
+                aff_vdu_map.append(c)
+
         # *** End Instantiation Level mapping ***
 
         # If there is a mapping function needed, the second parameter is a list with the mapping
         # as the second parameter
         # The first parameter is always a tuple
-        # This now supports the same value mapped to different locations
         """
                 TOSCA.vnf_desc_id -> SOL6.vnfd_id
                 vnfd.id = "topology_template.node_templates.vnf.properties.descriptor_id"
@@ -619,16 +669,28 @@ class V2Map(V2MapBase):
                  [sv("df_scale_aspect_max_level"), scaling_aspects_map]))
         add_map(((tv("scaling_aspect_deltas"), self.FLAG_LIST_FIRST),
                  [sv("df_scale_aspect_deltas_id"), scaling_deltas_map]))
-        #add_map(((tv("deltas_elem"), self.FLAG_BLANK),
-        #         [sv("df_scale_aspect_vdu_num"), deltas_inst_map]))
         # For the delta information
         add_map(((tv("deltas_num_instances"), self.FLAG_BLANK),
                  [sv("df_scale_aspect_vdu_num"), deltas_map]))
         add_map(((tv("deltas_target"), self.FLAG_BLANK),
                  [sv("df_scale_aspect_vdu_id"), deltas_targets_map]))
 
-        print(tv("deltas_targets"))
         # -- End Scaling Aspect
+
+        # -- Affinity or Antiaffinity Groups --
+        add_map(((tv("affinity_group"), self.FLAG_KEY_SET_VALUE),
+                 [sv("df_affinity_id"), anti_aff_comb_map]))
+        add_map(((tv("affinity_group_scope"), self.FLAG_FORMAT_AFF_SCOPE),
+                 [sv("df_affinity_scope"), anti_aff_comb_map]))
+        # Set the type based on what list they're in
+        for antiaff in anti_aff_map:
+            add_map((self.set_value(sv("anti_affinity_VAL"), sv("df_affinity_type"), antiaff.cur_map)))
+        for aff in aff_map:
+            add_map((self.set_value(sv("affinity_VAL"), sv("df_affinity_type"), aff.cur_map)))
+
+        add_map(((tv("placement_group"), self.FLAG_KEY_SET_VALUE),
+                 [sv("df_vdu_prof_aff_group_id"), aff_vdu_map]))
+        # -- End Affinity or Antiaffinity Groups --
         # -- End Deployment Flavor --
 
     def set_value(self, val, path, index):

@@ -21,6 +21,7 @@
     VALID_PROTOCOLS_VAL         = ["Ethernet", "IPv4", "IPv6", "MPLS", "ODU2", "Pseudo-Wire"]
     VALID_DISK_FORMATS_VAL      = ["qcow2", "raw", "vmdk"]
     VALID_CONTAINER_FORMATS_VAL = ["aki", "ami", "ari", "bare", "docker", "ova", "ovf"]
+    VALID_AFF_SCOPES_VAL        = ["nfvi-node", "nfvi-pop", "zone", "zone-group"]
 
     # ********************************
     # ** Virtual Compute Descriptor **
@@ -57,6 +58,9 @@
     df_vdu_prof_id              = ["df_vdu_profile", "id"]
     df_vdu_prof_inst_min        = ["df_vdu_profile", "min-number-of-instances"]
     df_vdu_prof_inst_max        = ["df_vdu_profile", "max-number-of-instances"]
+    df_vdu_prof_aff_group       = ["df_vdu_profile", "affinity-or-anti-affinity-group.{}"]
+    df_vdu_prof_aff_group_id    = ["df_vdu_prof_aff_group", "id"]
+
     # -- Instantiation Level
     df_inst_level               = ["deployment_flavor", "instantiation-level.{}"]
     df_inst_level_id            = ["df_inst_level", "id"]
@@ -81,6 +85,13 @@
     df_scale_aspect_vdu_id      = ["df_scale_aspect_vdu_delta", "id"]
     df_scale_aspect_vdu_num     = ["df_scale_aspect_vdu_delta", "number-of-instances"]
     df_scale_aspect_no_delta_VAL = "unknown"
+
+    df_affinity_group           = ["deployment_flavor", "affinity-or-anti-affinity-group.{}"]
+    df_affinity_id              = ["df_affinity_group", "id"]
+    df_affinity_type            = ["df_affinity_group", "type"]
+    df_affinity_scope           = ["df_affinity_group", "scope"]
+    affinity_VAL                = "affinity"
+    anti_affinity_VAL           = "anti-affinity"
 
     df_lcm_config               = ["deployment_flavor", "lcm-operations-configuration"]
     df_lcm_heal_config          = ["df_lcm_config", "heal-vnf-op-config"]

@@ -237,6 +237,7 @@ class V2MapBase(V2Mapping):
     FLAG_FORMAT_IP                  = "FORMATIPVER"
     FLAG_FORMAT_DISK_FMT            = "FORMATDISK"
     FLAG_FORMAT_CONT_FMT            = "FORMATCONTAINER"
+    FLAG_FORMAT_AFF_SCOPE           = "FORMATAFFSCOPE"
     # If a value is getting formatted, return None instead of default 'val (INVALID)'
     FLAG_FORMAT_INVALID_NONE        = "INVALIDISNONE"
 
