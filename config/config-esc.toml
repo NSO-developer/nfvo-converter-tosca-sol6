@@ -29,6 +29,7 @@ version = "0.1.0"
     substitution_map        = ["topology_template", "substitution_mappings"]
     substitution_req        = ["substitution_map", "requirements"]
     policies                = ["topology_template", "policies"]
+    groups                  = ["topology_template", "groups"]
     inputs                  = ["topology_template", "inputs"]
     desc                    = "description"
     input_key               = "get_input"
@@ -142,6 +143,9 @@ version = "0.1.0"
     affinity_group          = ["policies", "{}"]
     affinity_group_scope    = ["affinity_group", "properties.scope"]
     affinity_group_targets  = ["affinity_group", "targets"]
+
+    placement_group         = ["groups", "{}"]
+    placement_members       = ["placement_group", "members"]
 
 [tosca.input_values]
     VIM_FLAVOR = "VIM_FLAVOR_INPUT"
