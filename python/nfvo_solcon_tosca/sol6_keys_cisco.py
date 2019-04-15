@@ -28,11 +28,6 @@ class TOSCA(TOSCA_BASE):
         return key_exists(item, "properties.sw_image_data")
 
     @staticmethod
-    def delta_filter(item):
-        print(item)
-        return True
-
-    @staticmethod
     def set_variables(cur_dict, obj, exclude="", variables=None, dict_tosca=None, cur_provider=None):
         """
         Take the input from the config file, and set the variables that are identifiers here
@@ -199,6 +194,19 @@ class V2Map(V2MapBase):
                     vim_flavors_map.append(MapElem(k, m.cur_map, m.parent_map))
 
         # *** End VDU Flavors ***
+
+        # *** Day0 Variables ***
+
+        day0_map = []
+        for vdu in vdu_map:
+            cur_path = MapElem.format_path(vdu, tv("vdu_day0_list"), use_value=False)
+            cur_day0_map = self.generate_map(cur_path, None, parent=vdu)
+            day0_map.append(cur_day0_map)
+
+        day0_map = flatten(day0_map)
+        print(day0_map)
+
+        # *** End Day0 Variables ***
 
         # *** Connection Point mappings ***
         # Map internal connection points to their VDUs

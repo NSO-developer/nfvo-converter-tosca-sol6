@@ -142,6 +142,8 @@
     vdu_vs_desc                 = ["vdu", "virtual-storage-desc.{}"]
     vdu_sw_image_desc           = ["vdu", "sw-image-desc.{}"]
 
+    vdu_artifact                = ["vdu", "tailf-etsi-rel3-nfvo-vnfm:artifact"]
+
     # ********************************
     # ** Internal Connection Points **
     # ********************************
@@ -184,3 +186,16 @@
     sw_image                    = ["sw_img_desc", "image"]
     sw_operating_sys            = ["sw_img_desc", "operating-system"]
     sw_supp_virt_environ        = ["sw_img_desc", "supported-virtualization-environment"]
+
+    # **************
+    # ** Artifact **
+    # **************
+    artifact                    = ["vnfd", "artifact.{}"]
+    artifact_id                 = ["artifact", "id"]
+    artifact_dest               = ["artifact", "destination-name"]
+    artifact_url                = ["artifact", "url"]
+    artifact_variable_list      = ["artifact", "variable"]
+    artifact_variable           = ["artifact_variable_list", "{}"]
+    artifact_variable_id        = ["artifact_variable", "id"]
+    artifact_variable_desc      = ["artifact_variable", "description"]
+
