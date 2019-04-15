@@ -68,6 +68,10 @@ version = "0.1.0"
     vdu_prof_inst_min       = ["vdu_profile", "min_number_of_instances"]
     vdu_prof_inst_max       = ["vdu_profile", "max_number_of_instances"]
 
+    vdu_day0_list           = ["vdu_props", "vendor_section.cisco_esc.config_data"]
+    vdu_day0                = ["vdu_day0_list", "{}"]
+    vdu_day0_file           = ["vdu_day0", "file"]
+
     # ** Internal Connection Points **
     int_cpd                 = ["node_templates", "{}"]
     int_cpd_props           = ["int_cpd", "properties"]
