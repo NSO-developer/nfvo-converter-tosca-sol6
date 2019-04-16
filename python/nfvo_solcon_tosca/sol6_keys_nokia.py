@@ -60,7 +60,6 @@ class V2Map(V2MapBase):
         # Internal CP
         icp_mapping = self.generate_map(None, tv("int_cpd_identifier"),
                                         field_filter=self.icp_mapped)
-        print(icp_mapping)
 
         # We have the icp mapping, which is
         # [oamICpd -> 0, parent=(None), ...]

@@ -219,7 +219,6 @@ class V2Map(V2MapBase):
         # We need to make another mapping for assigning the values in the VDUs, since there is only 1 input required
         # vnfd;vdu;{};tailf-etsi-rel3-nfvo-vnfm:artifact
         day0_vdu_map = []
-        print(day0_map)
 
         # Now handle the variables defined in day0, which are the main bit of information
         day0_variables_map = []
