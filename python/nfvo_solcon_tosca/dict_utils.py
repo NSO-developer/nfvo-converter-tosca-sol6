@@ -1,13 +1,14 @@
 import logging
 log = logging.getLogger(__name__)
 
+SPLIT_CHAR = "."
 
 def get_path_value(path, cur_dict, must_exist=True, ensure_dict=False, no_msg=False):
     """
     topology_template.node_templates.vnf.properties.descriptor_id
     Pass in a path and a dict the path applies to and get the value of the key
     """
-    values = path.split(".")
+    values = path.split(SPLIT_CHAR)
     cur_context = cur_dict
 
     for val in values:
@@ -67,7 +68,7 @@ def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
     If a list is encountered and the current value is not a number, then the method will
     pick list_elem in the list and continue with that as the context.
     """
-    values = path.split(".")
+    values = path.split(SPLIT_CHAR)
     cur_context = cur_dict
     i = 0
     while i < len(values):
@@ -76,7 +77,7 @@ def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
             cur_context = [cur_context]
             # So, we need to set the new value explicitly
             # Concat the paths up to this point into a full path
-            path_to_set = ".".join(values[0:i])
+            path_to_set = SPLIT_CHAR.join(values[0:i])
             # Use that path to recurse and set the value that we're about to work on in here
             # This will update the dict in our current method, because of how python works
             set_path_to(path_to_set, cur_dict, cur_context, create_missing=True)
@@ -314,7 +315,7 @@ def key_exists(item, path, strip_first=True):
     try:
         if strip_first:
             item = item[get_dict_key(item)]
-        paths = path.split(".")
+        paths = path.split(SPLIT_CHAR)
         for p in paths:
             item = item[p]
     except KeyError:

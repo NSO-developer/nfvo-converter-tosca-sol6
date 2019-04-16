@@ -361,7 +361,7 @@ class MapElem:
         This allows different numbers of formattable elements.
         """
 
-        path_list = path.split(".")
+        path_list = path.split(SPLIT_CHAR)
         while "{}" in path_list:
             # Get the index of the last occurrence of a formattable entry
             index = max(idx for idx, val in enumerate(path_list)
@@ -379,7 +379,7 @@ class MapElem:
 
             elem = elem.parent_map
 
-        return ".".join(path_list)
+        return SPLIT_CHAR.join(path_list)
 
     def __str__(self):
         return "{} -> {}, parent=({})".format(self.name, self.cur_map, self.parent_map)
