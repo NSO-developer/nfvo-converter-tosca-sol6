@@ -79,9 +79,11 @@ version = "0.1.0"
     int_cpd_virt_binding    = ["int_cpd_req", "virtual_binding"]
     int_cpd_virt_link       = ["int_cpd_req", "virtual_link"]
     int_cpd_layer_prot      = ["int_cpd_props", "layer_protocols"]
-    int_cpd_ip_allowed_addr = ["int_cpd_props", "allowed_address_pairs.ip_address"]
+    int_cpd_allowed_pair    = ["int_cpd_props", "allowed_address_pairs"]
+    int_cpd_ip_allowed_addr = ["int_cpd_allowed_pair", "ip_address"]
     int_cpd_ip_addr         = ["int_cpd_props", "ip_address"]
-    int_cpd_virt_prot_data  = ["int_cpd_props", "vl_profile.virtual_link_protocol_data"]
+    int_cpd_vl_profile      = ["int_cpd_props", "vl_profile"]
+    int_cpd_virt_prot_data  = ["int_cpd_vl_profile", "virtual_link_protocol_data"]
     int_cpd_l3_data         = ["int_cpd_virt_prot_data", "l3_protocol_data"]
     int_cpd_cidr            = ["int_cpd_l3_data", "cidr"]
     int_cpd_dhcp            = ["int_cpd_l3_data", "dhcp_enabled"]
@@ -94,7 +96,8 @@ version = "0.1.0"
     virt_artifacts          = ["virt_storage", "artifacts"]
     virt_vsb                = ["virt_props", "virtual_block_storage_data"]
     virt_size               = ["virt_vsb", "size_of_storage"]
-    virt_type               = ["virt_vsb", "vdu_storage_requirements.type"]
+    virt_storage_req        = ["virt_vsb", "vdu_storage_requirements"]
+    virt_type               = ["virt_storage_req", "type"]
 
     sw_image_data           = ["virt_props", "sw_image_data"]
     sw_name                 = ["sw_image_data", "name"]
@@ -104,7 +107,8 @@ version = "0.1.0"
     sw_disk_fmt             = ["sw_image_data", "disk_format"]
     sw_min_disk             = ["sw_image_data", "min_disk"]
     sw_size                 = ["sw_image_data", "size"]
-    sw_image_file           = ["virt_artifacts", "sw_image.file"]
+    sw_image                = ["virt_artifacts", "sw_image"]
+    sw_image_file           = ["sw_image", "file"]
 
     # ** Deployment Flavor **
     df_id                   = ["vnf_prop", "flavour_id"]
@@ -113,11 +117,16 @@ version = "0.1.0"
 
     def_inst_level          = ["policies", "instantiation_levels"]
     def_inst_key            = "default"
-    def_inst_prop           = ["def_inst_level", "properties.levels"]
-    def_inst_desc           = ["def_inst_prop", "default.description"] # Matches def_inst_key
+    def_inst_prop           = ["def_inst_level", "properties"]
+    def_inst_p_levels       = ["def_inst_prop", "levels"]
+    def_inst_def            = ["def_inst_p_levels", "default"]
+    def_inst_desc           = ["def_inst_def", "description"] # Matches def_inst_key
     inst_level              = ["policies", "{}"]
     inst_level_targets      = ["inst_level", "targets"]
-    inst_level_num_instances = ["inst_level", "properties.levels.default.number_of_instances"]
+    inst_level_props        = ["inst_level", "properties"]
+    inst_level_levels       = ["inst_level_props", "levels"]
+    inst_level_def          = ["inst_level_levels", "default"]
+    inst_level_num_instances = ["inst_level_def", "number_of_instances"]
 
     # ** Scaling Aspects **
     scaling_aspects         = ["policies", "{}"]
@@ -145,7 +154,8 @@ version = "0.1.0"
 
     # ** Affinity/Anti Groups **
     affinity_group          = ["policies", "{}"]
-    affinity_group_scope    = ["affinity_group", "properties.scope"]
+    affinity_group_props    = ["affinity_group", "properties"]
+    affinity_group_scope    = ["affinity_group_props", "scope"]
     affinity_group_targets  = ["affinity_group", "targets"]
 
     placement_group         = ["groups", "{}"]
