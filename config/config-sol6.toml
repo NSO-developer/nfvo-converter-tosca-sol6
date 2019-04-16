@@ -211,7 +211,7 @@
     # **************
     # ** Artifact **
     # **************
-    artifact_base               = ["vnfd", "artifact"]
+    artifact_base               = ["vnfd", "tailf-etsi-rel3-nfvo-vnfm:artifact"]
     artifact                    = ["artifact_base", "{}"]
     artifact_id                 = ["artifact", "id"]
     artifact_dest               = ["artifact", "destination-name"]

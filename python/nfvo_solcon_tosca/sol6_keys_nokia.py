@@ -261,6 +261,6 @@ class V2Map(V2MapBase):
 
     def icp_mapped(self, a):
         """Check if the given int_cpd has the required value"""
-        return get_path_value(self.tv("int_cpd_cond"), a[get_dict_key(a)], must_exist=False,
+        return get_path_value(self.tv("int_cpd_cond".format(SPLIT_CHAR)), a[get_dict_key(a)], must_exist=False,
                               no_msg=True)
 
