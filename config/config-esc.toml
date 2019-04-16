@@ -78,6 +78,12 @@ version = "0.1.0"
     vdu_day0_list           = ["vdu_cisco_esc", "config_data"]
     vdu_day0                = ["vdu_day0_list", "{}"]
     vdu_day0_file           = ["vdu_day0", "file"]
+    vdu_day0_variables      = ["vdu_day0", "variables"]
+    vdu_day0_variable       = ["vdu_day0_variables", "{}"]
+
+    # ** Do not modify **
+    vdu_day0_custom_id      = ["vdu_day0", "custom_id"]
+    # ** End **
 
     # ** Internal Connection Points **
     int_cpd                 = ["node_templates", "{}"]

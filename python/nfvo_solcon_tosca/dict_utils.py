@@ -1,7 +1,7 @@
 import logging
 log = logging.getLogger(__name__)
 
-SPLIT_CHAR = "."
+SPLIT_CHAR = ";"
 
 
 def get_path_value(path, cur_dict, must_exist=True, ensure_dict=False, no_msg=False):

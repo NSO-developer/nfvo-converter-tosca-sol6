@@ -4,7 +4,6 @@ The TOSCA variables are mapped to the SOL6 ones, they must have the same names.
 The program does not attempt to map variables beginning with '_'
 """
 from sol6_keys import TOSCA_BASE, SOL6_BASE, V2MapBase
-from key_utils import KeyUtils
 from mapping_v2 import MapElem
 from dict_utils import *
 from list_utils import *
@@ -19,13 +18,13 @@ class TOSCA(TOSCA_BASE):
     @staticmethod
     def int_cp_mgmt(item):
         """Return if the current cp is assigned to management or not"""
-        return key_exists(item, "properties.management") and \
-            get_path_value("properties.management", item[get_dict_key(item)], must_exist=False)
+        return key_exists(item, "properties{}management".format(SPLIT_CHAR)) and \
+            get_path_value("properties{}management".format(SPLIT_CHAR), item[get_dict_key(item)], must_exist=False)
 
     @staticmethod
     def virt_filter(item):
         # Make sure that the virtual storage block we get has the {}.properties.sw_image_data field
-        return key_exists(item, "properties.sw_image_data")
+        return key_exists(item, "properties{}sw_image_data".format(SPLIT_CHAR))
 
     @staticmethod
     def set_variables(cur_dict, obj, exclude="", variables=None, dict_tosca=None, cur_provider=None):
@@ -197,7 +196,6 @@ class V2Map(V2MapBase):
 
         # *** Day0 Variables ***
         # Get the unique names for all the artifacts across all VDUs
-        day0_unique = {}
         day0_map = []
         for vdu in vdu_map:
             cur_path = MapElem.format_path(vdu, tv("vdu_day0_list"), use_value=False)
@@ -205,16 +203,38 @@ class V2Map(V2MapBase):
             if not cv:
                 continue
 
-            for cd0 in cv:
-                day0_unique[cd0] = True
-
             cur_day0 = self.generate_map(cur_path, None, parent=vdu)
+            for c0 in cur_day0:
+                custom_id = "{}::{}".format(vdu.name, c0.name)
+                # The keys aren't enough for our purposes, because each VDU can have different settings
+                # so we need to create a new value that we can map later
+                # We *don't* need to modify day0_map because we ensure_map_values, which means they're
+                # unique references
+                set_path_to(MapElem.format_path(c0, tv("vdu_day0_custom_id"), use_value=False),
+                            dict_tosca, custom_id, create_missing=True)
             day0_map.append(cur_day0)
 
         day0_map = flatten(day0_map)
-        print(day0_unique)
+        MapElem.ensure_map_values(day0_map)
+        # We need to make another mapping for assigning the values in the VDUs, since there is only 1 input required
+        # vnfd;vdu;{};tailf-etsi-rel3-nfvo-vnfm:artifact
+        day0_vdu_map = []
         print(day0_map)
-        print(sv("artifact_id"))
+
+        # Now handle the variables defined in day0, which are the main bit of information
+        day0_variables_map = []
+        for d0 in day0_map:
+            cur_path = MapElem.format_path(d0, tv("vdu_day0_variables"), use_value=False)
+            cur_var_map = self.generate_map(cur_path, None, parent=d0)
+            day0_variables_map.append(cur_var_map)
+
+            # The mapping data for the VDU map
+            # It's in this loop to save cycles
+            vdu_d0 = d0.copy()
+            vdu_d0.cur_map = None
+            day0_vdu_map.append(vdu_d0)
+
+        day0_variables_map = flatten(day0_variables_map)
 
         # *** End Day0 Variables ***
 
@@ -712,10 +732,16 @@ class V2Map(V2MapBase):
         # -- End Deployment Flavor --
 
         # -- Artifact --
-        add_map(((tv("vdu_day0"), self.FLAG_KEY_SET_VALUE),
+        add_map(((tv("vdu_day0_custom_id"), self.FLAG_BLANK),
                  [sv("artifact_id"), day0_map]))
         add_map(((tv("vdu_day0_file"), self.FLAG_BLANK),
+                 [sv("artifact_url"), day0_map]))
+        add_map(((tv("vdu_day0"), self.FLAG_KEY_SET_VALUE),
                  [sv("artifact_dest"), day0_map]))
+        add_map(((tv("vdu_day0_variable"), self.FLAG_KEY_SET_VALUE),
+                 [sv("artifact_variable_id"), day0_variables_map]))
+        add_map(((tv("vdu_day0_custom_id"), self.FLAG_BLANK),
+                 [sv("vdu_artifact"), day0_vdu_map]))
 
         # -- End Artifact --
 
