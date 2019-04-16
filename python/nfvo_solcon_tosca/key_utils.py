@@ -1,3 +1,5 @@
+from dict_utils import SPLIT_CHAR
+
 class KeyUtils:
     """
     General utility methods to use on paths from this file
@@ -8,14 +10,14 @@ class KeyUtils:
         """
         Get the n last elements of the path, with their separators between them
         """
-        paths = path.split(".")
+        paths = path.split(SPLIT_CHAR)
         if len(paths) > 0:
-            return ".".join(paths[len(paths) - n:len(paths)])
+            return SPLIT_CHAR.join(paths[len(paths) - n:len(paths)])
         raise KeyError("Path {} is an invalid path to use in this method.".format(path))
 
     @staticmethod
     def get_path_index(path, index):
-        paths = path.split(".")
+        paths = path.split(SPLIT_CHAR)
         if len(paths) >= index:
             return paths[index]
         raise KeyError("Path {} is an invalid path to use in this method.".format(path))
@@ -23,17 +25,17 @@ class KeyUtils:
     @staticmethod
     def remove_path_first(path, n=1):
         """ Get the string without the first n elements of the path """
-        paths = path.split(".")
+        paths = path.split(SPLIT_CHAR)
         if len(paths) > 0:
-            return ".".join(paths[n:len(paths)])
+            return SPLIT_CHAR.join(paths[n:len(paths)])
         raise KeyError("Path {} is an invalid path to use in this method.".format(path))
 
     @staticmethod
     def remove_path_last(path, n=1):
         """ Get the string without the last n elements of the path """
-        paths = path.split(".")
+        paths = path.split(SPLIT_CHAR)
         if len(paths) > 0:
-            return ".".join(paths[:len(paths)-n])
+            return SPLIT_CHAR.join(paths[:len(paths)-n])
         raise KeyError("Path {} is an invalid path to use in this method.".format(path))
 
     @staticmethod
@@ -45,10 +47,10 @@ class KeyUtils:
         """
         Remove the given elem of the path, return the path string without that element
         """
-        paths = path.split(".")
+        paths = path.split(SPLIT_CHAR)
         del paths[elem]
-        return ".".join(paths)
+        return SPLIT_CHAR.join(paths)
 
     @staticmethod
     def get_path_level(path):
-        return path.count(".") + 1
+        return path.count(SPLIT_CHAR) + 1

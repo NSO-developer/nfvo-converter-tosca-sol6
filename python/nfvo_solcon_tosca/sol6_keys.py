@@ -70,7 +70,7 @@ class PathMaping:
             log.error("Could not find {} as a parent".format(elem))
             return ""
 
-        return "{}.{}".format(PathMaping.get_full_path(dic[elem][0], dic), dic[elem][1])
+        return "{}{}{}".format(PathMaping.get_full_path(dic[elem][0], dic), SPLIT_CHAR, dic[elem][1])
 
 
 class TOSCA_BASE(PathMaping):

@@ -26,7 +26,8 @@
     # ********************************
     # ** Virtual Compute Descriptor **
     # ********************************
-    vnfd_virt_compute_desc      = ["vnfd", "virtual-compute-desc.{}"]
+    vnfd_virt_compute_desc_base = ["vnfd", "virtual-compute-desc"]
+    vnfd_virt_compute_desc      = ["vnfd_virt_compute_desc_base", "{}"]
     vnfd_vcd_id                 = ["vnfd_virt_compute_desc", "id"]
     vnfd_vcd_flavor_name        = ["vnfd_virt_compute_desc", "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions:flavor-name-variable"]
     vnfd_virtual_cpu            = ["vnfd_virt_compute_desc", "virtual-cpu"]
@@ -35,12 +36,14 @@
     vnfd_vcd_cpu_arch           = ["vnfd_virtual_cpu", "cpu-architecture"]
     vnfd_vcd_cpu_oversub        = ["vnfd_virtual_cpu", "oversubscription-policy"]
     vnfd_vcd_vdu_cpu_req        = ["vnfd_virtual_cpu", "vdu-cpu-requirements"]
-    vnfd_vcd_mem_size           = ["vnfd_virt_compute_desc", "virtual-memory.size"]
+    vnfd_vcd_mem                = ["vnfd_virt_compute_desc", "virtual-memory"]
+    vnfd_vcd_mem_size           = ["vnfd_vcd_mem", "size"]
 
     # ********************************
     # ** Virtual Storage Descriptor **
     # ********************************
-    vnfd_virt_storage_desc      = ["vnfd", "virtual-storage-desc.{}"]
+    vnfd_virt_storage_desc_base = ["vnfd", "virtual-storage-desc"]
+    vnfd_virt_storage_desc      = ["vnfd_virt_storage_desc_base", "{}"]
     vnfd_virt_storage_id        = ["vnfd_virt_storage_desc", "id"]
     vnfd_virt_storage_type      = ["vnfd_virt_storage_desc", "type-of-storage"]
     VIRT_STORAGE_DEFAULT_VAL    = "root"
@@ -54,39 +57,48 @@
     df_id                       = ["deployment_flavor", "id"]
     df_desc                     = ["deployment_flavor", "description"]
     df_inst_level_default       = ["deployment_flavor", "default-instantiation-level"]
-    df_vdu_profile              = ["deployment_flavor", "vdu-profile.{}"]
+    df_vdu_profile_list         = ["deployment_flavor", "vdu-profile"]
+    df_vdu_profile              = ["df_vdu_profile_list", "{}"]
     df_vdu_prof_id              = ["df_vdu_profile", "id"]
     df_vdu_prof_inst_min        = ["df_vdu_profile", "min-number-of-instances"]
     df_vdu_prof_inst_max        = ["df_vdu_profile", "max-number-of-instances"]
-    df_vdu_prof_aff_group       = ["df_vdu_profile", "affinity-or-anti-affinity-group.{}"]
+    df_vdu_prof_aff_group_list  = ["df_vdu_profile", "affinity-or-anti-affinity-group"]
+    df_vdu_prof_aff_group       = ["df_vdu_prof_aff_group_list", "{}"]
     df_vdu_prof_aff_group_id    = ["df_vdu_prof_aff_group", "id"]
 
     # -- Instantiation Level
-    df_inst_level               = ["deployment_flavor", "instantiation-level.{}"]
+    df_inst_level_base          = ["deployment_flavor", "instantiation-level"]
+    df_inst_level               = ["df_inst_level_base", "{}"]
     df_inst_level_id            = ["df_inst_level", "id"]
     df_inst_level_desc          = ["df_inst_level", "description"]
-    df_inst_level_vdu_level     = ["df_inst_level", "vdu-level.{}"]
+    df_inst_level_vdu_level_lst = ["df_inst_level", "vdu-level"]
+    df_inst_level_vdu_level     = ["df_inst_level_vdu_level_lst", "{}"]
     df_inst_level_vdu_vdu       = ["df_inst_level_vdu_level", "id"]
     df_inst_level_vdu_num       = ["df_inst_level_vdu_level", "number-of-instances"]
     # -- Scaling Info
-    df_inst_scaling_info        = ["df_inst_level", "scaling-info.{}"]
+    df_inst_scaling_info_list   = ["df_inst_level", "scaling-info"]
+    df_inst_scaling_info        = ["df_inst_scaling_info_list", "{}"]
     df_inst_scaling_aspect      = ["df_inst_scaling_info", "id"]
     df_inst_scaling_level       = ["df_inst_scaling_info", "scale-level"]
 
-    df_scale_aspect             = ["deployment_flavor", "scaling-aspect.{}"]
+    df_scale_aspect_list        = ["deployment_flavor", "scaling-aspect"]
+    df_scale_aspect             = ["df_scale_aspect_list", "{}"]
     df_scale_aspect_id          = ["df_scale_aspect", "id"]
     df_scale_aspect_name        = ["df_scale_aspect", "name"]
     df_scale_aspect_desc        = ["df_scale_aspect", "description"]
     df_scale_aspect_max_level   = ["df_scale_aspect", "max-scale-level"]
     df_scale_aspect_delta_det   = ["df_scale_aspect", "aspect-delta-details"]
-    df_scale_aspect_deltas      = ["df_scale_aspect_delta_det", "deltas.{}"]
+    df_scale_aspect_deltas_list = ["df_scale_aspect_delta_det", "deltas"]
+    df_scale_aspect_deltas      = ["df_scale_aspect_deltas_list", "{}"]
     df_scale_aspect_deltas_id   = ["df_scale_aspect_deltas", "id"]
-    df_scale_aspect_vdu_delta   = ["df_scale_aspect_deltas", "vdu-delta.{}"]
+    df_scale_aspect_vdu_delta_lst = ["df_scale_aspect_deltas", "vdu-delta"]
+    df_scale_aspect_vdu_delta   = ["df_scale_aspect_vdu_delta_lst", "{}"]
     df_scale_aspect_vdu_id      = ["df_scale_aspect_vdu_delta", "id"]
     df_scale_aspect_vdu_num     = ["df_scale_aspect_vdu_delta", "number-of-instances"]
     df_scale_aspect_no_delta_VAL = "unknown"
 
-    df_affinity_group           = ["deployment_flavor", "affinity-or-anti-affinity-group.{}"]
+    df_affinity_group_list      = ["deployment_flavor", "affinity-or-anti-affinity-group"]
+    df_affinity_group           = ["df_affinity_group_list", "{}"]
     df_affinity_id              = ["df_affinity_group", "id"]
     df_affinity_type            = ["df_affinity_group", "type"]
     df_affinity_scope           = ["df_affinity_group", "scope"]
@@ -95,14 +107,16 @@
 
     df_lcm_config               = ["deployment_flavor", "lcm-operations-configuration"]
     df_lcm_heal_config          = ["df_lcm_config", "heal-vnf-op-config"]
-    df_heal_param               = ["df_lcm_heal_config", "parameter.{}"]
+    df_heal_param_base          = ["df_lcm_heal_config", "parameter"]
+    df_heal_param               = ["df_heal_param_base", "{}"]
     df_heal_param_key           = ["df_heal_param", "key"]
     df_heal_param_value         = ["df_heal_param", "value"]
 
     # ****************************
     # ** Virtual/External Links **
     # ****************************
-    virt_link_desc              = ["vnfd", "int-virtual-link-desc.{}"]
+    virt_link_desc_base         = ["vnfd", "int-virtual-link-desc"]
+    virt_link_desc              = ["virt_link_desc_base", "{}"]
     virt_link_desc_id           = ["virt_link_desc", "id"]
     virt_link_desc_desc         = ["virt_link_desc", "description"]
     virt_link_desc_conn         = ["virt_link_desc", "connectivity-type"]
@@ -112,7 +126,8 @@
     virt_link_desc_cidr         = ["virt_link_desc_add_params", "cidr-variable"]
     virt_link_desc_dhcp         = ["virt_link_desc_add_params", "dhcp-enabled-variable"]
 
-    ext_cpd                     = ["vnfd", "ext-cpd.{}"]
+    ext_cpd_base                = ["vnfd", "ext-cpd"]
+    ext_cpd                     = ["ext_cpd_base", "{}"]
     ext_cpd_id                  = ["ext_cpd", "id"]
     ext_cpd_protocol            = ["ext_cpd", "layer-protocol"]
     ext_cpd_virt_link           = ["ext_cpd", "int-virtual-link-desc"]
@@ -135,17 +150,24 @@
     vdu_name                    = ["vdu", "name"]
     vdu_desc                    = ["vdu", "description"]
     vdu_id                      = ["vdu", "id"]
-    vdu_boot_order              = ["vdu", "boot-order.{}"]
+    vdu_boot_order_list         = ["vdu", "boot-order"]
+    vdu_boot_order              = ["vdu_boot_order_list", "{}"]
     vdu_boot_key                = ["vdu_boot_order", "key"]
     vdu_boot_value              = ["vdu_boot_order", "value"]
-    vdu_vc_desc                 = ["vdu", "virtual-compute-desc.{}"]
-    vdu_vs_desc                 = ["vdu", "virtual-storage-desc.{}"]
-    vdu_sw_image_desc           = ["vdu", "sw-image-desc.{}"]
+    vdu_vc_desc_list            = ["vdu", "virtual-compute-desc"]
+    vdu_vc_desc                 = ["vdu_vc_desc_list", "{}"]
+    vdu_vs_desc_list            = ["vdu", "virtual-storage-desc"]
+    vdu_vs_desc                 = ["vdu_vs_desc_list", "{}"]
+    vdu_sw_image_desc_list      = ["vdu", "sw-image-desc"]
+    vdu_sw_image_desc           = ["vdu_sw_image_desc_list", "{}"]
+
+    vdu_artifact                = ["vdu", "tailf-etsi-rel3-nfvo-vnfm:artifact"]
 
     # ********************************
     # ** Internal Connection Points **
     # ********************************
-    int_cpd                     = ["vdu", "int-cpd.{}"]
+    int_cpd_list                = ["vdu", "int-cpd"]
+    int_cpd                     = ["int_cpd_list", "{}"]
     int_cpd_id                  = ["int_cpd", "id"]
     int_cpd_layer_prot          = ["int_cpd", "layer-protocol"]
     int_cpd_virt_link_desc      = ["int_cpd", "int-virtual-link-desc"]
@@ -170,7 +192,8 @@
     # *******************************
     # ** Software Image Descriptor **
     # *******************************
-    sw_img_desc                 = ["vnfd", "sw-image-desc.{}"]
+    sw_img_desc_base            = ["vnfd", "sw-image-desc"]
+    sw_img_desc                 = ["sw_img_desc_base", "{}"]
     sw_id                       = ["sw_img_desc", "id"]
     sw_name                     = ["sw_img_desc", "name"]
     sw_image_name_var           = ["sw_img_desc", "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions:image-name-variable"]
@@ -184,3 +207,17 @@
     sw_image                    = ["sw_img_desc", "image"]
     sw_operating_sys            = ["sw_img_desc", "operating-system"]
     sw_supp_virt_environ        = ["sw_img_desc", "supported-virtualization-environment"]
+
+    # **************
+    # ** Artifact **
+    # **************
+    artifact_base               = ["vnfd", "tailf-etsi-rel3-nfvo-vnfm:artifact"]
+    artifact                    = ["artifact_base", "{}"]
+    artifact_id                 = ["artifact", "id"]
+    artifact_dest               = ["artifact", "destination-name"]
+    artifact_url                = ["artifact", "url"]
+    artifact_variable_list      = ["artifact", "variable"]
+    artifact_variable           = ["artifact_variable_list", "{}"]
+    artifact_variable_id        = ["artifact_variable", "id"]
+    artifact_variable_desc      = ["artifact_variable", "description"]
+
