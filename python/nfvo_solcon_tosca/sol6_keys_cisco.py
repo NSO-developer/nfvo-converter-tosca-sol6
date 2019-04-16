@@ -196,15 +196,25 @@ class V2Map(V2MapBase):
         # *** End VDU Flavors ***
 
         # *** Day0 Variables ***
-
+        # Get the unique names for all the artifacts across all VDUs
+        day0_unique = {}
         day0_map = []
         for vdu in vdu_map:
             cur_path = MapElem.format_path(vdu, tv("vdu_day0_list"), use_value=False)
-            cur_day0_map = self.generate_map(cur_path, None, parent=vdu)
-            day0_map.append(cur_day0_map)
+            cv = get_path_value(cur_path, dict_tosca, must_exist=False)
+            if not cv:
+                continue
+
+            for cd0 in cv:
+                day0_unique[cd0] = True
+
+            cur_day0 = self.generate_map(cur_path, None, parent=vdu)
+            day0_map.append(cur_day0)
 
         day0_map = flatten(day0_map)
+        print(day0_unique)
         print(day0_map)
+        print(sv("artifact_id"))
 
         # *** End Day0 Variables ***
 
@@ -700,6 +710,14 @@ class V2Map(V2MapBase):
                  [sv("df_vdu_prof_aff_group_id"), aff_vdu_map]))
         # -- End Affinity or Antiaffinity Groups --
         # -- End Deployment Flavor --
+
+        # -- Artifact --
+        add_map(((tv("vdu_day0"), self.FLAG_KEY_SET_VALUE),
+                 [sv("artifact_id"), day0_map]))
+        add_map(((tv("vdu_day0_file"), self.FLAG_BLANK),
+                 [sv("artifact_dest"), day0_map]))
+
+        # -- End Artifact --
 
     def set_value(self, val, path, index):
         return (val, self.FLAG_KEY_SET_VALUE), [path, [MapElem(val, index)]]

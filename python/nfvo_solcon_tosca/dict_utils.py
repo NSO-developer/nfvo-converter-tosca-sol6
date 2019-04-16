@@ -3,6 +3,7 @@ log = logging.getLogger(__name__)
 
 SPLIT_CHAR = "."
 
+
 def get_path_value(path, cur_dict, must_exist=True, ensure_dict=False, no_msg=False):
     """
     topology_template.node_templates.vnf.properties.descriptor_id
