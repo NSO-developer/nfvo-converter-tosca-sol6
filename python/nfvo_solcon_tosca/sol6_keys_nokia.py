@@ -60,6 +60,7 @@ class V2Map(V2MapBase):
         # Internal CP
         icp_mapping = self.generate_map(None, tv("int_cpd_identifier"),
                                         field_filter=self.icp_mapped)
+        print(icp_mapping)
 
         # We have the icp mapping, which is
         # [oamICpd -> 0, parent=(None), ...]
@@ -73,6 +74,7 @@ class V2Map(V2MapBase):
         # External CP
         ecp_mapping = self.generate_map(None, tv("ext_cpd_identifier"))
         ecp_icp_vdus = self.generate_map(None, tv("ext_cpd_identifier"))
+
         # Map ext cpds to connected ICPs then get the VDUs from those ICPs
         for ecp in ecp_icp_vdus:
             cur_icp = get_path_value(
@@ -261,6 +263,6 @@ class V2Map(V2MapBase):
 
     def icp_mapped(self, a):
         """Check if the given int_cpd has the required value"""
-        return get_path_value(self.tv("int_cpd_cond".format(SPLIT_CHAR)), a[get_dict_key(a)], must_exist=False,
+        return get_path_value(self.tv("int_cpd_cond").format(SPLIT_CHAR), a[get_dict_key(a)], must_exist=False,
                               no_msg=True)
 
