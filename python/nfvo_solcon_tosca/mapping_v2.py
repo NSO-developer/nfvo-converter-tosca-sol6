@@ -180,7 +180,7 @@ class V2Mapping:
 
         # We now have a list of dicts
         # Get the names of each element in the lists
-        names = []
+        names = []F
 
         for elem in to_map:
             if isinstance(elem, dict):
