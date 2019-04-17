@@ -18,7 +18,7 @@
     vnfd_config_autoscale       = ["vnfd_config_props", "auto-scalable"]
 
 
-    VALID_PROTOCOLS_VAL         = ["Ethernet", "IPv4", "IPv6", "MPLS", "ODU2", "Pseudo-Wire"]
+    VALID_PROTOCOLS_VAL         = ["ethernet", "ipv4", "ipv6", "mpls", "odu2", "pseudo-wire"]
     VALID_DISK_FORMATS_VAL      = ["qcow2", "raw", "vmdk"]
     VALID_CONTAINER_FORMATS_VAL = ["aki", "ami", "ari", "bare", "docker", "ova", "ovf"]
     VALID_AFF_SCOPES_VAL        = ["nfvi-node", "nfvi-pop", "zone", "zone-group"]
