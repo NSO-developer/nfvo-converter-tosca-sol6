@@ -14,8 +14,8 @@
     vnfd_vnfm_info              = ["vnfd", "vnfm-info"]
 
     vnfd_config_props           = ["vnfd", "configurable-properties"]
-    vnfd_config_autoheal        = ["vnfd_config_props", "auto-healable"]
-    vnfd_config_autoscale       = ["vnfd_config_props", "auto-scalable"]
+    vnfd_config_autoheal        = ["vnfd_config_props", "is-auto-heal-enabled"]
+    vnfd_config_autoscale       = ["vnfd_config_props", "is-auto-scalable-enabled"]
 
 
     VALID_PROTOCOLS_VAL         = ["ethernet", "ipv4", "ipv6", "mpls", "odu2", "pseudo-wire"]
@@ -29,7 +29,7 @@
     vnfd_virt_compute_desc_base = ["vnfd", "virtual-compute-desc"]
     vnfd_virt_compute_desc      = ["vnfd_virt_compute_desc_base", "{}"]
     vnfd_vcd_id                 = ["vnfd_virt_compute_desc", "id"]
-    vnfd_vcd_flavor_name        = ["vnfd_virt_compute_desc", "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions:flavor-name-variable"]
+    vnfd_vcd_flavor_name        = ["vnfd_virt_compute_desc", "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions:flavour-name-variable"]
     vnfd_virtual_cpu            = ["vnfd_virt_compute_desc", "virtual-cpu"]
     vnfd_vcd_cpu_num            = ["vnfd_virtual_cpu", "num-virtual-cpu"]
     vnfd_vcd_cpu_clock          = ["vnfd_virtual_cpu", "clock"]
@@ -132,9 +132,9 @@
     ext_cpd_protocol            = ["ext_cpd", "layer-protocol"]
     ext_cpd_virt_link           = ["ext_cpd", "int-virtual-link-desc"]
     ext_cpd_role                = ["ext_cpd", "role"]
-    ext_cpd_vdu                 = ["ext_cpd", "vdu"]
+    ext_cpd_vdu                 = ["ext_cpd", "int-cpd"]
     ext_cpd_vdu_id              = ["ext_cpd_vdu", "vdu-id"]
-    ext_cpd_int_cpd_id          = ["ext_cpd_vdu", "int-cpd-id"]
+    ext_cpd_int_cpd_id          = ["ext_cpd_vdu", "cpd"]
 
 
     #ext_cpd_int_cpd             = ["ext_cpd", "int-cpd"]

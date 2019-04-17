@@ -120,7 +120,7 @@ class SolCon:
         if self.args.prune:
             cnfv = dict_utils.remove_empty_from_dict(cnfv)
         # Put the data:esti-nfv:vnf tags at the base
-        cnfv = {'data': {'etsi-nfv:nfv': cnfv}}
+        cnfv = {'data': {'etsi-nfv-descriptors:nfv': cnfv}}
 
         json_output = json.dumps(cnfv, indent=2)
 
