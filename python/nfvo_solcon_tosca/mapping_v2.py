@@ -353,6 +353,17 @@ class MapElem:
         return [MapElem.basic_map(n) for n in range(num)]
 
     @staticmethod
+    def get_parent_list(map_list):
+        """
+        Returns a list that contains the parent mappings of each element
+        :param map_list:
+        :return:
+        """
+        if not isinstance(map_list, list):
+            raise TypeError("Expected a list of MapElems")
+        return [m.parent_map for m in map_list]
+
+    @staticmethod
     def format_path(elem, path, use_value=True):
         """
         Formats the provided path with the mapping that is stored internally
