@@ -104,12 +104,11 @@ class SOL6ConverterCisco(Sol6Converter):
         return value
 
     # Flag option formatting methods
-    @staticmethod
-    def _handle_default_root(option, path, value):
+    def _handle_default_root(self, option, path, value):
         if not option:
             return value
         if not value:
-            return SOL6.VIRT_STORAGE_DEFAULT
+            return self.variables["sol6"]["VIRT_STORAGE_DEFAULT_VAL"]
         return value
 
     @staticmethod

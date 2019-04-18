@@ -36,6 +36,7 @@ class Sol6Converter:
         self.format_as_disk     = False
         self.format_as_container = False
         self.format_as_aff_scope = False
+        self.format_as_storage = False
         self.format_invalid_none = False
         self.fail_silent        = False
         self.req_parent         = False
@@ -203,7 +204,8 @@ class Sol6Converter:
         value = self._append_to_list(self.append_list, f_sol6_path, value)
         value = self._format_as_valid(self.format_as_ip, f_sol6_path, value,
                                       self.variables["sol6"]["VALID_PROTOCOLS_VAL"],
-                                      none_found=self.format_invalid_none)
+                                      none_found=self.format_invalid_none,
+                                      prefix=self.variables["sol6"]["PROTOCOLS_PREFIX_VAL"])
         value = self._format_as_valid(self.format_as_disk, f_sol6_path, value,
                                       self.variables["sol6"]["VALID_DISK_FORMATS_VAL"],
                                       none_found=self.format_invalid_none)
@@ -213,6 +215,9 @@ class Sol6Converter:
         value = self._format_as_valid(self.format_as_aff_scope, f_sol6_path, value,
                                       self.variables["sol6"]["VALID_AFF_SCOPES_VAL"],
                                       none_found=self.format_invalid_none)
+        value = self._format_as_valid(self.format_as_storage, f_sol6_path, value,
+                                      self.variables["sol6"]["VALID_STORAGE_TYPES_VAL"],
+                                      none_found=self.format_invalid_none, fuzzy=True)
         value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
         value = self._check_for_null(value)
 
@@ -234,6 +239,7 @@ class Sol6Converter:
         self.format_as_container = False
         self.format_as_disk     = False
         self.format_as_aff_scope = False
+        self.format_as_storage = False
         self.fail_silent        = False
         self.req_parent         = False
         self.format_invalid_none = False
@@ -276,6 +282,8 @@ class Sol6Converter:
                 self.format_as_container = True
             if flag == keys.FLAG_FORMAT_AFF_SCOPE:
                 self.format_as_aff_scope = True
+            if flag == keys.FLAG_FORMAT_STORAGE_TYPE:
+                self.format_as_storage = True
             if flag == keys.FLAG_FORMAT_INVALID_NONE:
                 self.format_invalid_none = True
             if flag == keys.FLAG_UNIT_GB:
@@ -325,7 +333,7 @@ class Sol6Converter:
         return value[0]
 
     @staticmethod
-    def _format_as_valid(option, path, value, valid_formats, none_found=False):
+    def _format_as_valid(option, path, value, valid_formats, none_found=False, prefix="", fuzzy=False):
         """
         Take the value, and a list of valid options, see if the value is any of the valid ones.
         Return the output as a list (for some reason)
@@ -336,15 +344,20 @@ class Sol6Converter:
         # Turn it into a list if it isn't already
         if not isinstance(value, list):
             value = [value]
+        else:
+            # If it is, make sure it isn't a reference to the tosca_vnf
+            value = list(value)
         for i, item in enumerate(value):
-            found, value[i] = Sol6Converter._fmt_val(item, valid_formats, none_found)
+            found, value[i] = Sol6Converter._fmt_val(item, valid_formats, none_found, fuzzy=fuzzy)
             if not found:
                 log.error("Value '{}' not found in valid formats: {}".format(item, valid_formats))
+            if value[i]:
+                value[i] = prefix + value[i]
         # Any value not matching will be returned with a (INVALID) at the end
         return value
 
     @staticmethod
-    def _fmt_val(val, valid_opts, return_none):
+    def _fmt_val(val, valid_opts, return_none, fuzzy=False):
         """Format the value with the list, called from _format_as_valid"""
         tmp_val = val.lower()
 
@@ -353,7 +366,11 @@ class Sol6Converter:
             tmp_val = tmp_val.replace("_", "-")
             # We found a valid mapping, so set the value to the actual formatted value
             if tmp_val == tmp_opt:
-                return True, opt
+                return True, str(opt)
+            # Do more lax checking if specified
+            if fuzzy:
+                if tmp_val in tmp_opt or tmp_opt in tmp_val:
+                    return True, str(opt)
 
         if return_none:
             return False, None
