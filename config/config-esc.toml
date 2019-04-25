@@ -50,6 +50,16 @@ version = "0.1.0"
     vnf_lcm_conf            = ["vnf_prop", "lcm_operations_configuration"]
     vnf_lcm_heal            = ["vnf_lcm_conf", "heal"]
     vnf_lcm_heal_item       = ["vnf_lcm_heal", "{}"]
+    # Additional configurable parameters
+    vnf_interfaces          = ["vnf", "interfaces"]
+    vnf_vnflcm              = ["vnf_interfaces", "Vnflcm"]
+    vnf_instantiate         = ["vnf_vnflcm", "instantiate"]
+    vnf_inst_inputs         = ["vnf_instantiate", "inputs"]
+    vnf_additional_param_list= ["vnf_inst_inputs", "additional_parameters"]
+    vnf_add_parameter       = ["vnf_additional_param_list", "parameters"]
+    vnf_add_param_elem      = ["vnf_add_parameter", "{}"]
+    # These are the variables that will be taken from parameters_list and put into the sol6 VNFD
+    ADD_PARAMS_VAL          = ["BOOTUP_TIME_SF", "BOOTUP_TIME_CF", "CHASSIS_KEY"]
 
     # ** VDU **
     vdu                     = ["node_templates", "{}"]
@@ -176,3 +186,4 @@ version = "0.1.0"
 
 [tosca.input_values]
     VIM_FLAVOR = "VIM_FLAVOR_INPUT"
+

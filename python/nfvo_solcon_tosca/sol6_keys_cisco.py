@@ -116,7 +116,7 @@ class V2Map(V2MapBase):
         # vnfd.vdu.{c1->0}.boot-order.{1-cf-boot->0}.key
         boot_map = []
         for vdu in vdu_map:
-            tosca_path = MapElem.format_path(vdu, tv("vdu_boot"), use_value=False, )
+            tosca_path = MapElem.format_path(vdu, tv("vdu_boot"), use_value=False)
             boot_data = get_path_value(tosca_path, self.dict_tosca, must_exist=False, no_msg=True)
 
             if boot_data:
@@ -125,6 +125,22 @@ class V2Map(V2MapBase):
 
                 boot_map.append(b_map)
         boot_map = flatten(boot_map)
+
+        # *** VNFD Additional Configurable Parameters ***
+        # TODO: Determine if the value needs to be read from the yaml
+        # Right now all this does is read an array variable from the esc toml, and if those variables
+        # match with values in additional_parameters.parmeters then they are added just as a key
+        conf_props = get_path_value(tv("vnf_add_parameter"), dict_tosca, must_exist=False)
+        conf_props_map = []
+        if conf_props:
+            existing_props = []
+            # Just for extra validation
+            for prop in tv("ADD_PARAMS_VAL"):
+                if prop in conf_props:
+                    existing_props.append(prop)
+            conf_props_map = self.generate_map_from_list(existing_props)
+
+        # *** End Additional Parameters ***
 
         # *** VDU Flavors ***
         # vim_flavors = [VDU, {"get_input": FLAVOR_NAME}], so get the second param
@@ -532,6 +548,8 @@ class V2Map(V2MapBase):
         # -- Set Values --
         add_map(((tv("vnf_conf_autoheal"), self.FLAG_BLANK),           sv("vnfd_config_autoheal")))
         add_map(((tv("vnf_conf_autoscale"), self.FLAG_BLANK),          sv("vnfd_config_autoscale")))
+        add_map(((tv("vnf_add_param_elem"), self.FLAG_VAR),
+                 [sv("vnfd_config_add_key"), conf_props_map]))
 
         # Create the internal virtual links specified by the YAML
         add_map((("{}", self.FLAG_KEY_SET_VALUE),
