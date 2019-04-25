@@ -16,6 +16,10 @@
     vnfd_config_props           = ["vnfd", "configurable-properties"]
     vnfd_config_autoheal        = ["vnfd_config_props", "auto-healable"]
     vnfd_config_autoscale       = ["vnfd_config_props", "auto-scalable"]
+    vnfd_config_additional      = ["vnfd_config_props", "additional-configurable-property"]
+    vnfd_config_add_elem        = ["vnfd_config_additional", "{}"]
+    vnfd_config_add_key         = ["vnfd_config_add_elem", "key"]
+    vnfd_config_add_value       = ["vnfd_config_add_elem", "value"]
 
 
     VALID_PROTOCOLS_VAL         = ["Ethernet", "IPv4", "IPv6", "MPLS", "ODU2", "Pseudo-Wire"]
