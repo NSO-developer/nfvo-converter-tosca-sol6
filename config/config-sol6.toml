@@ -14,8 +14,13 @@
     vnfd_vnfm_info              = ["vnfd", "vnfm-info"]
 
     vnfd_config_props           = ["vnfd", "configurable-properties"]
+
     vnfd_config_autoheal        = ["vnfd_config_props", "is-auto-heal-enabled"]
     vnfd_config_autoscale       = ["vnfd_config_props", "is-auto-scalable-enabled"]
+    vnfd_config_additional      = ["vnfd_config_props", "additional-configurable-property"]
+    vnfd_config_add_elem        = ["vnfd_config_additional", "{}"]
+    vnfd_config_add_key         = ["vnfd_config_add_elem", "key"]
+    vnfd_config_add_value       = ["vnfd_config_add_elem", "value"]
 
 
     PROTOCOLS_PREFIX_VAL        = "etsi-nfv-descriptors:"
@@ -225,4 +230,3 @@
     artifact_variable           = ["artifact_variable_list", "{}"]
     artifact_variable_id        = ["artifact_variable", "id"]
     artifact_variable_desc      = ["artifact_variable", "description"]
-
