@@ -274,19 +274,11 @@ class V2Map(V2MapBase):
                 if virt_link:
                     icps_to_create.append(virt_link)
                 if layer_protocol:
-                    # Based on how the layer protocol has changed, we need to add another basic mapping
-                    if not isinstance(layer_protocol, list):
-                        layer_protocol = [layer_protocol]
-                    # No tosca values, and this is probably going to be a single-element list most of the time
-                    lp_map = self.generate_map_from_list(layer_protocol, map_args={"none_key": True})
-                    MapElem.add_parent_mapping(lp_map, icp.copy())
-
-                    for lp in lp_map:
-                        icp_create_layer_prot.append(lp)
+                    icp_create_layer_prot.append(icp.copy())
 
             icps_create_map = self.generate_map_from_list(icps_to_create)
-            # Remove any gaps in the parent mapping, which is the actually important one
-            MapElem.ensure_map_values(MapElem.get_parent_list(icp_create_layer_prot), start_val=0)
+            # Remove any gaps in the mapping
+            MapElem.ensure_map_values(icp_create_layer_prot, start_val=0)
 
             # Get the NICs that are assigned to management
             # This does not take into account if they are supposed to be mapped to an ECP
