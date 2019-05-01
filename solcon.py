@@ -124,12 +124,13 @@ class SolCon:
 
         json_output = json.dumps(cnfv, indent=2)
 
+        # Get the absolute path, since apparently relative paths sometimes have issues with things?
         if self.args.output:
-            if not os.path.exists(self.args.output):
-                dirs = self.args.output
-                # Get the path except the last
-                dirs = "/".join(dirs.split("/")[0:-1])
-                os.makedirs(dirs, exist_ok=True)
+            abs_path = os.path.abspath(self.args.output)
+            # Also python has a function for what I was sloppily doing, so use that
+            abs_dir = os.path.dirname(abs_path)
+            if not os.path.exists(abs_dir):
+                os.makedirs(abs_dir, exist_ok=True)
 
             with open(self.args.output, 'w') as f:
                 f.writelines(json_output)
