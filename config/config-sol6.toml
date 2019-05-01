@@ -14,18 +14,20 @@
     vnfd_vnfm_info              = ["vnfd", "vnfm-info"]
 
     vnfd_config_props           = ["vnfd", "configurable-properties"]
-    vnfd_config_autoheal        = ["vnfd_config_props", "auto-healable"]
-    vnfd_config_autoscale       = ["vnfd_config_props", "auto-scalable"]
+    vnfd_config_autoheal        = ["vnfd_config_props", "is-auto-heal-enabled"]
+    vnfd_config_autoscale       = ["vnfd_config_props", "is-auto-scalable-enabled"]
     vnfd_config_additional      = ["vnfd_config_props", "additional-configurable-property"]
     vnfd_config_add_elem        = ["vnfd_config_additional", "{}"]
     vnfd_config_add_key         = ["vnfd_config_add_elem", "key"]
     vnfd_config_add_value       = ["vnfd_config_add_elem", "value"]
 
 
-    VALID_PROTOCOLS_VAL         = ["Ethernet", "IPv4", "IPv6", "MPLS", "ODU2", "Pseudo-Wire"]
+    PROTOCOLS_PREFIX_VAL        = "etsi-nfv-descriptors:"
+    VALID_PROTOCOLS_VAL         = ["ethernet", "ipv4", "ipv6", "mpls", "odu2", "pseudo-wire"]
     VALID_DISK_FORMATS_VAL      = ["qcow2", "raw", "vmdk"]
     VALID_CONTAINER_FORMATS_VAL = ["aki", "ami", "ari", "bare", "docker", "ova", "ovf"]
     VALID_AFF_SCOPES_VAL        = ["nfvi-node", "nfvi-pop", "zone", "zone-group"]
+    VALID_STORAGE_TYPES_VAL     = ["ephemeral-storage", "root-storage", "swap-storage", "cisco-etsi-nfvo:volume-storage"]
 
     # ********************************
     # ** Virtual Compute Descriptor **
@@ -33,7 +35,7 @@
     vnfd_virt_compute_desc_base = ["vnfd", "virtual-compute-desc"]
     vnfd_virt_compute_desc      = ["vnfd_virt_compute_desc_base", "{}"]
     vnfd_vcd_id                 = ["vnfd_virt_compute_desc", "id"]
-    vnfd_vcd_flavor_name        = ["vnfd_virt_compute_desc", "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions:flavor-name-variable"]
+    vnfd_vcd_flavor_name        = ["vnfd_virt_compute_desc", "cisco-etsi-nfvo-sol1-vnfd-extensions:flavor-name-variable"]
     vnfd_virtual_cpu            = ["vnfd_virt_compute_desc", "virtual-cpu"]
     vnfd_vcd_cpu_num            = ["vnfd_virtual_cpu", "num-virtual-cpu"]
     vnfd_vcd_cpu_clock          = ["vnfd_virtual_cpu", "clock"]
@@ -50,7 +52,7 @@
     vnfd_virt_storage_desc      = ["vnfd_virt_storage_desc_base", "{}"]
     vnfd_virt_storage_id        = ["vnfd_virt_storage_desc", "id"]
     vnfd_virt_storage_type      = ["vnfd_virt_storage_desc", "type-of-storage"]
-    VIRT_STORAGE_DEFAULT_VAL    = "root"
+    VIRT_STORAGE_DEFAULT_VAL    = "root-storage"
     vnfd_virt_storage_size      = ["vnfd_virt_storage_desc", "size-of-storage"]
     vnfd_virt_storage_sw_image  = ["vnfd_virt_storage_desc", "sw-image-desc"]
 
@@ -77,7 +79,7 @@
     df_inst_level_desc          = ["df_inst_level", "description"]
     df_inst_level_vdu_level_lst = ["df_inst_level", "vdu-level"]
     df_inst_level_vdu_level     = ["df_inst_level_vdu_level_lst", "{}"]
-    df_inst_level_vdu_vdu       = ["df_inst_level_vdu_level", "id"]
+    df_inst_level_vdu_vdu       = ["df_inst_level_vdu_level", "vdu-id"]
     df_inst_level_vdu_num       = ["df_inst_level_vdu_level", "number-of-instances"]
     # -- Scaling Info
     df_inst_scaling_info_list   = ["df_inst_level", "scaling-info"]
@@ -126,7 +128,7 @@
     virt_link_desc_conn         = ["virt_link_desc", "connectivity-type"]
     virt_link_desc_protocol     = ["virt_link_desc_conn", "layer-protocol"]
     virt_link_desc_flow         = ["virt_link_desc_conn", "flow-pattern"]
-    virt_link_desc_add_params   = ["virt_link_desc", "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions:additional-sol1-parameters"]
+    virt_link_desc_add_params   = ["virt_link_desc", "cisco-etsi-nfvo-sol1-vnfd-extensions:additional-sol1-parameters"]
     virt_link_desc_cidr         = ["virt_link_desc_add_params", "cidr-variable"]
     virt_link_desc_dhcp         = ["virt_link_desc_add_params", "dhcp-enabled-variable"]
 
@@ -136,9 +138,9 @@
     ext_cpd_protocol            = ["ext_cpd", "layer-protocol"]
     ext_cpd_virt_link           = ["ext_cpd", "int-virtual-link-desc"]
     ext_cpd_role                = ["ext_cpd", "role"]
-    ext_cpd_vdu                 = ["ext_cpd", "vdu"]
+    ext_cpd_vdu                 = ["ext_cpd", "int-cpd"]
     ext_cpd_vdu_id              = ["ext_cpd_vdu", "vdu-id"]
-    ext_cpd_int_cpd_id          = ["ext_cpd_vdu", "int-cpd-id"]
+    ext_cpd_int_cpd_id          = ["ext_cpd_vdu", "cpd"]
 
 
     #ext_cpd_int_cpd             = ["ext_cpd", "int-cpd"]
@@ -165,7 +167,7 @@
     vdu_sw_image_desc_list      = ["vdu", "sw-image-desc"]
     vdu_sw_image_desc           = ["vdu_sw_image_desc_list", "{}"]
 
-    vdu_artifact                = ["vdu", "tailf-etsi-rel3-nfvo-vnfm:artifact"]
+    vdu_artifact                = ["vdu", "cisco-etsi-nfvo:artifact"]
 
     # ********************************
     # ** Internal Connection Points **
@@ -176,22 +178,22 @@
     int_cpd_layer_prot          = ["int_cpd", "layer-protocol"]
     int_cpd_virt_link_desc      = ["int_cpd", "int-virtual-link-desc"]
     int_cpd_role                = ["int_cpd", "role"]
-    int_cpd_interface_id        = ["int_cpd", "tailf-etsi-rel3-nfvo-vnfm:interface-id"]
-    int_cpd_management          = ["int_cpd", "tailf-etsi-rel3-nfvo-vnfm:management"]
+    int_cpd_interface_id        = ["int_cpd", "cisco-etsi-nfvo:interface-id"]
+    int_cpd_management          = ["int_cpd", "cisco-etsi-nfvo:management"]
     int_cpd_management_VAL      = "[null]"
-    int_cpd_additional_params   = ["int_cpd", "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions:additional-sol1-parameters"]
+    int_cpd_additional_params   = ["int_cpd", "cisco-etsi-nfvo-sol1-vnfd-extensions:additional-sol1-parameters"]
     int_cpd_allowed_addr        = ["int_cpd_additional_params", "allowed-address-variable"]
     int_cpd_ip_addr             = ["int_cpd_additional_params", "ip-address-variable"]
     int_cpd_security            = ["int_cpd_additional_params", "security-group-variable"]
 
     KEY_VIRT_LINK_MGMT_VAL      = "VIM_NETWORK_MANAGEMENT-VL"
-    KEY_VIRT_LINK_MGMT_PROT_VAL = "IPv4"
+    KEY_VIRT_LINK_MGMT_PROT_VAL = "etsi-nfv-descriptors:ipv4"
     KEY_VIRT_LINK_ORCH_VAL      = "VIM_NETWORK_ORCHESTRATION-VL"
-    KEY_VIRT_LINK_ORCH_PROT_VAL = "IPv4"
+    KEY_VIRT_LINK_ORCH_PROT_VAL = "etsi-nfv-descriptors:ipv4"
     KEY_EXT_CP_MGMT_VAL         = "VIM_NETWORK_MANAGEMENT"
-    KEY_EXT_CP_MGMT_PROT_VAL    = "IPv4"
+    KEY_EXT_CP_MGMT_PROT_VAL    = "etsi-nfv-descriptors:ipv4"
     KEY_EXT_CP_ORCH_VAL         = "VIM_NETWORK_ORCHESTRATION"
-    KEY_EXT_CP_ORCH_PROT_VAL    = "IPv4"
+    KEY_EXT_CP_ORCH_PROT_VAL    = "etsi-nfv-descriptors:ipv4"
 
     # *******************************
     # ** Software Image Descriptor **
@@ -200,9 +202,12 @@
     sw_img_desc                 = ["sw_img_desc_base", "{}"]
     sw_id                       = ["sw_img_desc", "id"]
     sw_name                     = ["sw_img_desc", "name"]
-    sw_image_name_var           = ["sw_img_desc", "tailf-etsi-rel3-nfvo-vnfm-sol1-vnfd-extensions:image-name-variable"]
+    sw_image_name_var           = ["sw_img_desc", "cisco-etsi-nfvo-sol1-vnfd-extensions:image-name-variable"]
     sw_version                  = ["sw_img_desc", "version"]
     sw_checksum                 = ["sw_img_desc", "checksum"]
+    sw_checksum_hash            = ["sw_checksum", "hash"]
+    sw_checksum_algorithm       = ["sw_checksum", "algorithm"]
+    sw_checksum_algorithm_VAL    = "sha-256"
     sw_container_format         = ["sw_img_desc", "container-format"]
     sw_disk_format              = ["sw_img_desc", "disk-format"]
     sw_min_disk                 = ["sw_img_desc", "min-disk"]
@@ -215,7 +220,7 @@
     # **************
     # ** Artifact **
     # **************
-    artifact_base               = ["vnfd", "tailf-etsi-rel3-nfvo-vnfm:artifact"]
+    artifact_base               = ["vnfd", "cisco-etsi-nfvo:artifact"]
     artifact                    = ["artifact_base", "{}"]
     artifact_id                 = ["artifact", "id"]
     artifact_dest               = ["artifact", "destination-name"]

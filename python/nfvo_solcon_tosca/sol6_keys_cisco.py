@@ -293,6 +293,7 @@ class V2Map(V2MapBase):
                     icp_create_layer_prot.append(icp.copy())
 
             icps_create_map = self.generate_map_from_list(icps_to_create)
+            # Remove any gaps in the mapping
             MapElem.ensure_map_values(icp_create_layer_prot, start_val=0)
 
             # Get the NICs that are assigned to management
@@ -554,7 +555,7 @@ class V2Map(V2MapBase):
         # Create the internal virtual links specified by the YAML
         add_map((("{}", self.FLAG_KEY_SET_VALUE),
                  [sv("virt_link_desc_id"), icps_create_map]))
-        add_map(((tv("int_cpd_layer_prot"), self.FLAG_FORMAT_IP),
+        add_map(((tv("int_cpd_layer_prot"), (self.FLAG_FORMAT_IP, self.FLAG_LIST_FIRST)),
                  [sv("virt_link_desc_protocol"), icp_create_layer_prot]))
 
         add_map(((tv("int_cpd_cidr"), (self.FLAG_VAR, self.FLAG_FAIL_SILENT)),
@@ -571,8 +572,9 @@ class V2Map(V2MapBase):
         if create_ext_mgmt:
             add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_VAL"),
                                     sv("virt_link_desc_id"), cur_ecp)))
+            # For these I need a mapping of (None -> 0, parent=(val -> cur_ecp))
             add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_PROT_VAL"),
-                                    sv("virt_link_desc_protocol"), cur_ecp)))
+                                    sv("virt_link_desc_protocol"), cur_ecp, prefix_index=0)))
 
             add_map((self.set_value(sv("KEY_EXT_CP_MGMT_VAL"), sv("ext_cpd_id"), cur_ecp)))
             add_map((self.set_value(sv("KEY_EXT_CP_MGMT_PROT_VAL"),
@@ -585,7 +587,7 @@ class V2Map(V2MapBase):
             add_map((self.set_value(sv("KEY_VIRT_LINK_ORCH_VAL"),
                                     sv("virt_link_desc_id"), cur_ecp)))
             add_map((self.set_value(sv("KEY_VIRT_LINK_ORCH_PROT_VAL"),
-                                    sv("virt_link_desc_protocol"), cur_ecp)))
+                                    sv("virt_link_desc_protocol"), cur_ecp, prefix_index=0)))
 
             add_map((self.set_value(sv("KEY_EXT_CP_ORCH_VAL"), sv("ext_cpd_id"), cur_ecp)))
             add_map((self.set_value(sv("KEY_EXT_CP_ORCH_PROT_VAL"),
@@ -677,7 +679,12 @@ class V2Map(V2MapBase):
         add_map(((tv("sw_name"), self.FLAG_VAR),
                  [sv("sw_image_name_var"), sw_map]))
         add_map(((tv("sw_version"), self.FLAG_BLANK),             [sv("sw_version"), sw_map]))
-        add_map(((tv("sw_checksum"), self.FLAG_BLANK),            [sv("sw_checksum"), sw_map]))
+        add_map(((tv("sw_checksum"), self.FLAG_BLANK),            [sv("sw_checksum_hash"), sw_map]))
+        # There is only one option for checksum algorithm right now, it's hardcoded in NFVO to SHA256
+        for i, swm in enumerate(sw_map):
+            add_map((self.set_value(sv("sw_checksum_algorithm_VAL"),
+                                    MapElem.format_path(swm, sv("sw_checksum_algorithm")), i)))
+
         add_map(((tv("sw_container_fmt"), self.FLAG_BLANK),
                  [sv("sw_container_format"), sw_map]))
         add_map(((tv("sw_disk_fmt"), self.FLAG_BLANK),
@@ -761,9 +768,6 @@ class V2Map(V2MapBase):
                  [sv("vdu_artifact"), day0_vdu_map]))
 
         # -- End Artifact --
-
-    def set_value(self, val, path, index):
-        return (val, self.FLAG_KEY_SET_VALUE), [path, [MapElem(val, index)]]
 
     def int_cp_mapping(self, names, map_start, **kwargs):
         if "filtered" not in kwargs or "vdu_map" not in kwargs:

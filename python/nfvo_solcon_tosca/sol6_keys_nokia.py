@@ -94,6 +94,22 @@ class V2Map(V2MapBase):
         # Virtual Link mapping
         virt_link_mapping = self.generate_map(None, tv("virtual_link_identifier"))
 
+        # We need a special mapping for handling the layer protocols
+        # We need to specify the list element for layer-protocols[i].protocol = 'whatever'
+        vl_layer_protocols_map = []
+        for vcm in virt_link_mapping:
+            cur_path = MapElem.format_path(vcm, tv("virt_link_protocol"), use_value=False)
+            cur_prot = get_path_value(cur_path, dict_tosca)
+            if not isinstance(cur_prot, list):
+                cur_prot = [cur_prot]
+
+            # No tosca values, and this is probably going to be a single-element list most of the time
+            lp_map = self.generate_map_from_list(cur_prot, map_args={"none_key": True})
+            MapElem.add_parent_mapping(lp_map, vcm.copy())
+
+            for lp in lp_map:
+                vl_layer_protocols_map.append(lp)
+
         # ** Virtual Compute, Virtual Storage, Software mappings **
         vdu_vc_mapping = []
         vdu_vs_mapping = []
@@ -153,7 +169,7 @@ class V2Map(V2MapBase):
         # ** Virtual Storage **
         add_map(((tv("virtual_storage"), self.FLAG_KEY_SET_VALUE),
                  [sv("vnfd_virt_storage_id"), virt_storage_mapping]))
-        add_map(((tv("virtual_storage_type"), self.FLAG_BLANK),
+        add_map(((tv("virtual_storage_type"), self.FLAG_FORMAT_STORAGE_TYPE),
                  [sv("vnfd_virt_storage_type"), virt_storage_mapping]))
         add_map(((tv("virtual_storage_size"), self.FLAG_ONLY_NUMBERS),
                  [sv("vnfd_virt_storage_size"), virt_storage_mapping]))
@@ -168,7 +184,12 @@ class V2Map(V2MapBase):
         add_map(((tv("sw_image_version"), self.FLAG_BLANK),
                  [sv("sw_version"), sw_image_mapping]))
         add_map(((tv("sw_image_checksum"), self.FLAG_BLANK),
-                 [sv("sw_checksum"), sw_image_mapping]))
+                 [sv("sw_checksum_hash"), sw_image_mapping]))
+        # There is only one option for checksum algorithm right now, it's hardcoded in NFVO to SHA256
+        for i, swm in enumerate(sw_image_mapping):
+            add_map((self.set_value(sv("sw_checksum_algorithm_VAL"),
+                                    MapElem.format_path(swm, sv("sw_checksum_algorithm")), i)))
+
         add_map(((tv("sw_image_min_disk"), self.FLAG_ONLY_NUMBERS),
                  [sv("sw_min_disk"), sw_image_mapping]))
         add_map(((tv("sw_image_min_ram"), self.FLAG_ONLY_NUMBERS),
@@ -221,8 +242,10 @@ class V2Map(V2MapBase):
         # Internal CPs
         add_map(((tv("int_cpd"), self.FLAG_KEY_SET_VALUE),
                  [sv("int_cpd_id"), icp_mapping]))
+
         add_map(((tv("int_cpd_protocol"), self.FLAG_FORMAT_IP),
                  [sv("int_cpd_layer_prot"), icp_mapping]))
+
         add_map(((tv("int_cpd_role"), self.FLAG_BLANK),
                  [sv("int_cpd_role"), icp_mapping]))
         # Interface id, with incrementing number, use the sol6 array index
@@ -253,8 +276,8 @@ class V2Map(V2MapBase):
                  [sv("virt_link_desc_id"), virt_link_mapping]))
         add_map(((tv("virt_link_desc"), self.FLAG_BLANK),
                  [sv("virt_link_desc_desc"), virt_link_mapping]))
-        add_map(((tv("virt_link_protocol"), self.FLAG_FORMAT_IP),
-                 [sv("virt_link_desc_protocol"), virt_link_mapping]))
+        add_map(((tv("virt_link_protocol"), (self.FLAG_FORMAT_IP, self.FLAG_LIST_FIRST)),
+                 [sv("virt_link_desc_protocol"), vl_layer_protocols_map]))
         add_map(((tv("virt_link_flow_pattern"), self.FLAG_BLANK),
                  [sv("virt_link_desc_flow"), virt_link_mapping]))
 
