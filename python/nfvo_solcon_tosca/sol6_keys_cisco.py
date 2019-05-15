@@ -767,6 +767,10 @@ class V2Map(V2MapBase):
         add_map(((tv("vdu_day0_custom_id"), self.FLAG_BLANK),
                  [sv("vdu_artifact"), day0_vdu_map]))
 
+        for i, artifact in enumerate(day0_map):
+            add_map((self.set_value(sv("artifact_hash_DUMMY_VAL"), sv("artifact_hash"), i)))
+            add_map((self.set_value(sv("artifact_algorithm_DUMMY_VAL"), sv("artifact_algorithm"), i)))
+
         # -- End Artifact --
 
     def int_cp_mapping(self, names, map_start, **kwargs):
