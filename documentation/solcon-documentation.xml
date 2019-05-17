@@ -5,23 +5,179 @@
          xmlns:xlink="http://www.w3.org/1999/xlink">
 
     <info>
-        <title>Tail-f Documentation Guide</title>
+        <title>SolCon Guide</title>
 
         <releaseinfo>
-            Version <xi:include href="../version" parse="text"><xi:fallback>?</xi:fallback></xi:include>
+            Version 0.0
         </releaseinfo>
 
         <abstract>
             <title>Summary</title>
-            <para>This document outlines how to write documentation at
-                Tail-f. It includes a short introduction to DocBook, and the
-                specific markups used locally.</para>
+            <para>This document outlines how to use the TOSCA (SOL001) to SOL006 converter, known as SolCon.</para>
         </abstract>
 
     </info>
 
-    <sect1>
+    <section>
         <title>Introduction</title>
+        <para>An external tool to convert TOSCA YAML files to SOL006 JSON files that can then be load merged into NCS in rel3 with the SOL6 VNFD model.</para>
+        <para>Downloads: <link xlink:href="https://stash.tail-f.com/users/aasteele/repos/nfvo-converter-tosca-sol6/browse/builds"/></para>
+    </section>
 
-    </sect1>
+    <section>
+        <title>Installing Compiled Binary</title>
+        <section>
+            <title>Step 1</title>
+            <para>Download the most recent version of solcon for your operating system (either Mac or Linux) from the above download link.</para>
+            <para>Note: For the example commands we are going to download solcon-OSX-0.6. Substitute the "-OSX-0.6" for whatever OS and version you have downloaded.</para>
+        </section>
+
+        <section>
+            <title>Step 2</title>
+            <para>Ensure the executable is runnable</para>
+
+            <para>
+                <code>
+                    chmod +x solcon-OSX-0.6
+                </code>
+            </para>
+
+            <para>The program is now installed.</para>
+        </section>
+
+        <section>
+            <title>Step 3</title>
+            Ensure the input and configuration files are present:
+
+            <itemizedlist>
+                <listitem>Input files are TOSCA specified YAML files, such as altiostar_vCU.yaml</listitem>
+                <listitem>Configuration files are in TOML format
+                <itemizedlist>
+                    <listitem>TOSCA configuration for ESC VNFDs: <link linkend="esc.toml">config-esc.toml</link></listitem>
+                    <listitem>SOL6 output configuration: <link linkend="sol6.toml">config-sol6.toml</link></listitem>
+                </itemizedlist>
+                </listitem>
+            </itemizedlist>
+
+            <para>Note: The configuration files determine how the YAML VNFD is read, and also how the JSON SOL6 VNFD is outputted.
+                config-esc.toml specifies how the TOSCA YAML file is read, and config-sol6.toml specifies exactly how the data is output.
+                There is no need to change these files by default.</para>
+        </section>
+
+        <section>
+            <title>Step 4</title>
+            <para>Run the compiled program. The argument "-o output_altiostar.json" determines where the output JSON file is located and what it is named.</para>
+
+            <para>
+                <code>
+                    ./solcon-OSX-0.6 -f altiostar_vCU.yaml -o output_altiostar.json -c config-esc.toml -s config-sol6.toml
+                </code>
+            </para>
+
+            <para>Note: If the program does not run for some reason with the frozen package, try downloading and running from the source code (instructions below.)</para>
+        </section>
+
+        <section>
+            <title>Step 5</title>
+            <para>Load merging JSON into NCS can be done, but it's slightly more complicated than normal load merging via CLI.</para>
+
+            <para>Instead of entering NCS, run the following command</para>
+
+            <para>
+                <code>
+                    ncs_load -lm -F o altiostar_vCU.json
+                </code>
+            </para>
+
+            <itemizedlist>
+                <listitem>-lm stands for load merge</listitem>
+                <listitem>-F is the format</listitem>
+                <listitem>o is the flag for JSON format</listitem>
+            </itemizedlist>
+
+            <para>If the file to be load merged is not properly formatted, or is missing some required fields,
+                the ncs_load program will give the same error message as load merging from inside NCS.</para>
+        </section>
+
+    </section>
+
+    <section>
+        <title>Installing + Running from Source</title>
+
+        <section>
+            <title>Step 1: Installing pre-requisites/dependencies</title>
+            Download and install Python3 based on your OS.
+
+            Once python3 is installed, run tool/setup-script.sh:
+
+            <para><code>
+                sh tools/setup-script.sh
+            </code></para>
+
+            <para>This will install the following python packages
+                <itemizedlist>
+                    <listitem>PyYAML</listitem>
+                    <listitem>toml</listitem>
+                </itemizedlist>
+            </para>
+        </section>
+
+        <section>
+            <title>Step 2: Setup PYTHONPATH variable</title>
+            <para>Running without a bash script requires that with every unique terminal instance, the following command be run from inside the repository directory</para>
+
+            <code>PYTHONPATH=python/nfvo_solcon_tosca</code>
+            <para>This can be automated by using a bash script (check the bottom of this document to see how.)</para>
+        </section>
+
+        <section>
+            <title>Step 3: Running the program</title>
+            <para>Run the program with the following command</para>
+
+            <para>
+                <code>python3 solcon.py -f altiostar_vCU.yaml -o output_altiostar.json -c config-esc.toml -s config-sol6.toml</code>
+            </para>
+        </section>
+
+        <section>
+            <title>Step 4: Load merging output</title>
+            <para>Load merging JSON into NCS can be done, but it's slightly more complicated than normal load merging via CLI.</para>
+
+            <para>Instead of entering NCS, run the following command:</para>
+            <para>
+                <code>ncs_load -lm -F o altiostar_vCU.json</code>
+                <itemizedlist>
+                    <listitem>-lm stands for load merge</listitem>
+                    <listitem>-F is the format</listitem>
+                    <listitem>o is the flag for JSON format</listitem>
+                </itemizedlist>
+            </para>
+            <para>If the file to be load merged is not properly formatted, or is missing some required fields,
+                the ncs_load program will give the same error message as load merging from inside NCS.</para>
+        </section>
+    </section>
+
+    <section>
+        <title>Troubleshooting and Diagnostics</title>
+        <para>All log messages are captured in a file in the folder 'logs/' for review after the program has been run.</para>
+
+        <para>Running the program with log-level set to debug will provide considerably more information than running in "info" mode.</para>
+
+        <para>
+            <code>./solcon-OSX-0.6 (...) --log-level DEBUG</code>
+        </para>
+    </section>
+
+
+    <appendix id="esc.toml">
+        <title>ESC TOML Config File</title>
+        <programlisting><xi:include href="../config/config-esc.toml" parse="text"><xi:fallback>(File not found)</xi:fallback></xi:include>
+        </programlisting>
+    </appendix>
+
+    <appendix id="sol6.toml">
+        <title>SOL6 TOML Config File</title>
+        <programlisting><xi:include href="../config/config-sol6.toml" parse="text"><xi:fallback>(File not found)</xi:fallback></xi:include>
+        </programlisting>
+    </appendix>
 </article>
