@@ -181,23 +181,21 @@ python3 solcon.py -f altiostar_vCU.yaml -o output_altiostar.json -c config-esc.t
         <para>This will set the PYTHONPATH and run the program at the same time.</para>
     </section>
 
-    <section>
-        <title>Appendix</title>
-        <appendix>
-            <title>Sources</title>
-            <link xlink:href="https://stash.tail-f.com/users/aasteele/repos/nfvo-converter-tosca-sol6/browse"/>
-        </appendix>
+    <title>Appendix</title>
+    <appendix>
+        <title>Sources</title>
+        <link xlink:href="https://stash.tail-f.com/users/aasteele/repos/nfvo-converter-tosca-sol6/browse"/>
+    </appendix>
 
-        <appendix id="esc.toml">
-            <title>ESC TOML Config File</title>
-            <programlisting><xi:include href="../config/config-esc.toml" parse="text"><xi:fallback>(File not found)</xi:fallback></xi:include>
-            </programlisting>
-        </appendix>
+    <appendix id="esc.toml">
+        <title>ESC TOML Config File</title>
+        <programlisting><xi:include href="../config/config-esc.toml" parse="text"><xi:fallback>(File not found)</xi:fallback></xi:include>
+        </programlisting>
+    </appendix>
 
-        <appendix id="sol6.toml">
-            <title>SOL6 TOML Config File</title>
-            <programlisting><xi:include href="../config/config-sol6.toml" parse="text"><xi:fallback>(File not found)</xi:fallback></xi:include>
-            </programlisting>
-        </appendix>
-    </section>
+    <appendix id="sol6.toml">
+        <title>SOL6 TOML Config File</title>
+        <programlisting><xi:include href="../config/config-sol6.toml" parse="text"><xi:fallback>(File not found)</xi:fallback></xi:include>
+        </programlisting>
+    </appendix>
 </article>
