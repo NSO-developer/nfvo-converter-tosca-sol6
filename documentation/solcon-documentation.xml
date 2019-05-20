@@ -84,7 +84,7 @@
                             </code>
                         </para>
                         <para>
-                            The argument <code>-o output_altiostar.json</code> determines where the location and name of
+                            The argument <code>-o output_altiostar.json</code> determines the location and name of
                             the JSON file.
                         </para>
                         <para>If the program fails to run, download and run the package from the source code.
@@ -133,7 +133,7 @@
                 <section>
                     <orderedlist>
                         <listitem>
-                            Download the source code from the repository see<xref linkend="source"/>.
+                            Download the source code from the repository see <xref linkend="source"/>.
                         </listitem>
 
                         <listitem>Download and install Python3 based on your OS.</listitem>
@@ -212,7 +212,7 @@
             </para>
 
             <para>
-                This helps to capture more log information than running the program in the Info mode.
+                This helps to capture more log information than running the program in the info mode.
                 Use the log information stored in the logs/ folder to troubleshoot and diagnose any problems that you
                 may encounter with the tool.
             </para>
