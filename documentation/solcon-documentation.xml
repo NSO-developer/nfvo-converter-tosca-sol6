@@ -1,20 +1,24 @@
-<?xml version="1.0"?>                                    <!-- -*- nxml -*- -->
+<?xml version="1.0"?>
 
 <book xmlns="http://docbook.org/ns/docbook" version="5.0"
       xmlns:xlink="http://www.w3.org/1999/xlink"
       xmlns:xi="http://www.w3.org/2001/XInclude">
 
+    <info>
+        <title>SolCon User Guide</title>
+    </info>
+
     <chapter>
         <title>SolCon User Guide</title>
 
-        <section>
+        <sect1>
             <title>Introduction</title>
             <para>This document outlines how to use the SolCon tool to convert TOSCA YAML SOL001 files to JSON SOL006
                 files to be able to load merge into NCS in Rel3 with the SOL6 VNFD model.
             </para>
-        </section>
+        </sect1>
 
-        <section>
+        <sect1>
             <title>Installing the SolCon Converter</title>
             <para>
                 You can install the converter in any of the following ways:
@@ -30,7 +34,7 @@
                 appropriate operating system and version for the converter tool.
             </para>
 
-            <section>
+            <sect2>
                 <title>Installing Compiled Binary</title>
                 <orderedlist>
                     <listitem>
@@ -89,7 +93,7 @@
                         </para>
                         <para>If the program fails to run, download and run the package from the source code.
                             See
-                            <xref linkend="install-source"/>
+                            <xref linkend="install-source" xrefstyle="template:%t"/>
                             for more information.
                         </para>
                     </listitem>
@@ -115,25 +119,25 @@
                             fields,
                             the ncs_load program displays an error.
                             See
-                            <xref linkend="troubleshooting"/>
+                            <xref linkend="troubleshooting" xrefstyle="template:%t"/>
                             for more information.
                         </para>
                     </listitem>
                 </orderedlist>
-            </section>
+            </sect2>
 
 
-            <section id="install-source">
+            <sect2 id="install-source">
                 <title>Installing and Running from Source</title>
-                <section>
+                <sect3>
                     You can install and run SolCon from the source code if you are unable to install and run from the
                     compiled binary, or
                     if you wish to make changes on your own.
-                </section>
-                <section>
+                </sect3>
+                <sect3>
                     <orderedlist>
                         <listitem>
-                            Download the source code from the repository. See <xref linkend="source"/>.
+                            Download the source code from the repository. See <xref linkend="source" xrefstyle="template:%t"/>.
                         </listitem>
 
                         <listitem>Download and install Python3 based on your operating system.</listitem>
@@ -157,7 +161,7 @@
                                 you must run the command from inside the repository directory.
                                 However, you can automate this command to set up the variable and run the program
                                 simultaneously.
-                                See <xref linkend="automate-pythonpath"/> for more information.
+                                See <xref linkend="automate-pythonpath" xrefstyle="template:%t"/> for more information.
                             </para>
                         </listitem>
 
@@ -189,17 +193,17 @@
 
                             <para>If the file to be load merged is not properly formatted, or is missing some required
                                 fields, the ncs_load program displays an error.
-                                See <xref linkend="troubleshooting"/> for more information.
+                                See <xref linkend="troubleshooting" xrefstyle="template:%t"/> for more information.
                             </para>
                         </listitem>
                     </orderedlist>
 
-                </section>
+                </sect3>
 
-            </section>
-        </section>
+            </sect2>
+        </sect1>
 
-        <section id="troubleshooting">
+        <sect1 id="troubleshooting">
             <title>Troubleshooting and Diagnostics</title>
             <para>Run the SolCon converter program with the log-level set to debug.</para>
             <para>
@@ -211,9 +215,9 @@
                 Use the log information stored in the <code>logs/</code> folder to troubleshoot and diagnose any problems that you
                 may encounter with the tool.
             </para>
-        </section>
+        </sect1>
 
-        <section id="automate-pythonpath">
+        <sect1 id="automate-pythonpath">
             <title>Automating PYTHONPATH</title>
             Create a bash script as follows to set the PYTHONPATH and run the program simultaneously.
 
@@ -225,44 +229,42 @@
             </programlisting>
 
             <para>This sets the PYTHONPATH and runs the program at the same time.</para>
-        </section>
+        </sect1>
     </chapter>
 
     <chapter>
         <title>Appendix</title>
 
-        <section id="source">
+        <sect1 id="source">
             <title>Sources</title>
+            <para>If you are installing from the source code, download it from <link xlink:href="#">Here</link>.
+            </para>
             <para>
-                <link xlink:href="#">Here</link>
-                is the link to the source code for the converter.
+                You can make modifications to the source code (check the license for specifics.)
             </para>
-            <para>If you are installing from the source code, this is where you need to download it.
-                You are free to make modifications to the source code (check the license for specifics.)
-            </para>
-        </section>
+        </sect1>
 
-        <section>
+        <sect1>
             <title>TOML Configuration Files</title>
 
-            <section id="esc.toml">
+            <sect2 id="esc.toml">
                 <title>config-esc.toml</title>
                 <programlisting>
 <xi:include href="../config/config-esc.toml" parse="text">
     <xi:fallback>(File not found)</xi:fallback>
 </xi:include>
                 </programlisting>
-            </section>
+            </sect2>
 
-            <section id="sol6.toml">
+            <sect2 id="sol6.toml">
                 <title>config-sol6.toml</title>
                 <programlisting>
 <xi:include href="../config/config-sol6.toml" parse="text">
     <xi:fallback>(File not found)</xi:fallback>
 </xi:include>
                 </programlisting>
-            </section>
-        </section>
+            </sect2>
+        </sect1>
     </chapter>
 
 </book>
