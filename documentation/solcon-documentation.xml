@@ -19,8 +19,8 @@
             <para>
                 You can install the converter in any of the following ways:
                 <orderedlist>
-                    <listitem>Install the compiled binary on your system and run the converter</listitem>
-                    <listitem>Install and run the converter from the source code</listitem>
+                    <listitem>Install the compiled binary on your system and run the converter.</listitem>
+                    <listitem>Install and run the converter from the source code.</listitem>
                 </orderedlist>
             </para>
             <para>
@@ -55,7 +55,7 @@
                             <listitem>Input files are TOSCA specified YAML files, such as <code>
                                 altiostar_vCU.yaml</code>.
                             </listitem>
-                            <listitem>Configuration files are in TOML format
+                            <listitem>Configuration files are in TOML format.
                                 <itemizedlist>
                                     <listitem>TOSCA configuration for ESC VNFDs:
                                         <link linkend="esc.toml">config-esc.toml</link>
@@ -67,7 +67,7 @@
                             </listitem>
                         </itemizedlist>
 
-                        <para>Note: <code>config-esc.toml</code> determines how the YAML VNFD is read,
+                        <para><emphasis role="strong">Note:</emphasis> <code>config-esc.toml</code> determines how the YAML VNFD is read
                             and <code>config-sol6.toml</code> specifies how the JSON SOL6 VNFD is output.
                         </para>
 
@@ -97,7 +97,7 @@
                     <listitem>
                         <para>Load merge the JSON file into NCS.</para>
 
-                        <para>Instead of entering NCS, run the following terminal command</para>
+                        <para>Instead of entering NCS, run the following terminal command.</para>
 
                         <para>
                             <code>
@@ -113,7 +113,7 @@
 
                         <para>If the file to be load merged is not properly formatted, or is missing some required
                             fields,
-                            the ncs_load program will display an error.
+                            the ncs_load program displays an error.
                             See
                             <xref linkend="troubleshooting"/>
                             for more information.
@@ -133,10 +133,10 @@
                 <section>
                     <orderedlist>
                         <listitem>
-                            Download the source code from the repository see <xref linkend="source"/>.
+                            Download the source code from the repository. See <xref linkend="source"/>.
                         </listitem>
 
-                        <listitem>Download and install Python3 based on your OS.</listitem>
+                        <listitem>Download and install Python3 based on your operating system.</listitem>
 
                         <listitem>Once python3 is installed, run the following command to install the PyYAML and toml
                             packages
@@ -157,14 +157,12 @@
                                 you must run the command from inside the repository directory.
                                 However, you can automate this command to set up the variable and run the program
                                 simultaneously.
-                                See
-                                <xref linkend="automate-pythonpath"/>
-                                for more information.
+                                See <xref linkend="automate-pythonpath"/> for more information.
                             </para>
                         </listitem>
 
                         <listitem>
-                            <para>Run the SolCon program</para>
+                            <para>Run the SolCon program.</para>
                             <para>
                                 <code>python3 solcon.py -f altiostar_vCU.yaml -o output_altiostar.json -c
                                     config-esc.toml -s config-sol6.toml
@@ -175,7 +173,7 @@
                         <listitem>
                             <para>Load merge the JSON file into NCS.</para>
 
-                            <para>Instead of entering NCS, run the following terminal command</para>
+                            <para>Instead of entering NCS, run the following terminal command.</para>
 
                             <para>
                                 <code>
@@ -190,11 +188,8 @@
                             </itemizedlist>
 
                             <para>If the file to be load merged is not properly formatted, or is missing some required
-                                fields,
-                                the ncs_load program will display an error.
-                                See
-                                <xref linkend="troubleshooting"/>
-                                for more information.
+                                fields, the ncs_load program displays an error.
+                                See <xref linkend="troubleshooting"/> for more information.
                             </para>
                         </listitem>
                     </orderedlist>
@@ -213,7 +208,7 @@
 
             <para>
                 This helps to capture more log information than running the program in the info mode.
-                Use the log information stored in the logs/ folder to troubleshoot and diagnose any problems that you
+                Use the log information stored in the <code>logs/</code> folder to troubleshoot and diagnose any problems that you
                 may encounter with the tool.
             </para>
         </section>
@@ -229,7 +224,7 @@
                 python3 solcon.py -f altiostar_vCU.yaml -o output_altiostar.json -c config-esc.toml -s config-sol6.toml
             </programlisting>
 
-            <para>This will set the PYTHONPATH and run the program at the same time.</para>
+            <para>This sets the PYTHONPATH and runs the program at the same time.</para>
         </section>
     </chapter>
 
@@ -253,18 +248,18 @@
             <section id="esc.toml">
                 <title>config-esc.toml</title>
                 <programlisting>
-                    <xi:include href="../config/config-esc.toml" parse="text">
-                        <xi:fallback>(File not found)</xi:fallback>
-                    </xi:include>
+<xi:include href="../config/config-esc.toml" parse="text">
+    <xi:fallback>(File not found)</xi:fallback>
+</xi:include>
                 </programlisting>
             </section>
 
             <section id="sol6.toml">
                 <title>config-sol6.toml</title>
                 <programlisting>
-                    <xi:include href="../config/config-sol6.toml" parse="text">
-                        <xi:fallback>(File not found)</xi:fallback>
-                    </xi:include>
+<xi:include href="../config/config-sol6.toml" parse="text">
+    <xi:fallback>(File not found)</xi:fallback>
+</xi:include>
                 </programlisting>
             </section>
         </section>
