@@ -1,0 +1,274 @@
+<?xml version="1.0"?>
+
+<book xmlns="http://docbook.org/ns/docbook" version="5.0"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+
+    <info>
+        <title>SolCon User Guide</title>
+    </info>
+
+    <chapter>
+        <title>SolCon User Guide</title>
+
+        <sect1>
+            <title>Introduction</title>
+            <para>This document outlines how to use the SolCon tool to convert TOSCA YAML SOL001 files to JSON SOL006
+                files to be able to load merge into NCS in Rel3 with the SOL6 VNFD model.
+            </para>
+        </sect1>
+
+        <sect1>
+            <title>Installing the SolCon Converter</title>
+            <para>
+                You can install the converter in any of the following ways:
+                <orderedlist>
+                    <listitem>Install the compiled binary on your system and run the converter.</listitem>
+                    <listitem>Install and run the converter from the source code.</listitem>
+                </orderedlist>
+            </para>
+            <para>
+                The following sections provide detailed descriptions.
+                This documentation uses solcon-OSX-0.6 download version to provide examples.
+                Be sure to replace <code>-OSX-0.6</code> in the commands listed in this documentation with your
+                appropriate operating system and version for the converter tool.
+            </para>
+
+            <sect2>
+                <title>Installing Compiled Binary</title>
+                <orderedlist>
+                    <listitem>
+                        <para>Download the most recent version of SolCon for your supported operating system
+                            from <link xlink:href="#">here</link>.
+                        </para>
+                        <para>
+                            If you are not running OSX, Ubuntu, or CentOS see <xref linkend="install-source" xrefstyle="template:%t" />.
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>Make sure you are able to run the executable file to confirm installation.</para>
+                        <para>
+                            <code>
+                                chmod +x solcon-OSX-0.6
+                            </code>
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>Ensure the input and configuration files are present on your machine.</para>
+
+                        <itemizedlist>
+                            <listitem>Input files are TOSCA specified YAML files, such as <code>
+                                altiostar_vCU.yaml</code>.
+                            </listitem>
+                            <listitem>Configuration files are in TOML format.
+                                <itemizedlist>
+                                    <listitem>TOSCA configuration for ESC VNFDs:
+                                        <link linkend="esc.toml">config-esc.toml</link>
+                                    </listitem>
+                                    <listitem>SOL6 output configuration:
+                                        <link linkend="sol6.toml">config-sol6.toml</link>
+                                    </listitem>
+                                </itemizedlist>
+                            </listitem>
+                        </itemizedlist>
+
+                        <para><emphasis role="strong">Note:</emphasis> <code>config-esc.toml</code> determines how the YAML VNFD is read
+                            and <code>config-sol6.toml</code> specifies how the JSON SOL6 VNFD is output.
+                        </para>
+
+                        <para>These are default files and do not need to be modified.</para>
+                    </listitem>
+
+                    <listitem>
+                        <para>Run the compiled program from the terminal:</para>
+
+                        <para>
+                            <code>
+                                ./solcon-OSX-0.6 -f altiostar_vCU.yaml -o output_altiostar.json -c config-esc.toml -s
+                                config-sol6.toml
+                            </code>
+                        </para>
+                        <para>
+                            The argument <code>-o output_altiostar.json</code> determines the location and name of
+                            the JSON file.
+                        </para>
+                        <para>If the program fails to run, download and run the package from the source code.
+                            See
+                            <xref linkend="install-source" xrefstyle="template:%t"/>
+                            for more information.
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>Load merge the JSON file into NCS.</para>
+
+                        <para>Instead of entering NCS, run the following terminal command.</para>
+
+                        <para>
+                            <code>
+                                ncs_load -lm -F o altiostar_vCU.json
+                            </code>
+                        </para>
+
+                        <itemizedlist>
+                            <listitem>-lm stands for load merge</listitem>
+                            <listitem>-F is the format</listitem>
+                            <listitem>o is the flag for JSON format</listitem>
+                        </itemizedlist>
+
+                        <para>If the file to be load merged is not properly formatted, or is missing some required
+                            fields,
+                            the ncs_load program displays an error.
+                            See
+                            <xref linkend="troubleshooting" xrefstyle="template:%t"/>
+                            for more information.
+                        </para>
+                    </listitem>
+                </orderedlist>
+            </sect2>
+
+
+            <sect2 id="install-source">
+                <title>Installing and Running from Source</title>
+                <sect3>
+                    You can install and run SolCon from the source code if you are unable to install and run from the
+                    compiled binary, or
+                    if you wish to make changes on your own.
+                </sect3>
+                <sect3>
+                    <orderedlist>
+                        <listitem>
+                            Download the source code from the repository. See <xref linkend="source" xrefstyle="template:%t"/>.
+                        </listitem>
+
+                        <listitem>Download and install Python3 based on your operating system.</listitem>
+
+                        <listitem>Once python3 is installed, run the following command to install the PyYAML and toml
+                            packages
+                            <para>
+                                <code>sh tools/setup-script.sh</code>
+                            </para>
+                        </listitem>
+
+                        <listitem>
+                            <para>Run the following command to set up the <code>PYTHONPATH</code> variable
+                            </para>
+                            <para>
+                                <code>PYTHONPATH=python/nfvo_solcon_tosca</code>
+                            </para>
+                            <para>
+                                Running the command without a bash script requires that with every unique terminal
+                                instance,
+                                you must run the command from inside the repository directory.
+                                However, you can automate this command to set up the variable and run the program
+                                simultaneously.
+                                See <xref linkend="automate-pythonpath" xrefstyle="template:%t"/> for more information.
+                            </para>
+                        </listitem>
+
+                        <listitem>
+                            <para>Run the SolCon program.</para>
+                            <para>
+                                <code>python3 solcon.py -f altiostar_vCU.yaml -o output_altiostar.json -c
+                                    config-esc.toml -s config-sol6.toml
+                                </code>
+                            </para>
+                        </listitem>
+
+                        <listitem>
+                            <para>Load merge the JSON file into NCS.</para>
+
+                            <para>Instead of entering NCS, run the following terminal command.</para>
+
+                            <para>
+                                <code>
+                                    ncs_load -lm -F o altiostar_vCU.json
+                                </code>
+                            </para>
+
+                            <itemizedlist>
+                                <listitem>-lm stands for load merge</listitem>
+                                <listitem>-F is the format</listitem>
+                                <listitem>o is the flag for JSON format</listitem>
+                            </itemizedlist>
+
+                            <para>If the file to be load merged is not properly formatted, or is missing some required
+                                fields, the ncs_load program displays an error.
+                                See <xref linkend="troubleshooting" xrefstyle="template:%t"/> for more information.
+                            </para>
+                        </listitem>
+                    </orderedlist>
+
+                </sect3>
+
+            </sect2>
+        </sect1>
+
+        <sect1 id="troubleshooting">
+            <title>Troubleshooting and Diagnostics</title>
+            <para>Run the SolCon converter program with the log-level set to debug.</para>
+            <para>
+                <code>./solcon-OSX-0.6 (...) --log-level DEBUG</code>
+            </para>
+
+            <para>
+                This helps to capture more log information than running the program in the info mode.
+                Use the log information stored in the <code>logs/</code> folder to troubleshoot and diagnose any problems that you
+                may encounter with the tool.
+            </para>
+        </sect1>
+
+        <sect1 id="automate-pythonpath">
+            <title>Automating PYTHONPATH</title>
+            Create a bash script as follows to set the PYTHONPATH and run the program simultaneously.
+
+            <programlisting>
+                #!/usr/bin/env bash
+                export PYTHONPATH=python/nfvo_solcon_tosca
+
+                python3 solcon.py -f altiostar_vCU.yaml -o output_altiostar.json -c config-esc.toml -s config-sol6.toml
+            </programlisting>
+
+            <para>This sets the PYTHONPATH and runs the program at the same time.</para>
+        </sect1>
+    </chapter>
+
+    <chapter>
+        <title>Appendix</title>
+
+        <sect1 id="source">
+            <title>Sources</title>
+            <para>If you are installing from the source code, download it from <link xlink:href="#">Here</link>.
+            </para>
+            <para>
+                You can make modifications to the source code (check the license for specifics.)
+            </para>
+        </sect1>
+
+        <sect1>
+            <title>TOML Configuration Files</title>
+
+            <sect2 id="esc.toml">
+                <title>config-esc.toml</title>
+                <programlisting>
+<xi:include href="../config/config-esc.toml" parse="text">
+    <xi:fallback>(File not found)</xi:fallback>
+</xi:include>
+                </programlisting>
+            </sect2>
+
+            <sect2 id="sol6.toml">
+                <title>config-sol6.toml</title>
+                <programlisting>
+<xi:include href="../config/config-sol6.toml" parse="text">
+    <xi:fallback>(File not found)</xi:fallback>
+</xi:include>
+                </programlisting>
+            </sect2>
+        </sect1>
+    </chapter>
+
+</book>
+
