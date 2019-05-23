@@ -38,8 +38,11 @@
                 <title>Installing Compiled Binary</title>
                 <orderedlist>
                     <listitem>
-                        <para>Download the most recent version of SolCon for your operating system (either Mac or Linux)
+                        <para>Download the most recent version of SolCon for your supported operating system
                             from <link xlink:href="#">here</link>.
+                        </para>
+                        <para>
+                            If you are not running OSX, Ubuntu, or CentOS see <xref linkend="install-source" xrefstyle="template:%t" />.
                         </para>
                     </listitem>
 
