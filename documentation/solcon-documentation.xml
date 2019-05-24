@@ -16,6 +16,11 @@
             <para>This document outlines how to use the SolCon tool to convert TOSCA YAML SOL001 files to JSON SOL006
                 files to be able to load merge into NCS in Rel3 with the SOL6 VNFD model.
             </para>
+            <para>
+                It is important to note that the expectation for this tool is that it will do 80-90% of the work,
+                and the last 10% be manually completed, as there are some things the converter cannot handle.
+                See the <xref linkend="limitations" xrefstyle="template:%t"/> section for more detail.
+            </para>
         </sect1>
 
         <sect1>
@@ -208,16 +213,45 @@
 
         <sect1 id="troubleshooting">
             <title>Troubleshooting and Diagnostics</title>
-            <para>Run the SolCon converter program with the log-level set to debug.</para>
-            <para>
-                <code>./solcon-OSX-0.6 (...) --log-level DEBUG</code>
-            </para>
+            <sect2>
+                <title>Log-level DEBUG</title>
+                <para>
+                    Run the SolCon converter program with the log-level set to debug
+                </para>
+                <para>
+                    <code>./solcon-OSX-0.6 (...) --log-level DEBUG</code>
+                </para>
 
+                <para>
+                    This helps to capture more log information than running the program in the info mode.
+                    Use the log information stored in the <code>logs/</code> folder to troubleshoot and diagnose any problems that you
+                    may encounter with the tool.
+                </para>
+
+            </sect2>
+            <sect2>
+                <title>Ensure types match</title>
+                <para>
+                    Ensure the types in <code>config-esc.toml</code> match the types in the TOSCA VNFD.
+                </para>
+                <para>
+                    For example,
+                </para>
+                <programlisting>
+                c1:
+                    type: cisco.nodes.nfv.Vdu.Compute
+                </programlisting>
+            </sect2>
+        </sect1>
+
+        <sect1 id="limitations">
+            <title>Limitations</title>
             <para>
-                This helps to capture more log information than running the program in the info mode.
-                Use the log information stored in the <code>logs/</code> folder to troubleshoot and diagnose any problems that you
-                may encounter with the tool.
             </para>
+            <itemizedlist>
+                <listitem>Any data not present in the TOSCA file will not be able to be generated for the SOL6 model.</listitem>
+                <listitem>Internal connection points and external connection points must have unique names.</listitem>
+            </itemizedlist>
         </sect1>
 
         <sect1 id="automate-pythonpath">
