@@ -214,6 +214,26 @@
         <sect1 id="troubleshooting">
             <title>Troubleshooting and Diagnostics</title>
             <sect2>
+                <title><code>WARNING</code>s and <code>ERROR</code>s</title>
+                <para>
+                    SolCon makes liberal use of <code>WARNING</code> log messages, for example:
+                </para>
+                    <programlisting>
+NFO - Starting Cisco TOSCA -> SOL6 converter.
+WARNING - parameters not found in topology_template;node_templates;vnf;interfaces;Vnflcm;instantiate;inputs;additional_parameters;parameters
+WARNING - type not found in topology_template;node_templates;vBBU1_vol;properties;virtual_block_storage_data;vdu_storage_requirements;type
+                    </programlisting>
+                <para>
+                    These kinds of warnings are semi-expected, and they do not preclude the converter from generating an output file.
+                    Specifically they occur when a field is expected in the TOSCA file, but is not found. Unless it is an extremly important field,
+                    the program just prints the warning message and continues converting what it can.
+                </para>
+                <para>
+                    The converter will output an <code>ERROR</code> message when something critical has gone wrong.
+                    An output file will not be generated when an error occurs.
+                </para>
+            </sect2>
+            <sect2>
                 <title>Log-level DEBUG</title>
                 <para>
                     Run the SolCon converter program with the log-level set to debug
@@ -235,12 +255,32 @@
                     Ensure the types in <code>config-esc.toml</code> match the types in the TOSCA VNFD.
                 </para>
                 <para>
-                    For example,
+                    For example, given the following definitions in a TOSCA file:
                 </para>
                 <programlisting>
-                c1:
-                    type: cisco.nodes.nfv.Vdu.Compute
+c1:
+    type: cisco.nodes.nfv.Vdu.Compute
+
+vnfd1-deployment-control-function-1-cf-boot:
+    type: cisco.nodes.nfv.Vdu.VirtualBlockStorage
+
+c1_nic0:
+    type: cisco.nodes.nfv.VduCp
                 </programlisting>
+                <para>
+                    The <code>config-esc.toml</code> configuration file must look like this:
+                </para>
+                <programlisting>
+[provider_identifiers.cisco]
+    vdu                     = ["type", "cisco.nodes.nfv.Vdu.Compute"]
+    int_cpd                 = ["type", "cisco.nodes.nfv.VduCp"]
+    int_cpd_mgmt            = ["type", "cisco.nodes.nfv.VduCp"]
+    virtual_storage         = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage"]
+                </programlisting>
+                <para>
+                    There are more type definitions in the default files. If any of the types are not set correctly in
+                    the configuration, they will not be found by the converter and thus will be skipped.
+                </para>
             </sect2>
         </sect1>
 
@@ -259,10 +299,11 @@
             Create a bash script as follows to set the PYTHONPATH and run the program simultaneously.
 
             <programlisting>
-                #!/usr/bin/env bash
-                export PYTHONPATH=python/nfvo_solcon_tosca
+#!/usr/bin/env bash
+export PYTHONPATH=python/nfvo_solcon_tosca
 
-                python3 solcon.py -f altiostar_vCU.yaml -o output_altiostar.json -c config-esc.toml -s config-sol6.toml
+python3 solcon.py -f altiostar_vCU.yaml -o output_altiostar.json
+    -c config-esc.toml -s config-sol6.toml
             </programlisting>
 
             <para>This sets the PYTHONPATH and runs the program at the same time.</para>
