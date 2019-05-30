@@ -14,7 +14,6 @@
     vnfd_vnfm_info              = ["vnfd", "vnfm-info"]
 
     vnfd_config_props           = ["vnfd", "configurable-properties"]
-
     vnfd_config_autoheal        = ["vnfd_config_props", "is-auto-heal-enabled"]
     vnfd_config_autoscale       = ["vnfd_config_props", "is-auto-scalable-enabled"]
     vnfd_config_additional      = ["vnfd_config_props", "additional-configurable-property"]
