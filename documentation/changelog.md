@@ -8,6 +8,8 @@ and this project (tries to) adhere to [Semantic Versioning](https://semver.org/s
 ## [Unreleased]
 ### Added
 - Support for checksum in artifact elements
+- User manual documentation
+- Supported versions of TOSCA and SOL6 in README
 
 ## [0.6]
 ### Added

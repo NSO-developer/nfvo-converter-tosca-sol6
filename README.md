@@ -3,8 +3,16 @@
 
 ![TOSCA VNFD Relationships](TOSCA-vnfd-relations.png)
 
+### Introduction
+
+This document outlines how to use the SolCon tool to convert TOSCA YAML SOL001 files to JSON SOL006
+files to be able to load merge into NCS in Rel3 with the SOL6 VNFD model.  
+It is important to note that this tool is not expected to be able to convert a working SOL1 model to a 100% working SOL6 model.
+The expectation is that the tool will do 80-90% of the work, and the last 10% be manually completed, as there are some things
+the converter cannot handle. See the Limitations section for more detail.
+
 ### USAGE
-**Standalone**  
+#### Standalone
 Console command:
 ```
     PYTHONPATH=python/nfvo_solcon_tosca
@@ -15,7 +23,7 @@ Console command:
 `config-sol6.toml` has the default and configurable paths and values for SOL6.
 
 
-**Arguments**
+#### Arguments
 - -f --file (REQ): The TOSCA VNF YAML file to be processed
 - -o --output: The name of the file to be output in JSON format, outputs to stdout if not specified
 - -c --path-config (REQ): Location of the paths configuration file for TOSCA paths (TOML format)
@@ -27,9 +35,15 @@ Console command:
 - -i --interactive: Initiate the interactive mode for the program
 - -h --help: Show the help message
 
-**Wiki**  
+#### Wiki
 See https://confluence-eng-sjc1.cisco.com/conf/display/NSOUS/TOSCA+to+SOL006+Converter
 
+#### TOSCA and SOL6 Versions
+| Spec  | Version |
+| ---   | --- |
+| TOSCA | [ETSI GS NFV-SOL 001 V2.5.1 (2018-12)](https://www.etsi.org/deliver/etsi_gs/NFV-SOL/001_099/001/02.05.01_60/gs_NFV-SOL001v020501p.pdf) |
+| SOL6  | revision 2019-03-18 |
 
-### Current Limitations
-* Only the default instantiation level is supported in ESC VNFDs
+### Limitations
+* Any data not present in the TOSCA file will not be able to be generated for the SOL6 model.
+* Internal connection points and external connection points must have unique names.
