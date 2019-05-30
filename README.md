@@ -7,6 +7,7 @@
 
 This document outlines how to use the SolCon tool to convert TOSCA YAML SOL001 files to JSON SOL006
 files to be able to load merge into NCS in Rel3 with the SOL6 VNFD model.  
+For more detailed instructions, see the [User Guide](documentation/solcon-documentation.pdf).  
 It is important to note that this tool is not expected to be able to convert a working SOL1 model to a 100% working SOL6 model.
 The expectation is that the tool will do 80-90% of the work, and the last 10% be manually completed, as there are some things
 the converter cannot handle. See the Limitations section for more detail.
@@ -35,8 +36,10 @@ Console command:
 - -i --interactive: Initiate the interactive mode for the program
 - -h --help: Show the help message
 
-#### Wiki
-See https://confluence-eng-sjc1.cisco.com/conf/display/NSOUS/TOSCA+to+SOL006+Converter
+#### Documentation
+- [User Guide](documentation/solcon-documentation.pdf)
+- [Wiki](https://confluence-eng-sjc1.cisco.com/conf/display/NSOUS/TOSCA+to+SOL006+Converter)
+- [Documentation folder](documentation)
 
 ### Compatability
 #### NFVO
