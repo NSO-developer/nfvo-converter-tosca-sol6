@@ -7,6 +7,7 @@
 
 This document outlines how to use the SolCon tool to convert TOSCA YAML SOL001 files to JSON SOL006
 files to be able to load merge into NCS in Rel3 with the SOL6 VNFD model.  
+For more detailed instructions, see the [User Guide](documentation/solcon-documentation.pdf).  
 It is important to note that this tool is not expected to be able to convert a working SOL1 model to a 100% working SOL6 model.
 The expectation is that the tool will do 80-90% of the work, and the last 10% be manually completed, as there are some things
 the converter cannot handle. See the Limitations section for more detail.
@@ -35,14 +36,25 @@ Console command:
 - -i --interactive: Initiate the interactive mode for the program
 - -h --help: Show the help message
 
-#### Wiki
-See https://confluence-eng-sjc1.cisco.com/conf/display/NSOUS/TOSCA+to+SOL006+Converter
+#### Documentation
+- [User Guide](documentation/solcon-documentation.pdf)
+- [Wiki](https://confluence-eng-sjc1.cisco.com/conf/display/NSOUS/TOSCA+to+SOL006+Converter)
+- [Documentation folder](documentation)
 
-#### TOSCA and SOL6 Versions
+### Compatability
+#### NFVO
+| SolCon | NFVO Version |
+| ---    | --- |
+| 0.7(?) | 4.0 FCS | 
+| 0.6    | pre-FCS |
+| 0.5    | pre-FCS | 
+#### TOSCA and SOL6
 | Spec  | Version |
 | ---   | --- |
 | TOSCA | [ETSI GS NFV-SOL 001 V2.5.1 (2018-12)](https://www.etsi.org/deliver/etsi_gs/NFV-SOL/001_099/001/02.05.01_60/gs_NFV-SOL001v020501p.pdf) |
 | SOL6  | revision 2019-03-18 |
+
+
 
 ### Limitations
 * Any data not present in the TOSCA file will not be able to be generated for the SOL6 model.
