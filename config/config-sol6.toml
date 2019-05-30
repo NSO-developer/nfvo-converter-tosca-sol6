@@ -234,4 +234,3 @@
     artifact_algorithm          = ["artifact_checksum", "algorithm"]
     artifact_hash_DUMMY_VAL     = "9af30fce37a4c5c831e095745744d6d2"
     artifact_algorithm_DUMMY_VAL = "etsi-nfv-descriptors:sha-256"
-

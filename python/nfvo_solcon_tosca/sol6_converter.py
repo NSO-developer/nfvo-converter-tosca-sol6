@@ -430,4 +430,3 @@ def is_hashable(obj):
     except TypeError:
         return False
     return True
-
