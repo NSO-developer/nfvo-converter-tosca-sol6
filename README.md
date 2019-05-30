@@ -38,11 +38,20 @@ Console command:
 #### Wiki
 See https://confluence-eng-sjc1.cisco.com/conf/display/NSOUS/TOSCA+to+SOL006+Converter
 
-#### TOSCA and SOL6 Versions
+### Compatability
+#### NFVO
+| SolCon | NFVO Version |
+| ---    | --- |
+| 0.7(?) | 4.0 FCS | 
+| 0.6    | pre-FCS |
+| 0.5    | pre-FCS | 
+#### TOSCA and SOL6
 | Spec  | Version |
 | ---   | --- |
 | TOSCA | [ETSI GS NFV-SOL 001 V2.5.1 (2018-12)](https://www.etsi.org/deliver/etsi_gs/NFV-SOL/001_099/001/02.05.01_60/gs_NFV-SOL001v020501p.pdf) |
 | SOL6  | revision 2019-03-18 |
+
+
 
 ### Limitations
 * Any data not present in the TOSCA file will not be able to be generated for the SOL6 model.
