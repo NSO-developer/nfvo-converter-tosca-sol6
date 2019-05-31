@@ -38,8 +38,7 @@ Console command:
 
 #### Documentation
 - [User Guide](documentation/solcon-documentation.pdf)
-- [Wiki](https://confluence-eng-sjc1.cisco.com/conf/display/NSOUS/TOSCA+to+SOL006+Converter)
-- [Documentation folder](documentation)
+- [Wiki](https://github.com/NSO-developer/nfvo-converter-tosca-sol6/wiki)
 
 ### Compatability
 #### NFVO
