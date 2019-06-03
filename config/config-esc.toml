@@ -3,8 +3,6 @@
 # take the identifiers from this file
 providers=["cisco"]
 
-version = "0.1.0"
-
 # All of the identifiers must be the same for all instances of that object,
 # multiple IDs for a single type are not supported
 [provider_identifiers.cisco]
