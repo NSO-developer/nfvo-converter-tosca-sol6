@@ -44,7 +44,7 @@
                 <orderedlist>
                     <listitem>
                         <para>Download the most recent version of SolCon for your supported operating system
-                            from <link xlink:href="#">here</link>.
+                            from <link xlink:href="https://github.com/NSO-developer/nfvo-converter-tosca-sol6/releases">here</link>.
                         </para>
                         <para>
                             If you are not running OSX, Ubuntu, or CentOS see <xref linkend="install-source" xrefstyle="template:%t" />.
@@ -315,7 +315,7 @@ python3 solcon.py -f altiostar_vCU.yaml -o output_altiostar.json
 
         <sect1 id="source">
             <title>Sources</title>
-            <para>If you are installing from the source code, download it from <link xlink:href="#">Here</link>.
+            <para>If you are installing from the source code, download it from <link xlink:href="https://github.com/NSO-developer/nfvo-converter-tosca-sol6">Here</link>.
             </para>
             <para>
                 You can make modifications to the source code (check the license for specifics.)
