@@ -44,7 +44,7 @@ Console command:
 #### NFVO
 | SolCon | NFVO Version |
 | ---    | --- |
-| 0.7(?) | 4.0 FCS | 
+| 0.6.1 | 4.0.0 FCS | 
 | 0.6    | pre-FCS |
 | 0.5    | pre-FCS | 
 #### TOSCA and SOL6
