@@ -145,7 +145,9 @@ class V2Map(V2MapBase):
         # *** VDU Flavors ***
         # vim_flavors = [VDU, {"get_input": FLAVOR_NAME}], so get the second param
         # The second parameter can be either a dict with an input, or a straight value
-        vim_flavors = [x[1] for x in vdu_vim_flavors]
+        vim_flavors = []
+        if vdu_vim_flavors:
+            vim_flavors = [x[1] for x in vdu_vim_flavors]
 
         # If the entry is a dict, get the value inside of it, else just use the value
         vim_flavors_read = [x[get_dict_key(x)] if isinstance(x, dict)

@@ -35,7 +35,8 @@ class SolCon:
 
         self.supported_providers = {
             "cisco": SOL6ConverterCisco,
-            "nokia": SOL6ConverterNokia
+            "nokia": SOL6ConverterNokia,
+            "mavenir": SOL6ConverterCisco
         }
 
         parser = argparse.ArgumentParser(description=self.desc)
