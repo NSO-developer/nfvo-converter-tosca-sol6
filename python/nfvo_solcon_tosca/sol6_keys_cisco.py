@@ -142,12 +142,10 @@ class V2Map(V2MapBase):
 
         MapElem.ensure_map_values(vdu_sw_map, 0)
         MapElem.ensure_map_values(sw_map, 0)
-        print(vdu_sw_map)
-        print(sw_map)
 
-        print(dict_tosca)
         # This list has the VDUs the flavors are attached to
-        vdu_vim_flavors = self.get_items_from_map(tv("vdu_vim_flavor"), vdu_map, dict_tosca, link_list=True)
+        vdu_vim_flavors = self.get_items_from_map(tv("vdu_vim_flavor"), vdu_map, dict_tosca, must_exist=False,
+                                                  link_list=True)
 
         # Set up the boot order mapping
         # [vnfd1-deployment-control-function-1-cf-boot -> 0, parent=(None),

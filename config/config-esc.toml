@@ -81,7 +81,7 @@ providers=["cisco", "mavenir"]
     vdu_conf_props_base     = ["vdu_props", "configurable_properties"]
     vdu_conf_props          = ["vdu_conf_props_base", "additional_vnfc_configurable_properties"]
 
-    #vdu_vim_flavor          = ["vdu_conf_props", "vim_flavor"]
+    vdu_vim_flavor          = ["vdu_conf_props", "vim_flavor"]
     vdu_cap                 = ["vdu", "capabilities"]
     vdu_cap_vc              = ["vdu_cap", "virtual_compute"]
     vdu_cap_props           = ["vdu_cap_vc", "properties"]

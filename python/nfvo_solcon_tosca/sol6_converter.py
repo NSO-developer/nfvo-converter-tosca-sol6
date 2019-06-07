@@ -389,6 +389,8 @@ class Sol6Converter:
         """
         if not opt:
             return value
+        if not value:
+            return value
 
         valid_units = ["GB"]  # Make sure these are in all caps
         if unit.upper() not in valid_units:

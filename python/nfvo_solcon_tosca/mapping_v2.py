@@ -211,11 +211,11 @@ class V2Mapping:
         return mapped
 
     @staticmethod
-    def get_items_from_map(path, mapping, cur_dict, link_list=False):
+    def get_items_from_map(path, mapping, cur_dict, link_list=False, must_exist=True):
         if not path or not mapping:
             return None
 
-        res = [get_path_value(path.format(c_map.name), cur_dict) for c_map in mapping]
+        res = [get_path_value(path.format(c_map.name), cur_dict, must_exist=must_exist) for c_map in mapping]
         # We need the VDU names that are linked with the flavors, so get them this way
         if link_list:
             temp = []
