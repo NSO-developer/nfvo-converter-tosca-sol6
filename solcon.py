@@ -4,7 +4,7 @@
 """
 __author__ = "Aaron Steele"
 __credits__ = ["Frederick Jansson"]
-__version__ = "0.6.1"
+__version__ = "0.6.2"
 
 import argparse
 import json
@@ -35,7 +35,8 @@ class SolCon:
 
         self.supported_providers = {
             "cisco": SOL6ConverterCisco,
-            "nokia": SOL6ConverterNokia
+            "nokia": SOL6ConverterNokia,
+            "mavenir": SOL6ConverterCisco
         }
 
         parser = argparse.ArgumentParser(description=self.desc)
@@ -143,7 +144,7 @@ class SolCon:
         log.info("Reading TOSCA YAML file {}".format(file))
         file_read = open(file, 'rb').read()
         file_lines = open(file, 'rb').readlines()
-        parsed_yaml = yaml.load(file_read)
+        parsed_yaml = yaml.safe_load(file_read)
         return parsed_yaml, file_lines
 
     def initialize_converter(self, sel_provider, valid_providers):
@@ -170,7 +171,11 @@ class SolCon:
                 for s_p in valid_providers:
                     if s_p in sel_provider:
                         return s_p
-                raise TypeError("Unsupported provider: '{}'".format(sel_provider))
+                # No supported provider was found, try running it with the cisco one to see if it works, since
+                # the config files might have been edited
+                log.error("Unsupported provider: '{}', running with default provider 'cisco'. THIS WILL PROBABLY FAIL."
+                          .format(sel_provider))
+                sel_provider = 'cisco'
             return sel_provider
 
     def interactive_mode(self):

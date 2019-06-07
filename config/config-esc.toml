@@ -1,7 +1,7 @@
 # These must match with 'provider-identifiers.{}'
 # If the given provider for a VNFD matches with one of these, then it will automatically
 # take the identifiers from this file
-providers=["cisco"]
+providers=["cisco", "mavenir"]
 
 # All of the identifiers must be the same for all instances of that object,
 # multiple IDs for a single type are not supported
@@ -14,6 +14,19 @@ providers=["cisco"]
     scaling_aspects_deltas   = ["type", "tosca.policies.nfv.VduScalingAspectDeltas"]
     virtual_storage         = ["type", "cisco.nodes.nfv.Vdu.VirtualBlockStorage"]
     security_group          = ["type", "cisco.policies.nfv.SecurityGroupRule"]
+    anti_affinity_rule      = ["type", "tosca.policies.nfv.AntiAffinityRule"]
+    affinity_rule           = ["type", "tosca.policies.nfv.AffinityRule"]
+    placement_group         = ["type", "tosca.groups.nfv.PlacementGroup"]
+
+[provider_identifiers.mavenir]
+    vdu                     = ["type", "tosca.nodes.nfv.Vdu.Compute"]
+    int_cpd                 = ["type", "tosca.nodes.nfv.VduCp"]
+    int_cpd_mgmt            = ["type", "tosca.nodes.nfv.VduCp"]
+    instantiation_level     = ["type", "tosca.policies.nfv.VduInstantiationLevels"]
+    scaling_aspects         = ["type", "tosca.policies.nfv.ScalingAspects"]
+    scaling_aspects_deltas   = ["type", "tosca.policies.nfv.VduScalingAspectDeltas"]
+    virtual_storage         = ["type", "tosca.nodes.nfv.Vdu.VirtualBlockStorage"]
+    security_group          = ["type", "tosca.policies.nfv.SecurityGroupRule"]
     anti_affinity_rule      = ["type", "tosca.policies.nfv.AntiAffinityRule"]
     affinity_rule           = ["type", "tosca.policies.nfv.AffinityRule"]
     placement_group         = ["type", "tosca.groups.nfv.PlacementGroup"]
@@ -88,6 +101,8 @@ providers=["cisco"]
     vdu_day0_file           = ["vdu_day0", "file"]
     vdu_day0_variables      = ["vdu_day0", "variables"]
     vdu_day0_variable       = ["vdu_day0_variables", "{}"]
+
+    vdu_sw_image_data       = ["vdu_props", "sw_image_data"]
 
     # ** Do not modify **
     vdu_day0_custom_id      = ["vdu_day0", "custom_id"]
