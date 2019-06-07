@@ -8,6 +8,8 @@ and this project (tries to) adhere to [Semantic Versioning](https://semver.org/s
 ## [Unreleased]
 ### Added
 - Support for `sw_image_data` existing under a `vdu.compute` node
+- Ability to force run with an unsupported provider
+
 ### Fixed
 - Crash when `vim_flavors` didn't exist
 
