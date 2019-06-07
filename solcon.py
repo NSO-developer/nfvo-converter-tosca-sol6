@@ -144,7 +144,7 @@ class SolCon:
         log.info("Reading TOSCA YAML file {}".format(file))
         file_read = open(file, 'rb').read()
         file_lines = open(file, 'rb').readlines()
-        parsed_yaml = yaml.load(file_read)
+        parsed_yaml = yaml.safe_load(file_read)
         return parsed_yaml, file_lines
 
     def initialize_converter(self, sel_provider, valid_providers):

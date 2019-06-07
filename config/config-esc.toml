@@ -81,7 +81,7 @@ providers=["cisco", "mavenir"]
     vdu_conf_props_base     = ["vdu_props", "configurable_properties"]
     vdu_conf_props          = ["vdu_conf_props_base", "additional_vnfc_configurable_properties"]
 
-    vdu_vim_flavor          = ["vdu_conf_props", "vim_flavor"]
+    #vdu_vim_flavor          = ["vdu_conf_props", "vim_flavor"]
     vdu_cap                 = ["vdu", "capabilities"]
     vdu_cap_vc              = ["vdu_cap", "virtual_compute"]
     vdu_cap_props           = ["vdu_cap_vc", "properties"]
@@ -101,6 +101,8 @@ providers=["cisco", "mavenir"]
     vdu_day0_file           = ["vdu_day0", "file"]
     vdu_day0_variables      = ["vdu_day0", "variables"]
     vdu_day0_variable       = ["vdu_day0_variables", "{}"]
+
+    vdu_sw_image_data       = ["vdu_props", "sw_image_data"]
 
     # ** Do not modify **
     vdu_day0_custom_id      = ["vdu_day0", "custom_id"]

@@ -94,6 +94,7 @@ class V2Map(V2MapBase):
         # Generate VDU map
         vdu_map = self.generate_map(None, tv("vdu_identifier"))
 
+        # Get all the VirtualBlockStorage elements
         sw_map = self.generate_map(None, tv("virt_storage_identifier"),
                                    field_filter=TOSCA.virt_filter)
 
@@ -105,7 +106,46 @@ class V2Map(V2MapBase):
                 cur_sw = sw_map[0].copy()
                 MapElem.add_parent_mapping(cur_sw, cur_vdu, fail_silent=True)
                 vdu_sw_map.append(cur_sw)
+        else:
+            # We might have sw_image_data inside vduCompute(s)
+            for vdu in vdu_map:
+                cur_path = MapElem.format_path(vdu, tv("vdu_sw_image_data"), use_value=False)
+                img_data = get_path_value(cur_path, self.dict_tosca, must_exist=False, no_msg=True)
 
+                # If we actually have data here, we need to format it in such a way that
+                # we can process and create a new sw-image-desc based on it
+                if not img_data:
+                    continue
+
+                cur_vdu = vdu.copy()
+                # This is the name we have to generate, since it doesn't exist in the yaml
+                name = get_path_value(MapElem.format_path(vdu, tv("vdu_name"), use_value=False), dict_tosca,
+                                      must_exist=False)
+                if not name:
+                    name = "GEN_"
+                # Just nab the first key that has actual data
+                # If this fails then something really wrong has happened
+                name = "{}_{}".format(name, img_data[get_dict_key(img_data)])
+
+                cur_sw = MapElem(name, 0)
+                MapElem.add_parent_mapping(cur_sw, cur_vdu, fail_silent=True)
+                # Links the vdu -> sw-image-desc
+                vdu_sw_map.append(cur_sw)
+
+                # Now we need to copy the data into a new location with the proper paths in the tosca dict
+                # with the name we generated
+                t_path = MapElem.format_path(MapElem(name, 0), tv("sw_image_data"), use_value=False)
+                set_path_to(t_path, dict_tosca, img_data, create_missing=True)
+
+                # Then, add a new mapping into sw_map with that name
+                sw_map.append(MapElem(name, 100))
+
+        MapElem.ensure_map_values(vdu_sw_map, 0)
+        MapElem.ensure_map_values(sw_map, 0)
+        print(vdu_sw_map)
+        print(sw_map)
+
+        print(dict_tosca)
         # This list has the VDUs the flavors are attached to
         vdu_vim_flavors = self.get_items_from_map(tv("vdu_vim_flavor"), vdu_map, dict_tosca, link_list=True)
 
