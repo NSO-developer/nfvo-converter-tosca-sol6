@@ -171,7 +171,11 @@ class SolCon:
                 for s_p in valid_providers:
                     if s_p in sel_provider:
                         return s_p
-                raise TypeError("Unsupported provider: '{}'".format(sel_provider))
+                # No supported provider was found, try running it with the cisco one to see if it works, since
+                # the config files might have been edited
+                log.error("Unsupported provider: '{}', running with default provider 'cisco'. THIS WILL PROBABLY FAIL."
+                          .format(sel_provider))
+                sel_provider = 'cisco'
             return sel_provider
 
     def interactive_mode(self):
