@@ -386,6 +386,7 @@ class Sol6Converter:
     def _convert_units(opt, unit, value, decimal_places=1, is_float=False):
         """
         Attempt to figure out what the unit is, and convert to the given one
+        Currently the only supported output unit is
         """
         if not opt:
             return value
@@ -396,13 +397,20 @@ class Sol6Converter:
         if unit.upper() not in valid_units:
             raise KeyError("Unknown unit, valid units: {}".format(valid_units))
 
-        # If the result can't be fractional, don't round to decimal values
-        if not is_float:
-            decimal_places = 0
-
+        # If the result can't be fractional, rounding to 0 decimal places doesn't work
         value_num = Sol6Converter._only_number(True, value, is_float=is_float)
-        if "mb" in value.lower():
-            value_num = round(value_num / 1024, decimal_places)
+        try:
+            if "mb" in value.lower():
+                if is_float:
+                    value_num = round(value_num / 1024, decimal_places)
+                else:
+                    value_num = value_num // 1024
+
+        except AttributeError as e:
+            if "lower" in str(e):
+                raise AttributeError("'int' object {} has no attribute 'lower'. Ensure the value has a UNIT"
+                                     .format(value))
+            raise e
 
         return value_num
 
