@@ -70,10 +70,10 @@
                             <listitem>Configuration files are in TOML format.
                                 <itemizedlist>
                                     <listitem>TOSCA configuration for ESC VNFDs:
-                                        <link linkend="esc.toml">config-esc.toml</link>
+                                        <link xlink:href="https://github.com/NSO-developer/nfvo-converter-tosca-sol6/blob/master/config/config-esc.toml">config-esc.toml</link>
                                     </listitem>
                                     <listitem>SOL6 output configuration:
-                                        <link linkend="sol6.toml">config-sol6.toml</link>
+                                        <link xlink:href="https://github.com/NSO-developer/nfvo-converter-tosca-sol6/blob/master/config/config-sol6.toml">config-sol6.toml</link>
                                     </listitem>
                                 </itemizedlist>
                             </listitem>
@@ -154,22 +154,6 @@
                             packages
                             <para>
                                 <code>sh tools/setup-script.sh</code>
-                            </para>
-                        </listitem>
-
-                        <listitem>
-                            <para>Run the following command to set up the <code>PYTHONPATH</code> variable
-                            </para>
-                            <para>
-                                <code>PYTHONPATH=python/nfvo_solcon_tosca</code>
-                            </para>
-                            <para>
-                                Running the command without a bash script requires that with every unique terminal
-                                instance,
-                                you must run the command from inside the repository directory.
-                                However, you can automate this command to set up the variable and run the program
-                                simultaneously.
-                                See <xref linkend="automate-pythonpath" xrefstyle="template:%t"/> for more information.
                             </para>
                         </listitem>
 
@@ -293,21 +277,6 @@ c1_nic0:
                 <listitem>Internal connection points and external connection points must have unique names.</listitem>
             </itemizedlist>
         </sect1>
-
-        <sect1 id="automate-pythonpath">
-            <title>Automating PYTHONPATH</title>
-            Create a bash script as follows to set the PYTHONPATH and run the program simultaneously.
-
-            <programlisting>
-#!/usr/bin/env bash
-export PYTHONPATH=python/nfvo_solcon_tosca
-
-python3 solcon.py -f altiostar_vCU.yaml -o output_altiostar.json
-    -c config-esc.toml -s config-sol6.toml
-            </programlisting>
-
-            <para>This sets the PYTHONPATH and runs the program at the same time.</para>
-        </sect1>
     </chapter>
 
     <chapter>
@@ -320,28 +289,6 @@ python3 solcon.py -f altiostar_vCU.yaml -o output_altiostar.json
             <para>
                 You can make modifications to the source code (check the license for specifics.)
             </para>
-        </sect1>
-
-        <sect1>
-            <title>TOML Configuration Files</title>
-
-            <sect2 id="esc.toml">
-                <title>config-esc.toml</title>
-                <programlisting>
-<xi:include href="../config/config-esc.toml" parse="text">
-    <xi:fallback>(File not found)</xi:fallback>
-</xi:include>
-                </programlisting>
-            </sect2>
-
-            <sect2 id="sol6.toml">
-                <title>config-sol6.toml</title>
-                <programlisting>
-<xi:include href="../config/config-sol6.toml" parse="text">
-    <xi:fallback>(File not found)</xi:fallback>
-</xi:include>
-                </programlisting>
-            </sect2>
         </sect1>
     </chapter>
 
