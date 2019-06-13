@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 cd $(dirname $0)
 root=../../..
-export PYTHONPATH=$root/python/nfvo_solcon_tosca
+export PYTHONPATH=$root/src
 
 # Run all files in $example_root
 output_root=$root/outputs/esc
