@@ -12,10 +12,10 @@ import yaml
 import logging
 import sys
 import os.path
-import dict_utils
-from sol6_converter import Sol6Converter
-from sol6_converter_nokia import SOL6ConverterNokia
-from sol6_converter_cisco import SOL6ConverterCisco
+from src import dict_utils
+from src.sol6_converter import Sol6Converter
+from src.sol6_converter_nokia import SOL6ConverterNokia
+from src.sol6_converter_cisco import SOL6ConverterCisco
 import toml
 log = logging.getLogger(__name__)
 
