@@ -4,7 +4,7 @@
 """
 __author__ = "Aaron Steele"
 __credits__ = ["Frederick Jansson"]
-__version__ = "0.6.2"
+__version__ = "0.7.0"
 
 import argparse
 import json
@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 
 class SolCon:
-    def __init__(self):
+    def __init__(self, internal_run=False, internal_args=None):
         self.variables = None
         self.tosca_lines = None
         self.tosca_vnf = None
@@ -66,6 +66,14 @@ class SolCon:
                             help=argparse.SUPPRESS)
 
         args = parser.parse_args()
+        if internal_run:
+            args.file = internal_args["f"]
+            args.output = internal_args["o"]
+            args.path_config = internal_args["c"]
+            args.path_config_sol6 = internal_args["s"]
+            args.provider = internal_args["r"]
+            args.log_level = internal_args["l"]
+
         self.args = args
         self.parser = parser
 
@@ -105,9 +113,9 @@ class SolCon:
         self.converter.convert_variables()
 
         # Do the actual converting logic
-        cnfv = self.converter.convert(provider=self.provider)
+        self.cnfv = self.converter.convert(provider=self.provider)
 
-        self.output(cnfv)
+        self.output()
 
     @staticmethod
     def read_configs(tosca_config, sol6_config):
@@ -116,12 +124,12 @@ class SolCon:
         variables_sol6 = toml.load(sol6_config)
         return dict_utils.merge_two_dicts(variables, variables_sol6)
 
-    def output(self, cnfv):
+    def output(self):
         # Prune the empty fields
         if self.args.prune:
-            cnfv = dict_utils.remove_empty_from_dict(cnfv)
+            self.cnfv = dict_utils.remove_empty_from_dict(self.cnfv)
         # Put the data:esti-nfv:vnf tags at the base
-        cnfv = {'data': {'etsi-nfv-descriptors:nfv': cnfv}}
+        cnfv = {'data': {'etsi-nfv-descriptors:nfv': self.cnfv}}
 
         json_output = json.dumps(cnfv, indent=2)
 
