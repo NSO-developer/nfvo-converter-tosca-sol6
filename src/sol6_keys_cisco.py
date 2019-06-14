@@ -316,10 +316,6 @@ class V2Map(V2MapBase):
             # Union: ext_nics and cps_map
             int_cps = [m for m in cps_map if not any(nic == m.name for nic in ext_nics)]
 
-            print(len(cps_map), cps_map)
-            print(len(ext_nics), ext_nics)
-            print(len(ext_cps), ext_cps)
-            print(len(int_cps), int_cps)
             # For the non-external connection points, we need to create a virtual link for them
             # They already have names in the YAML, under virtual-link, so create VLs with
             # those names
