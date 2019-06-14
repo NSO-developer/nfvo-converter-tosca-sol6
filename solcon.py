@@ -28,6 +28,7 @@ class SolCon:
         self.converter = None
         self.provider = None
         self.supported_providers = None
+        self.cnfv = None
 
         if internal_args and internal_args["e"] is False:
             print("Starting SolCon (v{})...".format(__version__))
