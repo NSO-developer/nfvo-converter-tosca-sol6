@@ -64,6 +64,8 @@ class SolCon:
                             help='Do not prune empty values from the dict')
         parser.add_argument('-i', '--interactive', action='store_true',
                             help=argparse.SUPPRESS)
+        parser.add_argument('-e', '--output-silent', action='store_true', default=False,
+                            help=argparse.SUPPRESS)
 
         args = parser.parse_args()
         if internal_run:
@@ -73,6 +75,7 @@ class SolCon:
             args.path_config_sol6 = internal_args["s"]
             args.provider = internal_args["r"]
             args.log_level = internal_args["l"]
+            args.output_silent = internal_args["e"]
 
         self.args = args
         self.parser = parser
@@ -144,15 +147,20 @@ class SolCon:
             with open(self.args.output, 'w') as f:
                 f.writelines(json_output)
 
-        if not self.args.output:
+        if not self.args.output and not self.args.output_silent:
             sys.stdout.write(json_output)
 
     def read_tosca_yaml(self, file):
         # Read the tosca vnf into a dict from yaml format
         log.info("Reading TOSCA YAML file {}".format(file))
-        file_read = open(file, 'rb').read()
-        file_lines = open(file, 'rb').readlines()
+        f = open(file, 'rb')
+        file_read = f.read()
+        f.close()
+        f = open(file, 'rb')
+        file_lines = f.readlines()
+        f.close()
         parsed_yaml = yaml.safe_load(file_read)
+
         return parsed_yaml, file_lines
 
     def initialize_converter(self, sel_provider, valid_providers):
