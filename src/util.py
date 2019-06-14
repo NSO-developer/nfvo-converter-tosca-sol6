@@ -5,10 +5,11 @@ Test util file, it should be moved into test/ in the future
 
 
 class Util:
+    root = "../../"
     @staticmethod
-    def solcon(file, config="config-esc.toml", root="../../"):
+    def solcon(file, config="config-esc.toml"):
         # Remove '../' to root if you're running it via unit_tests.py
-        s = SolCon(internal_run=True, internal_args=Util.format_args(file, con=config, root=root))
+        s = SolCon(internal_run=True, internal_args=Util.format_args(file, con=config, root=Util.root))
         return s.cnfv
 
     @staticmethod
