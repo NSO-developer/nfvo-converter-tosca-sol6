@@ -16,6 +16,9 @@ if hash unzip 2>/dev/null; then
 
     echo "Removing 'solcon-master.zip'"
     rm solcon-master.zip
+
+    echo "Running 'tools/setup-script.sh'"
+    sh nfvo-converter-tosca-sol6-master/tools/setup-script.sh
 else
     echo "unzip not found, please unzip manually."
     exit
