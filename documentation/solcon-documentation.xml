@@ -138,58 +138,81 @@
             <sect2 id="install-source">
                 <title>Installing and Running from Source</title>
                 <sect3>
+                    <para>
                     You can install and run SolCon from the source code if you are unable to install and run from the
-                    compiled binary, or
-                    if you wish to make changes on your own.
-                </sect3>
-                <sect3>
-                    <orderedlist>
-                        <listitem>
-                            Download the source code from the repository. See <xref linkend="source" xrefstyle="template:%t"/>.
-                        </listitem>
+                    compiled binary, or if you wish to make changes on your own.
+                    </para>
+                    <para>
+                        There are two options for downloading and installing the source code, the automated one is
+                        recommended.
+                    </para>
+                    <sect4>
+                        <title>Automated Installation</title>
+                        <orderedlist>
+                            <listitem>Download <link xlink:href="https://raw.githubusercontent.com/NSO-developer/nfvo-converter-tosca-sol6/master/tools/download-repo.sh">download-repo.sh</link></listitem>
+                            <listitem>To download, extract, and setup the required packages, run<code>
+                                sh download-repo.sh
+                            </code></listitem>
+                        </orderedlist>
+                    </sect4>
 
-                        <listitem>Download and install Python3 based on your operating system.</listitem>
+                    <sect4>
+                        <title>Manual Installation</title>
+                        <orderedlist>
+                            <listitem>
+                                Download the source code from the repository. See <xref linkend="source" xrefstyle="template:%t"/>.
+                            </listitem>
 
-                        <listitem>Once python3 is installed, run the following command to install the PyYAML and toml
-                            packages
-                            <para>
-                                <code>sh tools/setup-script.sh</code>
-                            </para>
-                        </listitem>
+                            <listitem>Download and install Python3 based on your operating system.</listitem>
 
-                        <listitem>
-                            <para>Run the SolCon program.</para>
-                            <para>
-                                <code>python3 solcon.py -f altiostar_vCU.yaml -o output_altiostar.json -c
-                                    config-esc.toml -s config-sol6.toml
-                                </code>
-                            </para>
-                        </listitem>
+                            <listitem>Once python3 is installed, run the following command to install the PyYAML and toml
+                                packages
+                                <para>
+                                    <code>sh tools/setup-script.sh</code>
+                                </para>
+                            </listitem>
+                        </orderedlist>
+                    </sect4>
 
-                        <listitem>
-                            <para>Load merge the JSON file into NCS.</para>
+                    <sect4>
+                        <title>Running from Source</title>
 
-                            <para>Instead of entering NCS, run the following terminal command.</para>
+                        <orderedlist>
+                            <listitem>
+                                <para>Run the SolCon program.</para>
+                                <para>
+                                    <code>python3 solcon.py -f altiostar_vCU.yaml -o output_altiostar.json -c
+                                        config-esc.toml -s config-sol6.toml
+                                    </code>
+                                </para>
+                            </listitem>
 
-                            <para>
-                                <code>
-                                    ncs_load -lm -F o altiostar_vCU.json
-                                </code>
-                            </para>
+                            <listitem>
+                                <para>Load merge the JSON file into NCS.</para>
 
-                            <itemizedlist>
-                                <listitem>-lm stands for load merge</listitem>
-                                <listitem>-F is the format</listitem>
-                                <listitem>o is the flag for JSON format</listitem>
-                            </itemizedlist>
+                                <para>Instead of entering NCS, run the following terminal command.</para>
 
-                            <para>If the file to be load merged is not properly formatted, or is missing some required
-                                fields, the ncs_load program displays an error.
-                                See <xref linkend="troubleshooting" xrefstyle="template:%t"/> for more information.
-                            </para>
-                        </listitem>
-                    </orderedlist>
+                                <para>
+                                    <code>
+                                        ncs_load -lm -F o altiostar_vCU.json
+                                    </code>
+                                </para>
 
+                                <itemizedlist>
+                                    <listitem>-lm stands for load merge</listitem>
+                                    <listitem>-F is the format</listitem>
+                                    <listitem>o is the flag for JSON format</listitem>
+                                </itemizedlist>
+
+                                <para>If the file to be load merged is not properly formatted, or is missing some required
+                                    fields, the ncs_load program displays an error.
+                                    See <xref linkend="troubleshooting" xrefstyle="template:%t"/> for more information.
+                                </para>
+                            </listitem>
+
+                        </orderedlist>
+
+                    </sect4>
                 </sect3>
 
             </sect2>
