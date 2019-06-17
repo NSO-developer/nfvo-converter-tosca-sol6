@@ -3,10 +3,81 @@ from src.util import Util
 
 
 class TestVPCSI(unittest.TestCase):
+    # Use this method to load the vnfd, since otherwise it loads one every time
+    @classmethod
+    def setUpClass(cls):
+        cls.vnfd = Util.solcon("VPEC_SI_UPP_vnfd_esc_4_4.yaml")
+        cls.vdus = cls.vnfd["vnfd"]["vdu"]
 
-    def setUp(self):
-        self.vnfd = None
-       #self.vnfd = Util.solcon("VPEC_SI_UPP_vnfd_esc_4_4.yaml")
+    # *****************
+    # *** VNF Tests ***
+    # *****************
+    def test_sanity(self):
+        self.assertGreater(len(self.vnfd), 0)
 
-    def test_one(self):
-        self.assertEqual(1, 1)
+    # More than 1 thing exists
+    def test_exist_contents(self):
+        self.assertGreaterEqual(len(self.vnfd["vnfd"]), 1)
+
+    # *************************
+    # *** Virtual Link Tests ***
+    # *************************
+    def test_int_virt_cpd_length(self):
+        self.assertIn("int-virtual-link-desc", self.vnfd["vnfd"])
+        self.assertEqual(len(self.vnfd["vnfd"]["int-virtual-link-desc"]), 2)
+
+    # *********************
+    # *** EXT CPD Tests ***
+    # *********************
+    def test_ext_cpd_length(self):
+        self.assertIn("ext-cpd", self.vnfd["vnfd"])
+        self.assertEqual(len(self.vnfd["vnfd"]["ext-cpd"]), 2)
+
+    # *****************
+    # *** VDU Tests ***
+    # *****************
+    def test_vdu_exists(self):
+        self.assertIn("vdu", self.vnfd["vnfd"])
+
+    def test_vdu_length(self):
+        self.assertEqual(len(self.vdus), 1)
+
+    def test_vdu_storage_desc(self):
+        self._assertIn_subtests(len(self.vdus), "virtual-storage-desc", self.vdus)
+
+    def test_vdu_compute_desc(self):
+        self._assertIn_subtests(len(self.vdus), "virtual-compute-desc", self.vdus)
+
+    def test_vdu_sw_img_desc(self):
+        self._assertIn_subtests(len(self.vdus), "sw-image-desc", self.vdus)
+
+    def test_vdu_count_int_cpds(self):
+        with self.subTest(i=0):
+            self.assertEqual(len(self.vdus[0]["int-cpd"]), 4)
+
+    # *******************************
+    # *** Deployment Flavor Tests ***
+    # *******************************
+    def test_df_exist(self):
+        self.assertIn("df", self.vnfd["vnfd"])
+        df = self.vnfd["vnfd"]["df"]
+        self.assertIn("instantiation-level", df)
+        self.assertIn("vdu-profile", df)
+
+    # **********************
+    # *** Artifact Tests ***
+    # **********************
+    def test_artifacts(self):
+        self.assertFalse("cisco-etsi-nfvo:artifact" not in self.vnfd["vnfd"])
+
+        for i, a in enumerate(self.vnfd["vnfd"]["cisco-etsi-nfvo:artifact"]):
+            with self.subTest(i=i):
+                self.assertIn("id", a)
+                self.assertIn("url", a)
+                self.assertIn("checksum", a)
+
+    # *** Helper Methods ***
+    def _assertIn_subtests(self, leng, name, loc):
+        for i in range(leng):
+            with self.subTest(i=i):
+                self.assertIn(name, loc[i])
