@@ -3,11 +3,11 @@ These are automatically used without having to update anything else.
 The TOSCA variables are mapped to the SOL6 ones, they must have the same names.
 The program does not attempt to map variables beginning with '_'
 """
-from sol6_keys import TOSCA_BASE, SOL6_BASE, V2MapBase
-from mapping_v2 import MapElem
-from dict_utils import *
-from list_utils import *
-from key_utils import *
+from .sol6_keys import TOSCA_BASE, SOL6_BASE, V2MapBase
+from .mapping_v2 import MapElem
+from .dict_utils import *
+from .list_utils import *
+from .key_utils import *
 
 
 class TOSCA(TOSCA_BASE):
@@ -607,27 +607,29 @@ class V2Map(V2MapBase):
         # Create the virtual links and external connection points
         create_ext_mgmt = bool(mgmt_cps_map)
         create_ext_orch = bool(orch_cps_map)
-        cur_ecp = len(icps_create_map)
+        cur_icp = len(icps_create_map)
+        cur_ecp = 0
 
         if create_ext_mgmt:
             add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_VAL"),
-                                    sv("virt_link_desc_id"), cur_ecp)))
-            # For these I need a mapping of (None -> 0, parent=(val -> cur_ecp))
+                                    sv("virt_link_desc_id"), cur_icp)))
+            # For these I need a mapping of (None -> 0, parent=(val -> cur_icp))
             add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_PROT_VAL"),
-                                    sv("virt_link_desc_protocol"), cur_ecp, prefix_index=0)))
+                                    sv("virt_link_desc_protocol"), cur_icp, prefix_index=0)))
 
             add_map((self.set_value(sv("KEY_EXT_CP_MGMT_VAL"), sv("ext_cpd_id"), cur_ecp)))
             add_map((self.set_value(sv("KEY_EXT_CP_MGMT_PROT_VAL"),
                                     sv("ext_cpd_protocol"), cur_ecp)))
             add_map((self.set_value(sv("KEY_VIRT_LINK_MGMT_VAL"),
                                     sv("ext_cpd_virt_link"), cur_ecp)))
+            cur_icp += 1
             cur_ecp += 1
 
         if create_ext_orch:
             add_map((self.set_value(sv("KEY_VIRT_LINK_ORCH_VAL"),
-                                    sv("virt_link_desc_id"), cur_ecp)))
+                                    sv("virt_link_desc_id"), cur_icp)))
             add_map((self.set_value(sv("KEY_VIRT_LINK_ORCH_PROT_VAL"),
-                                    sv("virt_link_desc_protocol"), cur_ecp, prefix_index=0)))
+                                    sv("virt_link_desc_protocol"), cur_icp, prefix_index=0)))
 
             add_map((self.set_value(sv("KEY_EXT_CP_ORCH_VAL"), sv("ext_cpd_id"), cur_ecp)))
             add_map((self.set_value(sv("KEY_EXT_CP_ORCH_PROT_VAL"),

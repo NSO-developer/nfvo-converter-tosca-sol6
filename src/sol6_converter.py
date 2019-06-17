@@ -2,9 +2,9 @@
 
 """
 import re
-from sol6_keys import *
-from dict_utils import *
-from key_utils import KeyUtils
+from .sol6_keys import *
+from .dict_utils import *
+from .key_utils import KeyUtils
 import logging
 log = logging.getLogger(__name__)
 
@@ -359,6 +359,9 @@ class Sol6Converter:
     @staticmethod
     def _fmt_val(val, valid_opts, return_none, fuzzy=False):
         """Format the value with the list, called from _format_as_valid"""
+        if not isinstance(val, str):
+            return False, "{} (INVALID)".format(val)
+
         tmp_val = val.lower()
 
         for opt in valid_opts:
@@ -374,7 +377,7 @@ class Sol6Converter:
 
         if return_none:
             return False, None
-        return False, val + " (INVALID)"
+        return False, "{} (INVALID)".format(val)
 
     @staticmethod
     def _check_for_null(value):

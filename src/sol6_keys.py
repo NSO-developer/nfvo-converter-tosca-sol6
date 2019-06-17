@@ -3,7 +3,7 @@ These are automatically used without having to update anything else.
 The TOSCA variables are mapped to the SOL6 ones, they must have the same names.
 The program does not attempt to map variables beginning with '_'
 """
-from mapping_v2 import *
+from .mapping_v2 import *
 import logging
 log = logging.getLogger(__name__)
 
@@ -124,12 +124,11 @@ class V2MapBase(V2Mapping):
     FLAG_UNIT_GB                    = "UNITISGB"
     FLAG_UNIT_FRACTIONAL            = "UNITISFRACTIONAL"
 
-    mapping = []
-
     def __init__(self, dict_tosca, dict_sol6, c_log=None, variables=None):
         super().__init__(dict_tosca, dict_sol6)
         self.va_s = None
         self.va_t = None
+        self.mapping = []
 
         if variables:
             self.va_t = variables["tosca"]

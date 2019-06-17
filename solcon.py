@@ -4,7 +4,7 @@
 """
 __author__ = "Aaron Steele"
 __credits__ = ["Frederick Jansson"]
-__version__ = "0.6.2"
+__version__ = "0.7.0"
 
 import argparse
 import json
@@ -12,24 +12,26 @@ import yaml
 import logging
 import sys
 import os.path
-import dict_utils
-from sol6_converter import Sol6Converter
-from sol6_converter_nokia import SOL6ConverterNokia
-from sol6_converter_cisco import SOL6ConverterCisco
+from src import dict_utils
+from src.sol6_converter import Sol6Converter
+from src.sol6_converter_nokia import SOL6ConverterNokia
+from src.sol6_converter_cisco import SOL6ConverterCisco
 import toml
 log = logging.getLogger(__name__)
 
 
 class SolCon:
-    def __init__(self):
+    def __init__(self, internal_run=False, internal_args=None):
         self.variables = None
         self.tosca_lines = None
         self.tosca_vnf = None
         self.converter = None
         self.provider = None
         self.supported_providers = None
+        self.cnfv = None
 
-        print("Starting SolCon (v{})...".format(__version__))
+        if internal_args and internal_args["e"] is False:
+            print("Starting SolCon (v{})...".format(__version__))
 
         self.desc = "NFVO SOL6 Converter (SolCon): Convert a SOL001 (TOSCA) YAML to SOL006 JSON"
 
@@ -64,8 +66,19 @@ class SolCon:
                             help='Do not prune empty values from the dict')
         parser.add_argument('-i', '--interactive', action='store_true',
                             help=argparse.SUPPRESS)
+        parser.add_argument('-e', '--output-silent', action='store_true', default=False,
+                            help=argparse.SUPPRESS)
 
         args = parser.parse_args()
+        if internal_run:
+            args.file = internal_args["f"]
+            args.output = internal_args["o"]
+            args.path_config = internal_args["c"]
+            args.path_config_sol6 = internal_args["s"]
+            args.provider = internal_args["r"]
+            args.log_level = internal_args["l"]
+            args.output_silent = internal_args["e"]
+
         self.args = args
         self.parser = parser
 
@@ -105,9 +118,9 @@ class SolCon:
         self.converter.convert_variables()
 
         # Do the actual converting logic
-        cnfv = self.converter.convert(provider=self.provider)
+        self.cnfv = self.converter.convert(provider=self.provider)
 
-        self.output(cnfv)
+        self.output()
 
     @staticmethod
     def read_configs(tosca_config, sol6_config):
@@ -116,12 +129,12 @@ class SolCon:
         variables_sol6 = toml.load(sol6_config)
         return dict_utils.merge_two_dicts(variables, variables_sol6)
 
-    def output(self, cnfv):
+    def output(self):
         # Prune the empty fields
         if self.args.prune:
-            cnfv = dict_utils.remove_empty_from_dict(cnfv)
+            self.cnfv = dict_utils.remove_empty_from_dict(self.cnfv)
         # Put the data:esti-nfv:vnf tags at the base
-        cnfv = {'data': {'etsi-nfv-descriptors:nfv': cnfv}}
+        cnfv = {'data': {'etsi-nfv-descriptors:nfv': self.cnfv}}
 
         json_output = json.dumps(cnfv, indent=2)
 
@@ -136,15 +149,20 @@ class SolCon:
             with open(self.args.output, 'w') as f:
                 f.writelines(json_output)
 
-        if not self.args.output:
+        if not self.args.output and not self.args.output_silent:
             sys.stdout.write(json_output)
 
     def read_tosca_yaml(self, file):
         # Read the tosca vnf into a dict from yaml format
         log.info("Reading TOSCA YAML file {}".format(file))
-        file_read = open(file, 'rb').read()
-        file_lines = open(file, 'rb').readlines()
+        f = open(file, 'rb')
+        file_read = f.read()
+        f.close()
+        f = open(file, 'rb')
+        file_lines = f.readlines()
+        f.close()
         parsed_yaml = yaml.safe_load(file_read)
+
         return parsed_yaml, file_lines
 
     def initialize_converter(self, sel_provider, valid_providers):
