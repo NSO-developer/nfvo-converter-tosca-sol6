@@ -16,7 +16,6 @@ the converter cannot handle. See the Limitations section for more detail.
 #### Standalone
 Console command:
 ```
-    PYTHONPATH=python/nfvo_solcon_tosca
     python3 solcon.py -f examples/standalone_vpc_vnfd_esc_4_4.yaml -o output.json -c config-esc.toml -s config-sol6.coml
 ```
 `solcon.py` is the entry point for the standalone version of the converter.  

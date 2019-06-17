@@ -1,4 +1,5 @@
-from dict_utils import SPLIT_CHAR
+from .dict_utils import SPLIT_CHAR
+
 
 class KeyUtils:
     """
