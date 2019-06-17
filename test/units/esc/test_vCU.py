@@ -21,7 +21,7 @@ class TestvCU(unittest.TestCase):
         self.assertGreaterEqual(len(self.vnfd["vnfd"]), 1)
 
     # *************************
-    # *** Vitual Link Tests ***
+    # *** Virtual Link Tests ***
     # *************************
     def test_int_virt_cpd_length(self):
         self.assertIn("int-virtual-link-desc", self.vnfd["vnfd"])
@@ -31,7 +31,7 @@ class TestvCU(unittest.TestCase):
     # *** EXT CPD Tests ***
     # *********************
     def test_ext_cpd_length(self):
-        self.assertIn("int-virtual-link-desc", self.vnfd["vnfd"])
+        self.assertIn("ext-cpd", self.vnfd["vnfd"])
         self.assertGreaterEqual(len(self.vnfd["vnfd"]["ext-cpd"]), 1)
 
     # *****************
@@ -55,6 +55,15 @@ class TestvCU(unittest.TestCase):
     def test_vdu_count_int_cpds(self):
         with self.subTest(i=0):
             self.assertEqual(len(self.vdus[0]["int-cpd"]), 4)
+
+    # *******************************
+    # *** Deployment Flavor Tests ***
+    # *******************************
+    def test_df_exist(self):
+        self.assertIn("df", self.vnfd["vnfd"])
+        df = self.vnfd["vnfd"]["df"]
+        self.assertIn("instantiation-level", df)
+        self.assertIn("vdu-profile", df)
 
     # **********************
     # *** Artifact Tests ***
