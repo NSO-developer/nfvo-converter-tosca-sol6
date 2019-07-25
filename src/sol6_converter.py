@@ -411,9 +411,10 @@ class Sol6Converter:
 
         except AttributeError as e:
             if "lower" in str(e):
-                raise AttributeError("'int' object {} has no attribute 'lower'. Ensure the value has a UNIT"
-                                     .format(value))
-            raise e
+                raise AttributeError("'int' object '{}' has no attribute 'lower'. Ensure the value has a UNIT"
+                                     .format(value)) from e
+            else:
+                raise e
 
         return value_num
 
