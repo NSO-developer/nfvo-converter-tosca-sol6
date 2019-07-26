@@ -16,6 +16,7 @@ from src import dict_utils
 from src.sol6_converter import Sol6Converter
 from src.sol6_converter_nokia import SOL6ConverterNokia
 from src.sol6_converter_cisco import SOL6ConverterCisco
+from src.sol6_config_default import SOL6ConfigDefault
 import toml
 log = logging.getLogger(__name__)
 
@@ -86,16 +87,20 @@ class SolCon:
             self.interactive_mode()
             return
 
-        if not args.file or not args.path_config or not args.path_config_sol6:
-            print("error: the following arguments are required: -f/--file, -c/--path-config, "
-                  "-s/--path-config-sol6")
+        if not args.file or not args.path_config:
+            print("error: the following arguments are required: -f/--file, -c/--path-config")
             return
+
+        sol6_config_isfile = True
+        if not args.path_config_sol6:
+            args.path_config_sol6 = SOL6ConfigDefault.config
+            sol6_config_isfile = False
 
         # Initialize the log and have the level set properly
         setup_logger(args.log_level)
 
         # Read the configs
-        self.variables = self.read_configs(args.path_config, args.path_config_sol6)
+        self.variables = self.read_configs(args.path_config, args.path_config_sol6, sol6_config_isfile)
 
         # Parse the yang specifications file into an empty dictionary
         self.parsed_dict = {}
@@ -123,10 +128,14 @@ class SolCon:
         self.output()
 
     @staticmethod
-    def read_configs(tosca_config, sol6_config):
+    def read_configs(tosca_config, sol6_config, sol6_is_file=True):
         # Read the path configuration file
         variables = toml.load(tosca_config)
-        variables_sol6 = toml.load(sol6_config)
+        if sol6_is_file:
+            variables_sol6 = toml.load(sol6_config)
+        else:
+            variables_sol6 = toml.loads(sol6_config)
+
         return dict_utils.merge_two_dicts(variables, variables_sol6)
 
     def output(self):
@@ -225,6 +234,8 @@ class SolCon:
 
         # ** Read the config file locations **
         while True:
+            sol6_config_isfile = True
+
             if not args.path_config or not args.path_config_sol6:
                 print("Select config files")
             if not args.path_config:
@@ -232,7 +243,14 @@ class SolCon:
             else:
                 tosca_config = args.path_config
             if not args.path_config_sol6:
-                sol6_config = self.valid_input_file("SOL6 Config file (.toml)")
+                # Handle if they want to use the default config
+                opt = self.valid_input("Specify sol6 config file? (optional) (y/n)", yn)
+                if opt == "y":
+                    sol6_config = self.valid_input_file("SOL6 Config file (.toml)")
+                else:
+                    sol6_config = SOL6ConfigDefault.config
+                    sol6_config_isfile = False
+
             else:
                 sol6_config = args.path_config_sol6
 
@@ -241,7 +259,7 @@ class SolCon:
             opt = self.valid_input("OK? (y/n)", yn)
             if opt == "y":
                 break
-        self.variables = self.read_configs(tosca_config, sol6_config)
+        self.variables = self.read_configs(tosca_config, sol6_config, sol6_config_isfile)
 
         # ** Parse the yang specifications file into an empty dictionary **
         self.parsed_dict = {}
