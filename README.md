@@ -16,7 +16,7 @@ the converter cannot handle. See the Limitations section for more detail.
 #### Standalone
 Console command:
 ```
-    python3 solcon.py -f examples/standalone_vpc_vnfd_esc_4_4.yaml -o output.json -c config-esc.toml -s config-sol6.coml
+    python3 solcon.py -f examples/standalone_vpc_vnfd_esc_4_4.yaml -o output.json -c config-esc.toml
 ```
 `solcon.py` is the entry point for the standalone version of the converter.  
 `config-esc.toml` has the default and configurable paths and values for TOSCA ESC.
@@ -27,7 +27,6 @@ Console command:
 - -f --file (REQ): The TOSCA VNF YAML file to be processed
 - -o --output: The name of the file to be output in JSON format, outputs to stdout if not specified
 - -c --path-config (REQ): Location of the paths configuration file for TOSCA paths (TOML format)
-- -s --path-config-sol6 (REQ): Location of the paths configuration file for SOL6 paths (TOML format)
 - -l --log-level: Set the log level for standalone logging
 - -p --prune: Do not prune empty values from the dict at the end
 - -r --provider: Specifically provide the provider instead of trying to
