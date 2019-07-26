@@ -21,11 +21,15 @@ class TestVPCDI(unittest.TestCase):
         self.assertGreaterEqual(len(self.vnfd["vnfd"]), 1)
 
     # *************************
-    # *** Virtual Link Tests ***
+    # *** Virtual Link Tests **
     # *************************
     def test_int_virt_cpd_length(self):
         self.assertIn("ext-cpd", self.vnfd["vnfd"])
         self.assertGreaterEqual(len(self.vnfd["vnfd"]["int-virtual-link-desc"]), 3)
+
+    def test_int_virt_cpd_duplicates(self):
+        virt_link_ids = [elem["id"] for elem in self.vnfd["vnfd"]["int-virtual-link-desc"]]
+        self.assertEqual(len(set(virt_link_ids)), len(virt_link_ids))
 
     # *********************
     # *** EXT CPD Tests ***

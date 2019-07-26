@@ -317,8 +317,8 @@ class V2Map(V2MapBase):
             int_cps = [m for m in cps_map if not any(nic == m.name for nic in ext_nics)]
 
             # For the non-external connection points, we need to create a virtual link for them
-            # They already have names in the YAML, under virtual-link, so create VLs with
-            # those names
+            # They already have names in the YAML, under virtual-link, so link the CPs to those virtual
+            # links, and create the links if they don't already exist
             icps_to_create = []
             for icp in int_cps:
                 cur_path = MapElem.format_path(icp, tv("int_cpd_virt_link"), use_value=False)
@@ -326,11 +326,14 @@ class V2Map(V2MapBase):
 
                 cur_path = MapElem.format_path(icp, tv("int_cpd_layer_prot"), use_value=False)
                 layer_protocol = get_path_value(cur_path, self.dict_tosca, must_exist=False)
-
                 if virt_link:
+                    # Skip adding the virt_link if it already exists
+                    if virt_link in icps_to_create:
+                        continue
                     icps_to_create.append(virt_link)
-                if layer_protocol:
-                    icp_create_layer_prot.append(icp.copy())
+                    # Only add the layer protocol when a new virt link gets created
+                    if layer_protocol:
+                        icp_create_layer_prot.append(icp.copy())
 
             icps_create_map = self.generate_map_from_list(icps_to_create)
             # Remove any gaps in the mapping

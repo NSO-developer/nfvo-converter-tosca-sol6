@@ -26,6 +26,10 @@ class TestVPCSI(unittest.TestCase):
         self.assertIn("int-virtual-link-desc", self.vnfd["vnfd"])
         self.assertEqual(len(self.vnfd["vnfd"]["int-virtual-link-desc"]), 2)
 
+    def test_int_virt_cpd_duplicates(self):
+        virt_link_ids = [elem["id"] for elem in self.vnfd["vnfd"]["int-virtual-link-desc"]]
+        self.assertEqual(len(set(virt_link_ids)), len(virt_link_ids))
+
     # *********************
     # *** EXT CPD Tests ***
     # *********************
