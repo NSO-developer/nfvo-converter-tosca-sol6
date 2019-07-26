@@ -318,7 +318,7 @@ class V2Map(V2MapBase):
 
             # For the non-external connection points, we need to create a virtual link for them
             # They already have names in the YAML, under virtual-link, so link the CPs to those virtual
-            # links, and TODO: create the links if they don't already exist
+            # links, and create the links if they don't already exist
             icps_to_create = []
             for icp in int_cps:
                 cur_path = MapElem.format_path(icp, tv("int_cpd_virt_link"), use_value=False)
