@@ -56,7 +56,7 @@ class SolCon:
                             help='Location of the paths configuration file for TOSCA paths '
                                  '(TOML format)')
         parser.add_argument('-s', '--path-config-sol6',
-                            help='Location of the paths configuration file for SOL6 paths '
+                            help='Location of the paths configuration file for SOL6 paths (OPTIONAL) '
                                  '(TOML format)')
         parser.add_argument('-r', '--provider',
                             help='Specifically provide the provider instead of trying to read '
