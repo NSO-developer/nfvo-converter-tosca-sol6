@@ -1,3 +1,7 @@
+# This is an example file with the included default SOL6 paths
+# If desired, this file can be edited and specifically included for using custom output paths,
+# but it is not used by default
+
 # Sol6 Path configurations
 [sol6]
     # **********

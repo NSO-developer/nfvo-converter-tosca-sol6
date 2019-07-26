@@ -19,7 +19,7 @@
             <para>
                 It is important to note that the expectation for this tool is that it will do 80-90% of the work,
                 and the last 10% be manually completed, as there are some things the converter cannot handle.
-                See the <xref linkend="limitations" xrefstyle="template:%t"/> section for more detail.
+                See the <xref linkend="limitations" xrefstyle="template:%t"/> section for more details.
             </para>
         </sect1>
 
@@ -91,8 +91,7 @@
 
                         <para>
                             <code>
-                                ./solcon-OSX-0.6 -f altiostar_vCU.yaml -o output_altiostar.json -c config-esc.toml -s
-                                config-sol6.toml
+                                ./solcon-OSX-0.6 -f altiostar_vCU.yaml -o output_altiostar.json -c config-esc.toml
                             </code>
                         </para>
                         <para>
@@ -182,7 +181,7 @@
                                 <para>Run the SolCon program.</para>
                                 <para>
                                     <code>python3 solcon.py -f altiostar_vCU.yaml -o output_altiostar.json -c
-                                        config-esc.toml -s config-sol6.toml
+                                        config-esc.toml
                                     </code>
                                 </para>
                             </listitem>
