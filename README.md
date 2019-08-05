@@ -56,3 +56,4 @@ Console command:
 ### Limitations
 * Any data not present in the TOSCA file will not be able to be generated for the SOL6 model.
 * Internal connection points and external connection points must have unique names.
+* Type extension and default values are not supported at this time.
