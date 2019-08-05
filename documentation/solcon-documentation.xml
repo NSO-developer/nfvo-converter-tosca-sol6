@@ -297,6 +297,7 @@ c1_nic0:
             <itemizedlist>
                 <listitem>Any data not present in the TOSCA file will not be able to be generated for the SOL6 model.</listitem>
                 <listitem>Internal connection points and external connection points must have unique names.</listitem>
+                <listitem>Type extension and default values are not supported at this time.</listitem>
             </itemizedlist>
         </sect1>
     </chapter>
