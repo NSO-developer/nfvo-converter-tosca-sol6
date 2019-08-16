@@ -5,9 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project (tries to) adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [0.7.0]
 ### Added
 - Unit tests
+- Automated repo download script
 
 ### Fixed
 - An issue with non-fractional unit sizes being converted to have a '.0' when it shouldn't
@@ -15,6 +16,8 @@ and this project (tries to) adhere to [Semantic Versioning](https://semver.org/s
 ### Changed
 - Moved source files into src/ instead of python/nfvo_tosca_converter
 - Updated documentation to reflect new source location
+- Clarified some error messages
+- Moved the sol6 conifg parameter (-s) to optional
 
 ## [0.6.2]
 ### Added
