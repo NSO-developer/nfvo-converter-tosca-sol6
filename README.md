@@ -58,3 +58,7 @@ Console command:
 * Any data not present in the TOSCA file will not be able to be generated for the SOL6 model.
 * Internal connection points and external connection points must have unique names.
 * Type extension and default values are not supported at this time.
+
+This is an incomplete list of entries that need to be manually added to the converted file
+* NSD
+* External Networks

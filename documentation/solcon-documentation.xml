@@ -299,6 +299,13 @@ c1_nic0:
                 <listitem>Internal connection points and external connection points must have unique names.</listitem>
                 <listitem>Type extension and default values are not supported at this time.</listitem>
             </itemizedlist>
+            <para>
+                This is an incomplete list of entries that need to be manually added to the converted file
+                <itemizedlist>
+                    <listitem>NSD</listitem>
+                    <listitem>External Networks</listitem>
+                </itemizedlist>
+            </para>
         </sect1>
     </chapter>
 
