@@ -1,7 +1,4 @@
-I'm going to try another idea for mapping values with the VDUs, since they can be
-considered their own, effectively separate, subsection of the entire data structures
-
-###The problem
+### The problem
 There is data embedded in a structure in a multi-tiered dict T, we need to move the data
 from its' current location and rearrange it into new locations, sometimes in very different
 locations, and sometimes not.
@@ -21,9 +18,9 @@ The name is arbitrary, but the type is not.
 
 It might be that making an automatic mapping that is able to handle this kind of complicated
 behavior would just be better represented in raw code, but there are a lot of duplicate
-parts of code in what I have already written, and there must be a better way to do this.
+parts of code in is already written, and there must be a better way to do this.
 
-###V2 Mapping
+### V2 Mapping
 Have keys, as is given in current TOSCA and SOL6 classes, but instead of automatically mapping
 variables with the same name, be able to give a dict/some kind of relation between two arbitrary
 variables.
@@ -87,16 +84,15 @@ for map_tosca, map_sol6 in maps:
                     path_to_value("vnfd.vdu.{}.name".format("0")))
 ```
 
-####Mapping Syntax
+#### Mapping Syntax
 ```
     (TOSCA_PATH, (Single flag or tuple of flags)):  SOL6_PATH [, MAPPING]
 ```
 The SOL6_PATH can be alone, but if a mapping is required then the value must be a list with the path as the first
 element and the mapping as the second.
 
-###Mapping arbitrary number of variables
-The problem is the need to map lists inside of VDUs. There is currently not a way
-to do that with the system I have set up.
+### Mapping arbitrary number of variables
+The problem is the need to map lists inside of VDUs.
 
 Example problem
 ```
@@ -172,4 +168,3 @@ Which allows iterative behavior no matter how deep the mapping goes.
 
 # Fixes
 1. `id` field must always be the first entry
-2. 
