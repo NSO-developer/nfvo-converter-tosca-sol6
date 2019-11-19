@@ -15,8 +15,8 @@ class Util:
     @staticmethod
     def format_args(f, con, r=None, root=""):
         c = "{}config/{}".format(root, con)
-        s = "{}config/example-sol6-config.toml".format(root)
+        # s = "{}config/example-sol6-config.toml".format(root)
         l_l = 50  # critical
         o_silent = True
-        a = {"f": "{}examples/esc/{}".format(root, f), "o": None, "c": c, "s": s, "r": r, "l": l_l, "e": o_silent}
+        a = {"f": "{}examples/esc/{}".format(root, f), "o": None, "c": c, "r": r, "l": l_l, "e": o_silent}
         return a
