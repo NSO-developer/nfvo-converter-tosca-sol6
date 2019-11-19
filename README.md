@@ -60,5 +60,5 @@ Console command:
 * Type extension and default values are not supported at this time.
 
 This is an incomplete list of entries that need to be manually added to the converted file
-* NSD
+* NED
 * External Networks

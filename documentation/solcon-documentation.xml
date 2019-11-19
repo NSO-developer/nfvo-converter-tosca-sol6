@@ -302,7 +302,7 @@ c1_nic0:
             <para>
                 This is an incomplete list of entries that need to be manually added to the converted file
                 <itemizedlist>
-                    <listitem>NSD</listitem>
+                    <listitem>NED</listitem>
                     <listitem>External Networks</listitem>
                 </itemizedlist>
             </para>
