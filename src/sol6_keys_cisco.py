@@ -391,7 +391,7 @@ class V2Map(V2MapBase):
         def_inst = get_roots_from_filter(def_inst, child_key=tv("def_inst_key"))
         if def_inst:
             def_inst_id = tv("def_inst_key")
-            def_inst_desc = get_path_value(tv("def_inst_desc"), self.dict_tosca)
+            def_inst_desc = get_path_value(tv("def_inst_desc"), self.dict_tosca, must_exist=False)
         else:
             def_inst_id = None
             def_inst_desc = None
@@ -743,7 +743,8 @@ class V2Map(V2MapBase):
         add_map(((tv("df_id"), self.FLAG_BLANK), sv("df_id")))
         # Assign the default instantiation level to the first element in the array
         add_map((self.set_value(def_inst_id, sv("df_inst_level_id"), 0)))
-        add_map((self.set_value(def_inst_desc, sv("df_inst_level_desc"), 0)))
+        if def_inst_desc:
+            add_map((self.set_value(def_inst_desc, sv("df_inst_level_desc"), 0)))
         add_map(((tv("df_desc"), self.FLAG_BLANK), sv("df_desc")))
 
         add_map(((tv("vdu"), self.FLAG_KEY_SET_VALUE),
