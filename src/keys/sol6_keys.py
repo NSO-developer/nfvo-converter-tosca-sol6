@@ -3,7 +3,7 @@ These are automatically used without having to update anything else.
 The TOSCA variables are mapped to the SOL6 ones, they must have the same names.
 The program does not attempt to map variables beginning with '_'
 """
-from .mapping_v2 import *
+from mapping_v2 import *
 import logging
 log = logging.getLogger(__name__)
 

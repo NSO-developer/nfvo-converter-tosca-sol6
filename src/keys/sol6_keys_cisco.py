@@ -3,11 +3,11 @@ These are automatically used without having to update anything else.
 The TOSCA variables are mapped to the SOL6 ones, they must have the same names.
 The program does not attempt to map variables beginning with '_'
 """
-from .sol6_keys import TOSCA_BASE, SOL6_BASE, V2MapBase
-from .mapping_v2 import MapElem
-from .dict_utils import *
-from .list_utils import *
-from .key_utils import *
+from keys.sol6_keys import TOSCA_BASE, SOL6_BASE, V2MapBase
+from mapping_v2 import MapElem
+from dict_utils import *
+from list_utils import *
+from key_utils import *
 
 
 class TOSCA(TOSCA_BASE):

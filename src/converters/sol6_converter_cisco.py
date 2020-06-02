@@ -1,7 +1,7 @@
-from .sol6_keys_cisco import *
-from .sol6_converter import Sol6Converter
-from .sol6_keys import *
-from .dict_utils import *
+from keys.sol6_keys_cisco import *
+from converters.sol6_converter import Sol6Converter
+from keys.sol6_keys import *
+from dict_utils import *
 
 
 class SOL6ConverterCisco(Sol6Converter):

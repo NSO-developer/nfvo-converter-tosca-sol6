@@ -13,9 +13,9 @@ import logging
 import sys
 import os.path
 from src import dict_utils
-from src.sol6_converter import Sol6Converter
-from src.sol6_converter_nokia import SOL6ConverterNokia
-from src.sol6_converter_cisco import SOL6ConverterCisco
+from converters.sol6_converter import Sol6Converter
+from converters.sol6_converter_nokia import SOL6ConverterNokia
+from converters.sol6_converter_cisco import SOL6ConverterCisco
 from src.sol6_config_default import SOL6ConfigDefault
 import toml
 log = logging.getLogger(__name__)

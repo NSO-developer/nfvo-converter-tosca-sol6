@@ -2,9 +2,9 @@
 
 """
 import re
-from .sol6_keys import *
-from .dict_utils import *
-from .key_utils import KeyUtils
+from keys.sol6_keys import *
+from dict_utils import *
+from key_utils import KeyUtils
 import logging
 log = logging.getLogger(__name__)
 
