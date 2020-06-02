@@ -75,7 +75,8 @@ class SolCon:
             args.file = internal_args["f"]
             args.output = internal_args["o"]
             args.path_config = internal_args["c"]
-            args.path_config_sol6 = internal_args["s"]
+            if "s" in internal_args:
+                args.path_config_sol6 = internal_args["s"]
             args.provider = internal_args["r"]
             args.log_level = internal_args["l"]
             args.output_silent = internal_args["e"]
