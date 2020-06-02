@@ -1,5 +1,5 @@
 import unittest
-from src.util import Util
+from utils.util import Util
 
 
 class TestVPCDI(unittest.TestCase):

@@ -3,8 +3,8 @@
 """
 import re
 from keys.sol6_keys import *
-from dict_utils import *
-from key_utils import KeyUtils
+from utils.dict_utils import *
+from utils.key_utils import KeyUtils
 import logging
 log = logging.getLogger(__name__)
 

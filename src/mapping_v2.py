@@ -1,4 +1,4 @@
-from src.dict_utils import *
+from utils.dict_utils import *
 import logging
 log = logging.getLogger(__name__)
 

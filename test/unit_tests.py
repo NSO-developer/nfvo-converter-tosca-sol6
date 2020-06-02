@@ -1,6 +1,5 @@
 import unittest
-import sys
-from src.util import Util
+from utils.util import Util
 
 # For use in running tests from console
 # You have to tell it where the main code is tho,

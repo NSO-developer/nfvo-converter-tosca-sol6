@@ -12,7 +12,7 @@ import yaml
 import logging
 import sys
 import os.path
-from src import dict_utils
+from utils import dict_utils
 from converters.sol6_converter import Sol6Converter
 from converters.sol6_converter_nokia import SOL6ConverterNokia
 from converters.sol6_converter_cisco import SOL6ConverterCisco

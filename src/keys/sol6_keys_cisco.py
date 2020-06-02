@@ -5,9 +5,9 @@ The program does not attempt to map variables beginning with '_'
 """
 from keys.sol6_keys import TOSCA_BASE, SOL6_BASE, V2MapBase
 from mapping_v2 import MapElem
-from dict_utils import *
-from list_utils import *
-from key_utils import *
+from utils.dict_utils import *
+from utils.list_utils import *
+from utils.key_utils import *
 
 
 class TOSCA(TOSCA_BASE):
