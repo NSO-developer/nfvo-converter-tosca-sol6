@@ -71,7 +71,6 @@ the variable name
 
 ## [0.2.0]
 ### Added
-- Nokia provider options
 - Can now not include value that is expected in configuration file, it'll be skipped
 
 ### Changed

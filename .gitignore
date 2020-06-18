@@ -3,7 +3,10 @@
 /python/nfvo_solcon_tosca/__pycache__
 /.idea
 /test/internal/lux/lux_Logs
+
 /outputs
+/examples
+
 /build
 /dist
 /logs

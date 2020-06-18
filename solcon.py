@@ -14,7 +14,6 @@ import sys
 import os.path
 from utils import dict_utils
 from converters.sol6_converter import Sol6Converter
-from converters.sol6_converter_nokia import SOL6ConverterNokia
 from converters.sol6_converter_cisco import SOL6ConverterCisco
 from src.sol6_config_default import SOL6ConfigDefault
 import toml
@@ -38,7 +37,6 @@ class SolCon:
 
         self.supported_providers = {
             "cisco": SOL6ConverterCisco,
-            "nokia": SOL6ConverterNokia,
             "mavenir": SOL6ConverterCisco
         }
 
@@ -192,7 +190,7 @@ class SolCon:
 
             sel_provider = "-".join(Sol6Converter.find_provider(file_lines).split(" "))
 
-            # If the provider is not a part of a valid provider, i.e. 'cisco' in ['cisco', 'nokia'],
+            # If the provider is not a part of a valid provider, i.e. 'cisco' in ['cisco'],
             # check if any of the valid providers are in the sel_provider,
             #   i.e. 'cisco' in '&provider-cisco'
             if sel_provider not in valid_providers:

@@ -23,15 +23,15 @@ Providers have different types for the instantiations of blocks of code
 We needed a way to support finding different blocks of code without recompiling
 
 ```
-providers=["cisco", "nokia"]
+providers=["cisco", "prov2"]
 
 [provider-identifiers.cisco]    
     vdu = ["type", "cisco.nodes.nfv.Vdu.Compute"]    
     int-cpd = ["type", "cisco.nodes.nfv.VduCp"]
 
-[provider-identifiers.nokia]    
-    vdu = ["type", "nokia.nodes.nfv.Vdu.Compute"]
-    int-cpd = ["type", "nokia.nodes.nfv.VduCp"]
+[provider-identifiers.prov2]    
+    vdu = ["type", "prov2.nodes.nfv.Vdu.Compute"]
+    int-cpd = ["type", "prov2.nodes.nfv.VduCp"]
 
 ```
 
