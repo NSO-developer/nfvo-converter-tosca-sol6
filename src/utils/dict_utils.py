@@ -113,7 +113,12 @@ def set_path_to(path, cur_dict, value, create_missing=False, list_elem=0):
                     if values[i+1].isdigit():
                         cur_context[values[i]] = []
                     else:
-                        cur_context[values[i]] = {}
+                        # Make sure we're not deleting an empty list
+                        # This didn't happen for sol1->sol6, but 6->1 it can
+                        if isinstance(cur_context[values[i]], list):
+                            cur_context[values[i]] = [{}]
+                        else:
+                            cur_context[values[i]] = {}
                 cur_context = cur_context[values[i]]
 
             else:  # Enforce strict structure

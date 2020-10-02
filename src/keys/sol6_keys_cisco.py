@@ -652,11 +652,11 @@ class V2Map(V2MapBase):
         # the sol6 mapping, so swap the tosca map to the sol6 with FLAG_USE_VALUE, then
         # set the value to the key, and pass in '{}' so the mapping is the only thing we're
         # setting. This gives a list of numbers from 0->len
-        add_map((("{}", (self.FLAG_ONLY_NUMBERS, self.FLAG_LIST_FIRST, self.FLAG_USE_VALUE,
+        add_map((("{}", (self.FLAG_ONLY_NUMBERS, self.FLAG_LIST_NTH, self.FLAG_USE_VALUE,
                  self.FLAG_KEY_SET_VALUE)),             [sv("vdu_boot_key"), boot_map]))
-        add_map(((tv("vdu_boot"), self.FLAG_LIST_FIRST),        [sv("vdu_boot_value"), boot_map]))
+        add_map(((tv("vdu_boot"), self.FLAG_LIST_NTH),        [sv("vdu_boot_value"), boot_map]))
 
-        add_map(((tv("vdu_boot"), self.FLAG_LIST_FIRST),        [sv("vdu_vs_desc"), boot_map]))
+        add_map(((tv("vdu_boot"), self.FLAG_LIST_NTH),        [sv("vdu_vs_desc"), boot_map]))
         add_map((("{}", self.FLAG_KEY_SET_VALUE),
                  [sv("vdu_vc_desc"), vim_flavors_map]))
         add_map(((tv("virt_storage"), self.FLAG_KEY_SET_VALUE),

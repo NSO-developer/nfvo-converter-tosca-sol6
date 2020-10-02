@@ -25,7 +25,7 @@ class SOL6ConverterCisco(Sol6Converter):
 
         # The very first thing we want to do is set up the path variables
         log.debug("Setting path variables: {}".format(self.variables))
-        formatted_vars = PathMaping.format_paths(self.variables)
+        formatted_vars = PathMapping.format_paths(self.variables)
 
         TOSCA.set_variables(self.variables["tosca"], TOSCA, variables=formatted_vars,
                             dict_tosca=self.tosca_vnf, cur_provider=provider)
@@ -41,8 +41,9 @@ class SOL6ConverterCisco(Sol6Converter):
     def run_mapping_islist(self, tosca_path, map_sol6):
         mapping_list = map_sol6[1]  # List of MapElems
         sol6_path = map_sol6[0]
-
+        i = -1
         for elem in mapping_list:
+            i = i + 1
             # Skip this mapping element if it is None, but allow a none name to pass
             if not elem:
                 continue
@@ -60,7 +61,7 @@ class SOL6ConverterCisco(Sol6Converter):
                     continue
 
             # Handle flags for mapped values
-            value = self.handle_flags(f_sol6_path, f_tosca_path)
+            value = self.handle_flags(f_sol6_path, f_tosca_path, i)
 
             # If the value doesn't exist, don't write it
             # Do write it if the value is 0, though
@@ -96,8 +97,8 @@ class SOL6ConverterCisco(Sol6Converter):
             if flag == keys.FLAG_REQ_DELTA:
                 self.req_delta_valid = True
 
-    def handle_flags(self, f_sol6_path, f_tosca_path):
-        value = super().handle_flags(f_sol6_path, f_tosca_path)
+    def handle_flags(self, f_sol6_path, f_tosca_path, run):
+        value = super().handle_flags(f_sol6_path, f_tosca_path, run)
         value = self._handle_input(self.is_variable, f_sol6_path, value)
         value = self._handle_default_root(self.default_root, f_sol6_path, value)
 

@@ -8,7 +8,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class PathMaping:
+class PathMapping:
     @staticmethod
     def format_paths(variables):
         """
@@ -23,14 +23,14 @@ class PathMaping:
 
         for k in var_tosca:
             if "_VAL" not in k:
-                val = PathMaping.get_full_path(k, var_tosca)
+                val = PathMapping.get_full_path(k, var_tosca)
             else:
                 val = var_tosca[k]
             processed_tosca[k] = val
 
         for k in var_sol6:
             if "_VAL" not in k:
-                val = PathMaping.get_full_path(k, var_sol6)
+                val = PathMapping.get_full_path(k, var_sol6)
             else:
                 val = var_sol6[k]
             processed_sol6[k] = val
@@ -57,7 +57,7 @@ class PathMaping:
             if set_val:
                 val = cur_dict[var_val]
             else:
-                val = PathMaping.get_full_path(k, cur_dict)
+                val = PathMapping.get_full_path(k, cur_dict)
 
             setattr(obj, k, val)
 
@@ -70,14 +70,14 @@ class PathMaping:
             log.error("Could not find {} as a parent".format(elem))
             return ""
 
-        return "{}{}{}".format(PathMaping.get_full_path(dic[elem][0], dic), SPLIT_CHAR, dic[elem][1])
+        return "{}{}{}".format(PathMapping.get_full_path(dic[elem][0], dic), SPLIT_CHAR, dic[elem][1])
 
 
-class TOSCA_BASE(PathMaping):
+class TOSCA_BASE(PathMapping):
     pass
 
 
-class SOL6_BASE(PathMaping):
+class SOL6_BASE(PathMapping):
     pass
 
 
@@ -98,6 +98,7 @@ class V2MapBase(V2Mapping):
     FLAG_APPEND_LIST                = "APPENDLIST"
     # Get the first element in the output list
     FLAG_LIST_FIRST                 = "GETFIRSTLISTELEM"
+    FLAG_LIST_NTH                   = "GETNTHLISTELEM"
     # Require delta validation
     FLAG_REQ_DELTA                  = "YAMLSUCKS"
     # Try to format the value as a valid input for layer-protocol
@@ -137,11 +138,12 @@ class V2MapBase(V2Mapping):
     def add_map(self, cur_map):
         self.mapping.append(cur_map)
 
-    def set_value(self, val, path, index, prefix_value=None, prefix_index=None):
+    @staticmethod
+    def set_value(val, path, index, prefix_value=None, prefix_index=None):
         _mapping = MapElem(val, index)
         if prefix_value is not None or prefix_index is not None:
             _mapping = MapElem(prefix_value, prefix_index, parent_map=_mapping)
-        return (val, self.FLAG_KEY_SET_VALUE), [path, [_mapping]]
+        return (val, V2MapBase.FLAG_KEY_SET_VALUE), [path, [_mapping]]
 
     def get_tosca_value(self, value):
         return self.get_value(value, self.va_t, "tosca")

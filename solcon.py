@@ -4,7 +4,7 @@
 """
 __author__ = "Aaron Steele"
 __credits__ = ["Frederick Jansson"]
-__version__ = "0.7.0"
+__version__ = "0.8.0"
 
 import argparse
 import json
@@ -15,6 +15,7 @@ import os.path
 from utils import dict_utils
 from converters.sol6_converter import Sol6Converter
 from converters.sol6_converter_cisco import SOL6ConverterCisco
+from converters.sol1_converter import Sol1Converter
 from src.sol6_config_default import SOL6ConfigDefault
 import toml
 log = logging.getLogger(__name__)
@@ -42,9 +43,9 @@ class SolCon:
 
         parser = argparse.ArgumentParser(description=self.desc)
         parser.add_argument('-f', '--file',
-                            help="The TOSCA VNF YAML file to be processed")
+                            help="The VNF YAML/JSON file to be processed")
         parser.add_argument('-o', '--output',
-                            help="The output file for the convtered VNF (JSON format), "
+                            help="The output file for the convtered VNF (JSON/YAML format), "
                                  "outputs to stdout if not specified")
         parser.add_argument('-l', '--log-level',
                             choices=['DEBUG', 'INFO', 'WARNING'], default=logging.INFO,
@@ -86,7 +87,10 @@ class SolCon:
             self.interactive_mode()
             return
 
-        if not args.file or not args.path_config:
+        # Determine if the file we're converting is tosca or sol6 based on the file extension
+        is_yaml = args.file.split(".")[-1].lower() == "yaml"
+
+        if not args.file or (not args.path_config and not is_yaml):
             print("error: the following arguments are required: -f/--file, -c/--path-config")
             return
 
@@ -104,25 +108,31 @@ class SolCon:
         # Parse the yang specifications file into an empty dictionary
         self.parsed_dict = {}
 
-        # Read the data from the provided yaml file into variables
-        self.tosca_vnf, self.tosca_lines = self.read_tosca_yaml(args.file)
+        if is_yaml:
+            # Read the data from the provided yaml file into variables
+            self.tosca_vnf, self.tosca_lines = self.read_input_file(args.file, is_yaml)
 
-        # Determine what provider to use
-        self.provider = self.find_provider(args.provider, self.tosca_lines,
-                                           self.supported_providers)
-        if self.provider is None:
-            raise ValueError("The TOSCA provider could not be automatically found, pass it in"
-                             "manually.")
-        self.provider = self.provider.lower()
+            # Determine what provider to use
+            self.provider = self.find_provider(args.provider, self.tosca_lines,
+                                               self.supported_providers)
+            if self.provider is None:
+                raise ValueError("The TOSCA provider could not be automatically found, pass it in"
+                                 "manually.")
+            self.provider = self.provider.lower()
 
-        # Initialize the proper converter object for the given provider
-        self.converter = self.initialize_converter(self.provider, self.supported_providers)
+            # Initialize the proper converter object for the given provider
+            self.converter = self.initialize_converter(self.provider, self.supported_providers)
 
-        # Try to convert variables to their actual values
-        self.converter.convert_variables()
+            # Try to convert variables to their actual values
+            self.converter.convert_variables()
 
-        # Do the actual converting logic
-        self.cnfv = self.converter.convert(provider=self.provider)
+            # Do the actual converting logic
+            self.cnfv = self.converter.convert(provider=self.provider)
+        else:
+            # Read the data from the provided yaml file into variables
+            self.sol6_vnf, self.sol6_lines = self.read_input_file(args.file, is_yaml)
+            converter = Sol1Converter(self.sol6_vnf, self.parsed_dict, self.variables)
+            self.cnfv = converter.convert()
 
         self.output()
 
@@ -138,13 +148,19 @@ class SolCon:
         return dict_utils.merge_two_dicts(variables, variables_sol6)
 
     def output(self):
+        output_lines = None
         # Prune the empty fields
         if self.args.prune:
             self.cnfv = dict_utils.remove_empty_from_dict(self.cnfv)
-        # Put the data:esti-nfv:vnf tags at the base
-        cnfv = {'data': {'etsi-nfv-descriptors:nfv': self.cnfv}}
 
-        json_output = json.dumps(cnfv, indent=2)
+        # Output with yaml.dump if our output file is yaml
+        if self.args.output and self.args.output.split(".")[-1].lower() == "yaml":
+            output_lines = yaml.dump(self.cnfv, default_flow_style=False)
+        else:
+            # Put the data:esti-nfv:vnf tags at the base
+            cnfv = {'data': {'etsi-nfv-descriptors:nfv': self.cnfv}}
+
+            output_lines = json.dumps(cnfv, indent=2)
 
         # Get the absolute path, since apparently relative paths sometimes have issues with things?
         if self.args.output:
@@ -155,23 +171,26 @@ class SolCon:
                 os.makedirs(abs_dir, exist_ok=True)
 
             with open(self.args.output, 'w') as f:
-                f.writelines(json_output)
+                f.writelines(output_lines)
 
         if not self.args.output and not self.args.output_silent:
-            sys.stdout.write(json_output)
+            sys.stdout.write(output_lines)
 
-    def read_tosca_yaml(self, file):
-        # Read the tosca vnf into a dict from yaml format
-        log.info("Reading TOSCA YAML file {}".format(file))
+    @staticmethod
+    def read_input_file(file, is_yaml):
+        log.info("Reading TOSCA {} file {}".format("YAML" if is_yaml else "JSON", file))
         f = open(file, 'rb')
         file_read = f.read()
         f.close()
         f = open(file, 'rb')
         file_lines = f.readlines()
         f.close()
-        parsed_yaml = yaml.safe_load(file_read)
+        if is_yaml:
+            parsed = yaml.safe_load(file_read)
+        else:
+            parsed = json.loads(file_read)
 
-        return parsed_yaml, file_lines
+        return parsed, file_lines
 
     def initialize_converter(self, sel_provider, valid_providers):
         # We found a proper provider, so we can start doing things
@@ -275,7 +294,7 @@ class SolCon:
             opt = self.valid_input("OK? (y/n)", yn)
             if opt == "y":
                 break
-        self.tosca_vnf, self.tosca_lines = self.read_tosca_yaml(tosca_file)
+        self.tosca_vnf, self.tosca_lines = self.read_input_file(tosca_file)
 
         # ** Output to a file (or not) **
         file_out = args.output

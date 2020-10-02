@@ -1,6 +1,3 @@
-"""
-
-"""
 import re
 from keys.sol6_keys import *
 from utils.dict_utils import *
@@ -31,6 +28,7 @@ class Sol6Converter:
         self.only_number_float  = False
         self.append_list        = False
         self.first_list_elem    = False
+        self.nth_list_elem      = False
         self.tosca_use_value    = False
         self.format_as_ip       = False
         self.format_as_disk     = False
@@ -118,8 +116,10 @@ class Sol6Converter:
         """
         mapping_list = map_sol6[1]  # List of MapElems
         sol6_path = map_sol6[0]
+        i = -1
 
         for elem in mapping_list:
+            i = i + 1
             # Skip this mapping element if it is None, but allow a none name to pass
             if not elem:
                 continue
@@ -136,7 +136,7 @@ class Sol6Converter:
                       .format(f_tosca_path, f_sol6_path))
 
             # Handle flags for mapped values
-            value = self.handle_flags(f_sol6_path, f_tosca_path)
+            value = self.handle_flags(f_sol6_path, f_tosca_path, i)
 
             # If the value doesn't exist, don't write it
             # Do write it if the value is 0, though
@@ -158,7 +158,7 @@ class Sol6Converter:
             return
 
         # Handle the various flags for no mappings
-        value = self.handle_flags(sol6_path, tosca_path)
+        value = self.handle_flags(sol6_path, tosca_path, 0)
 
         set_path_to(sol6_path, self.vnfd, value, create_missing=True)
 
@@ -192,12 +192,13 @@ class Sol6Converter:
     # ******************
     # ** Flag methods **
     # ******************
-    def handle_flags(self, f_sol6_path, f_tosca_path):
+    def handle_flags(self, f_sol6_path, f_tosca_path, run):
         """
         Returns the value after being formatted by the flags
         """
 
         value = self._key_as_value(self.key_as_value, f_tosca_path)
+
         value = self._convert_units(self.unit_gb, "GB", value, is_float=self.unit_fractional)
         value = self._only_number(self.only_number, value, is_float=self.only_number_float)
         value = self._min_1(self.min_1, value)
@@ -219,6 +220,7 @@ class Sol6Converter:
                                       self.variables["sol6"]["VALID_STORAGE_TYPES_VAL"],
                                       none_found=self.format_invalid_none, fuzzy=True)
         value = self._first_list_elem(self.first_list_elem, f_sol6_path, value)
+        value = self._nth_list_elem(self.nth_list_elem, value, run)
         value = self._check_for_null(value)
 
         return value
@@ -268,6 +270,8 @@ class Sol6Converter:
                 self.only_number_float = True
             if flag == keys.FLAG_LIST_FIRST:
                 self.first_list_elem = True
+            if flag == keys.FLAG_LIST_NTH:
+                self.nth_list_elem = True
             if flag == keys.FLAG_USE_VALUE:
                 self.tosca_use_value = True
             if flag == keys.FLAG_FORMAT_IP:
@@ -299,10 +303,18 @@ class Sol6Converter:
         if not option:
             return value
         cur_list = get_path_value(path, self.vnfd, must_exist=False, no_msg=self.fail_silent)
-        if cur_list:
-            if not isinstance(cur_list, list):
-                raise TypeError("{} is not a list".format(cur_list))
-            return list(cur_list).append(value)
+        # If it doesn't exist, create it
+        if not cur_list:
+            cur_list = []
+
+        # This means a value exists in the path, so convert it to a list
+        if not isinstance(cur_list, list):
+            # Convert it to a list, then continue
+            cur_list = [cur_list]
+
+        # Now that everything is together in a list, append the value
+        cur_list.append(value)
+        return cur_list
 
     def _key_as_value(self, option, path):
         if option:
@@ -333,7 +345,16 @@ class Sol6Converter:
         return value[0]
 
     @staticmethod
-    def _format_as_valid(option, path, value, valid_formats, none_found=False, prefix="", fuzzy=False):
+    def _nth_list_elem(option, value, n):
+        if not option or not isinstance(value, list):
+            return value
+        if len(value) > n:
+            return value[n]
+        else:
+            return value[-1]
+
+    @classmethod
+    def _format_as_valid(cls, option, path, value, valid_formats, none_found=False, prefix="", fuzzy=False):
         """
         Take the value, and a list of valid options, see if the value is any of the valid ones.
         Return the output as a list (for some reason)
@@ -348,7 +369,7 @@ class Sol6Converter:
             # If it is, make sure it isn't a reference to the tosca_vnf
             value = list(value)
         for i, item in enumerate(value):
-            found, value[i] = Sol6Converter._fmt_val(item, valid_formats, none_found, fuzzy=fuzzy)
+            found, value[i] = cls._fmt_val(item, valid_formats, none_found, fuzzy=fuzzy)
             if not found:
                 log.error("Value '{}' not found in valid formats: {}".format(item, valid_formats))
             if value[i]:
