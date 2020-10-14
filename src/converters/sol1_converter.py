@@ -53,8 +53,6 @@ class Sol1Converter:
         add_map(((tv("vnf_conf_autoscale"), V2MapBase.FLAG_BLANK),          sv("vnfd_config_autoscale")))
 
         # -- End Metadata --
-        set_path_to(tv("substitution_type"), self.sol1_vnfd, self.type_vnf, create_missing=True)
-        set_path_to(tv("substitution_virt_link"), self.sol1_vnfd, " ", create_missing=True)
 
         # -- VDU --
         vdus = get_path_value(sv("vdus"), self.sol6_vnfd)
@@ -112,6 +110,16 @@ class Sol1Converter:
         add_map(((tv("int_cpd_virt_binding"), V2MapBase.FLAG_BLANK), [sv("vdu_id"), vdu_cpd_map]))
         # -- End VDU --
 
+        # -- Substitution Mappings --
+        # Note: this does generate different formatted YAML than default, but the evaulation is the same
+        # Ex: - virtual_link: [ c1_nic1, virtual_link]
+        # Vs: - virtual_link:
+        #       - c1_nic1
+        #       - virtual_link
+        substitution_data = [{"virtual_link": [key.name, "virtual_link"]} for key in int_cpd_map]
+        set_path_to(tv("substitution_type"), self.sol1_vnfd, self.type_vnf, create_missing=True)
+        set_path_to(tv("substitution_req"), self.sol1_vnfd, substitution_data, create_missing=True)
+        # -- End Substitution Mappings --
         self.run_mapping()
         return vnfd
 
