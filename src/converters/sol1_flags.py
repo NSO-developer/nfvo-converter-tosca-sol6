@@ -5,9 +5,10 @@ from utils.key_utils import KeyUtils
 
 
 class Sol1Flags:
-    def __init__(self,  sol1_vnfd, sol6_vnfd):
+    def __init__(self,  sol1_vnfd, sol6_vnfd, variables):
         self.sol6_vnfd = sol6_vnfd
         self.sol1_vnfd = sol1_vnfd
+        self.variables = variables
 
         # Set up the flag variables
         # We probably won't need all of these for SOL1
@@ -44,10 +45,9 @@ class Sol1Flags:
         value = self._only_number(self.only_number, value, is_float=self.only_number_float)
         value = self._min_1(self.min_1, value)
         value = self._append_to_list(self.append_list, f_sol1_path, value)
-        # value = self._format_as_valid(self.format_as_ip, f_sol6_path, value,
-        #                               self.variables["sol6"]["VALID_PROTOCOLS_VAL"],
-        #                               none_found=self.format_invalid_none,
-        #                               prefix=self.variables["sol6"]["PROTOCOLS_PREFIX_VAL"])
+        value = self._format_as_valid(self.format_as_ip, f_sol6_path, value,
+                                      self.variables["sol6"]["VALID_PROTOCOLS_VAL"],
+                                      none_found=self.format_invalid_none, fuzzy=True)
         # value = self._format_as_valid(self.format_as_disk, f_sol6_path, value,
         #                               self.variables["sol6"]["VALID_DISK_FORMATS_VAL"],
         #                               none_found=self.format_invalid_none)

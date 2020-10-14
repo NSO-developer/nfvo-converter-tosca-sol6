@@ -25,7 +25,7 @@ class Sol1Converter:
         self.va_s = formatted_vars["sol6"]
         self.mapping = []
         self.v2_map = V2Mapping(self.sol1_vnfd, self.sol6_vnfd)
-        self.sol1_flags = Sol1Flags(self.sol1_vnfd, self.sol6_vnfd)
+        self.sol1_flags = Sol1Flags(self.sol1_vnfd, self.sol6_vnfd, variables)
 
         # TODO: Add type inheritance for new types
         self.type_prefix = get_path_value(self.get_sol6_value("vnfd_id"), self.sol6_vnfd, must_exist=True)
@@ -105,7 +105,8 @@ class Sol1Converter:
             # ext_cpds = get_path_value(sv("ext_cpd"), self.sol6_vnfd)
 
         self.set_type(tv("int_cpd_type"), self.type_cp, int_cpd_map)
-        add_map(((tv("int_cpd_layer_prot"), V2MapBase.FLAG_BLANK),                    [sv("int_cpd_layer_prot"), int_cpd_map]))
+        add_map(((tv("int_cpd_layer_prot"), (V2MapBase.FLAG_FAIL_SILENT, V2MapBase.FLAG_APPEND_LIST, V2MapBase.FLAG_FORMAT_IP)),
+                 [sv("int_cpd_layer_prot"), int_cpd_map]))
 
         add_map(((tv("int_cpd_virt_binding"), V2MapBase.FLAG_BLANK), [sv("vdu_id"), vdu_cpd_map]))
         # -- End VDU --
@@ -120,6 +121,8 @@ class Sol1Converter:
         set_path_to(tv("substitution_type"), self.sol1_vnfd, self.type_vnf, create_missing=True)
         set_path_to(tv("substitution_req"), self.sol1_vnfd, substitution_data, create_missing=True)
         # -- End Substitution Mappings --
+
+
         self.run_mapping()
         return vnfd
 
