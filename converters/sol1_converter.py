@@ -109,6 +109,7 @@ class Sol1Converter:
                  [sv("int_cpd_layer_prot"), int_cpd_map]))
 
         add_map(((tv("int_cpd_virt_binding"), V2MapBase.FLAG_BLANK), [sv("vdu_id"), vdu_cpd_map]))
+        add_map(((tv("vdu_virt_storage"), V2MapBase.FLAG_BLANK), [sv("vdu_vs_desc_list"), vdu_map]))
         # -- End VDU --
 
         # -- Substitution Mappings --
@@ -122,7 +123,63 @@ class Sol1Converter:
         set_path_to(tv("substitution_req"), self.sol1_vnfd, substitution_data, create_missing=True)
         # -- End Substitution Mappings --
 
+        # -- Virtual Storage --
+        # -- End Virtual Storage --
 
+        # -- Artifacts --
+        artifact_map = []
+        for vdu in vdu_map:
+            vdu_artifact = get_path_value(MapElem.format_path(vdu, sv("vdu_artifact")), self.sol6_vnfd, must_exist=False)
+            if vdu_artifact:
+                # Ensure everything is a list so we can flatten
+                if not isinstance(vdu_artifact, list):
+                    vdu_artifact = [vdu_artifact]
+                for artifact in vdu_artifact:
+                    artifact_map.append(MapElem(artifact, None, parent_map=vdu.copy()))
+
+        # We know which artifact goes with which vdu, so now we need to match the artifact
+        # up with the entry in the vnfd artifact list
+        for i, artifact in enumerate(get_path_value(sv("artifact_base"), self.sol6_vnfd, must_exist=False)):
+            # To do this, loop through all the vnfd artifacts and save the index when we find a name we know
+            if artifact is None:
+                continue
+            for a in artifact_map:
+                if a.name == artifact["id"]:
+                    a.cur_map = i
+                    break
+
+        for artifact in artifact_map:
+            art_vars = self.merge_kvp(MapElem.format_path(artifact, sv("artifact_variable_list")), "id")
+            for cur_var in art_vars:
+                art_vars[cur_var] = {"get_input": cur_var}
+            # Just set this directly into the sol1 vnfd, there's no point adding a mapping for this
+            set_path_to(MapElem.format_path(artifact, tv("vdu_day0_variables"), use_value=False), self.sol1_vnfd, art_vars, create_missing=True)
+
+        add_map(((tv("vdu_day0_file"), V2MapBase.FLAG_BLANK), [sv("artifact_url"), artifact_map]))
+
+        # -- End Artifacts --
+
+        # -- Virtual Compute/Flavor --
+        # Create map based on virtual compute entries
+        # Match up vdu flavors with the virt compute entries
+        virt_compute_map = []
+        sol6_virt_computes = get_path_value(sv("vnfd_virt_compute_desc_base"), self.sol6_vnfd)
+
+        for vdu in vdu_map:
+            vdu_flavor = get_path_value(MapElem.format_path(vdu, sv("vdu_vc_desc_list")), self.sol6_vnfd, must_exist=False)
+            if not vdu_flavor:
+                continue
+            vdu_flavor = vdu_flavor[0]
+            for i, virt_compute in enumerate(sol6_virt_computes):
+                if vdu_flavor == virt_compute["id"]:
+                    virt_compute_map.append(MapElem(None, i, vdu.copy()))
+
+        add_map(((tv("vdu_vim_flavor"), V2MapBase.FLAG_LIST_FIRST), [sv("vdu_vc_desc_list"), vdu_map]))
+        add_map(((tv("vdu_virt_cpu_num"), V2MapBase.FLAG_BLANK), [sv("vnfd_vcd_cpu_num"), virt_compute_map]))
+        add_map(((tv("vdu_virt_mem_size"), V2MapBase.FLAG_UNIT_GB), [sv("vnfd_vcd_mem_size"), virt_compute_map]))
+
+
+        # -- End Virtual Compute/Flavor
         self.run_mapping()
         return vnfd
 

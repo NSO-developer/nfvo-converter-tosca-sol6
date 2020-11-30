@@ -2,6 +2,7 @@ from converters.sol6_converter import Sol6Converter
 from mapping_v2 import *
 import re
 from utils.key_utils import KeyUtils
+from utils.list_utils import flatten
 
 
 class Sol1Flags:
@@ -208,6 +209,11 @@ class Sol1Flags:
         else:
             # If it is, make sure it isn't a reference to the tosca_vnf
             value = list(value)
+            # It's possible we can have a list of lists here (if we use append_list)
+            # in which case we can't handle it properly
+            if isinstance(value[0], list):
+                value = flatten(value)
+
         for i, item in enumerate(value):
             found, value[i] = cls._fmt_val(item, valid_formats, none_found, fuzzy=fuzzy)
             if not found:
@@ -250,7 +256,7 @@ class Sol1Flags:
     def _convert_units(cls, opt, unit, value, decimal_places=1, is_float=False):
         """
         Attempt to figure out what the unit is, and convert to the given one
-        Currently the only supported output unit is
+        If the input is a number, add the 'GB' postfix
         """
         if not opt:
             return value
@@ -272,8 +278,7 @@ class Sol1Flags:
 
         except AttributeError as e:
             if "lower" in str(e):
-                raise AttributeError("'int' object '{}' has no attribute 'lower'. Ensure the value has a UNIT"
-                                     .format(value)) from e
+                return "{} GB".format(value)
             else:
                 raise e
 
