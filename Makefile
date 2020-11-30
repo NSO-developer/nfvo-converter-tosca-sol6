@@ -4,4 +4,6 @@ init:
 test:
 	test/unit_tests.py
 
-.PHONY: init tests
+doc:
+	sh documentation/compile-doc.sh
+.PHONY: init tests doc
