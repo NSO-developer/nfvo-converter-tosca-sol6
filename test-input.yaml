@@ -1,0 +1,46 @@
+description: Basic dummy VNF for conversion purposes
+topology_template:
+  node_templates:
+    vnf:
+      type: testVNF
+      properties:
+        descriptor_id: VNF-test
+        descriptor_version: '0.0.1'
+        provider: cisco
+        product_name: TEST
+        software_version: '0.1'
+        product_info_name: 'Test conversion, 32 vCPUs, 64Gb RAM, 66Gb vStorage'
+        vnfm_info:
+          - 'VNFM info here'
+        configurable_properties:
+          is_autoscale_enabled: false
+          is_autoheal_enabled: false
+        lcm_operations_configuration:
+          heal:
+            recovery_action: REBOOT_THEN_REDEPLOY
+            recovery_wait_time: 1
+        flavour_id: default
+        flavour_description: 'Default Deployment Flavour'
+
+    #####################
+    # VDU configuration #
+    #####################
+    vdu1:
+      type: cisco.nodes.nfv.Vdu.Compute
+      properties:
+        name: 'first vdu'
+        description: 'Vdu1'
+        boot_order:
+          - vnfd1-deployment-first-vdu
+        vdu_profile:
+          min_number_of_instances: 1
+          max_number_of_instances: 1
+      capabilities:
+        virtual_compute:
+          properties:
+            virtual_cpu:
+              num_virtual_cpu: 8
+            virtual_memory:
+              virtual_mem_size: 16 GB
+      requirements:
+        - virtual_storage: vnfd1-deployment-first-vdu-requirement

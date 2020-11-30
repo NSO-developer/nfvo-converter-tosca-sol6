@@ -14,15 +14,7 @@
 *.log
 *.spec
 *.pyc
-# Word temporary
-~$*.doc*
-# Word Auto Backup File
-Backup of *.doc*
-# Excel temporary
-~$*.xls*
-# Excel Backup File
-*.xlk
-# PowerPoint temporary
-~$*.ppt*
-# Visio autosave temporary files
-*.~vsd*
+
+output.json
+sol1-output.yaml
+
