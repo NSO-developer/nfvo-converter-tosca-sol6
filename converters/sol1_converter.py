@@ -122,8 +122,9 @@ class Sol1Converter:
 
         df_vdu_profile_value = get_path_value(sv("df_inst_level_base"), self.sol6_vnfd, must_exist=False)
         df_mapping = []
-        for i, df_inst_level in enumerate(df_vdu_profile_value):
-            df_mapping.append(MapElem(df_inst_level["id"], i))
+        if df_vdu_profile_value:
+            for i, df_inst_level in enumerate(df_vdu_profile_value):
+                df_mapping.append(MapElem(df_inst_level["id"], i))
 
         add_map(((tv("df_desc"), V2MapBase.FLAG_LIST_FIRST), [sv("df_inst_level_desc"), df_mapping]))
         # -- End VDU --
