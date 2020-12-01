@@ -6,7 +6,7 @@ from utils.list_utils import flatten
 from converters.etsi_nfv_vnfd import EtsiNfvVnfd, ToscaVnfd
 from converters.sol1_flags import *
 from keys.sol6_keys import V2MapBase
-from src.mapping_v2 import *
+from mapping_v2 import *
 import yaml
 import logging
 log = logging.getLogger(__name__)
@@ -77,7 +77,8 @@ class Sol1Converter:
 
         # This is now a list of multiple lists, so flatten that all into a single list
         vdu_boot_order_map = flatten(vdu_boot_order_map)
-        add_map(((tv("vdu_boot"), (V2MapBase.FLAG_APPEND_LIST, V2MapBase.FLAG_FAIL_SILENT)),                    [sv("vdu_boot_value"), vdu_boot_order_map]))
+        add_map(((tv("vdu_boot"), (V2MapBase.FLAG_APPEND_LIST, V2MapBase.FLAG_FAIL_SILENT)),
+                 [sv("vdu_boot_value"), vdu_boot_order_map]))
 
         # Save to variable for space reasons
         vdu_profiles = self.merge_kvp(sv("df_vdu_profile_list"), "id")
@@ -92,7 +93,10 @@ class Sol1Converter:
         vdu_cpd_map = []
 
         for vdu in vdu_map:
-            int_cpds = get_path_value(MapElem.format_path(vdu, sv("int_cpd_list")), self.sol6_vnfd)
+            int_cpds = get_path_value(MapElem.format_path(vdu, sv("int_cpd_list")), self.sol6_vnfd, must_exist=False)
+
+            if not int_cpds:
+                continue
 
             for i, icpd in enumerate(int_cpds):
                 int_cpd_map.append(MapElem(icpd["id"], i, parent_map=vdu))
@@ -110,6 +114,25 @@ class Sol1Converter:
 
         add_map(((tv("int_cpd_virt_binding"), V2MapBase.FLAG_BLANK), [sv("vdu_id"), vdu_cpd_map]))
         add_map(((tv("vdu_virt_storage"), V2MapBase.FLAG_BLANK), [sv("vdu_vs_desc_list"), vdu_map]))
+
+        # -- LCM Operations --
+        # We have something like {'recovery_action': {'value': 'REBOOT_THEN_REDEPLOY'}, ...
+        # So, move the internal value up one level
+        lcm_opers = self.merge_kvp(sv("df_heal_param_base"), "key")
+        lcm_opers = {x: lcm_opers[x]["value"] for x in lcm_opers}
+        set_path_to(sv("df_lcm_heal_config"), self.sol6_vnfd, lcm_opers)
+
+        add_map(((tv("vnf_lcm_heal"), V2MapBase.FLAG_BLANK), sv("df_lcm_heal_config")))
+
+        # -- Deployment Flavor --
+        add_map(((tv("df_id"), V2MapBase.FLAG_BLANK), sv("df_id")))
+
+        df_vdu_profile_value = get_path_value(sv("df_inst_level_base"), self.sol6_vnfd, must_exist=False)
+        df_mapping = []
+        for i, df_inst_level in enumerate(df_vdu_profile_value):
+            df_mapping.append(MapElem(df_inst_level["id"], i))
+
+        add_map(((tv("df_desc"), V2MapBase.FLAG_LIST_FIRST), [sv("df_inst_level_desc"), df_mapping]))
         # -- End VDU --
 
         # -- Substitution Mappings --
@@ -139,22 +162,29 @@ class Sol1Converter:
 
         # We know which artifact goes with which vdu, so now we need to match the artifact
         # up with the entry in the vnfd artifact list
-        for i, artifact in enumerate(get_path_value(sv("artifact_base"), self.sol6_vnfd, must_exist=False)):
-            # To do this, loop through all the vnfd artifacts and save the index when we find a name we know
-            if artifact is None:
-                continue
-            for a in artifact_map:
-                if a.name == artifact["id"]:
-                    a.cur_map = i
-                    break
+        artifacts = get_path_value(sv("artifact_base"), self.sol6_vnfd, must_exist=False)
+        if artifacts:
+            for i, artifact in enumerate(artifacts):
+                # To do this, loop through all the vnfd artifacts and save the index when we find a name we know
+                if artifact is None:
+                    continue
+                for a in artifact_map:
+                    if a.name == artifact["id"]:
+                        a.cur_map = i
+                        break
 
+        variables = {}
         for artifact in artifact_map:
             art_vars = self.merge_kvp(MapElem.format_path(artifact, sv("artifact_variable_list")), "id")
             for cur_var in art_vars:
                 art_vars[cur_var] = {"get_input": cur_var}
+                variables[cur_var] = art_vars[cur_var]
             # Just set this directly into the sol1 vnfd, there's no point adding a mapping for this
+
             set_path_to(MapElem.format_path(artifact, tv("vdu_day0_variables"), use_value=False), self.sol1_vnfd, art_vars, create_missing=True)
 
+        # Set the interfaces additional_parameters for the variables
+        set_path_to(tv("vnf_add_parameter"), self.sol1_vnfd, variables, create_missing=True)
         add_map(((tv("vdu_day0_file"), V2MapBase.FLAG_BLANK), [sv("artifact_url"), artifact_map]))
 
         # -- End Artifacts --
@@ -178,8 +208,8 @@ class Sol1Converter:
         add_map(((tv("vdu_virt_cpu_num"), V2MapBase.FLAG_BLANK), [sv("vnfd_vcd_cpu_num"), virt_compute_map]))
         add_map(((tv("vdu_virt_mem_size"), V2MapBase.FLAG_UNIT_GB), [sv("vnfd_vcd_mem_size"), virt_compute_map]))
 
-
         # -- End Virtual Compute/Flavor
+
         self.run_mapping()
         return vnfd
 

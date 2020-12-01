@@ -16,7 +16,7 @@ from utils import dict_utils
 from converters.sol6_converter import Sol6Converter
 from converters.sol6_converter_cisco import SOL6ConverterCisco
 from converters.sol1_converter import Sol1Converter
-from src.sol6_config_default import SOL6ConfigDefault
+from sol6_config_default import SOL6ConfigDefault
 import toml
 log = logging.getLogger(__name__)
 
@@ -87,12 +87,12 @@ class SolCon:
             self.interactive_mode()
             return
 
-        # Determine if the file we're converting is tosca or sol6 based on the file extension
-        is_yaml = args.file.split(".")[-1].lower() == "yaml"
-
-        if not args.file or (not args.path_config and not is_yaml):
+        if not args.file or not args.path_config:
             print("error: the following arguments are required: -f/--file, -c/--path-config")
             return
+
+        # Determine if the file we're converting is tosca or sol6 based on the file extension
+        is_yaml = args.file.split(".")[-1].lower() == "yaml"
 
         sol6_config_isfile = True
         if not args.path_config_sol6:
