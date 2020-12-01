@@ -129,7 +129,7 @@ class SolCon:
             # Do the actual converting logic
             self.cnfv = self.converter.convert(provider=self.provider)
         else:
-            # Read the data from the provided yaml file into variables
+            # Read the data from the provided json file into variables
             self.sol6_vnf, self.sol6_lines = self.read_input_file(args.file, is_yaml)
             converter = Sol1Converter(self.sol6_vnf, self.parsed_dict, self.variables)
             self.cnfv = converter.convert()

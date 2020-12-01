@@ -1,13 +1,7 @@
-import re
 from keys.sol6_keys import *
-from utils.dict_utils import *
-from utils.key_utils import KeyUtils
-from utils.list_utils import flatten
-from converters.etsi_nfv_vnfd import EtsiNfvVnfd, ToscaVnfd
 from converters.sol1_flags import *
 from keys.sol6_keys import V2MapBase
 from mapping_v2 import *
-import yaml
 import logging
 log = logging.getLogger(__name__)
 
@@ -17,7 +11,7 @@ class Sol1Converter:
     def __init__(self, sol6_vnf, parsed_dict, variables):
         self.sol6_vnfd = sol6_vnf["data"]["etsi-nfv-descriptors:nfv"]
         self.parsed_dict = parsed_dict
-        self.sol1_vnfd = ToscaVnfd().vnfd
+        self.sol1_vnfd = {}
         self.variables = variables
         formatted_vars = PathMapping.format_paths(self.variables)
 
@@ -27,7 +21,6 @@ class Sol1Converter:
         self.v2_map = V2Mapping(self.sol1_vnfd, self.sol6_vnfd)
         self.sol1_flags = Sol1Flags(self.sol1_vnfd, self.sol6_vnfd, variables)
 
-        # TODO: Add type inheritance for new types
         self.type_prefix = get_path_value(self.get_sol6_value("vnfd_id"), self.sol6_vnfd, must_exist=True)
         self.type_vnf = "{}_VNF".format(self.type_prefix)
         self.type_vdu = "{}_VDU_Compute".format(self.type_prefix)
